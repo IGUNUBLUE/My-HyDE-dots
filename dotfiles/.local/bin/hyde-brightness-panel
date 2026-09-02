@@ -121,7 +121,12 @@ class BrightnessPopup(Gtk.Window):
         GtkLayerShell.set_exclusive_zone(self, 0)
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-        self.connect("focus-out-event", lambda *_: self.close())
+        # Hyprland can move focus with the pointer. Closing immediately on
+        # focus-out destroys the popup while the pointer travels from Waybar
+        # to this window, so allow enough time for focus-in to cancel it.
+        self.close_timeout: int | None = None
+        self.connect("focus-out-event", self.schedule_close)
+        self.connect("focus-in-event", self.cancel_scheduled_close)
         self.connect("key-press-event", self.on_key_press)
 
         css = Gtk.CssProvider()
@@ -185,8 +190,25 @@ class BrightnessPopup(Gtk.Window):
 
     def on_key_press(self, _widget: Gtk.Widget, event: Gdk.EventKey) -> bool:
         if event.keyval == Gdk.KEY_Escape:
+            self.cancel_scheduled_close()
             self.close()
             return True
+        return False
+
+    def schedule_close(self, *_args: object) -> bool:
+        self.cancel_scheduled_close()
+        self.close_timeout = GLib.timeout_add(750, self.close_after_focus_loss)
+        return False
+
+    def cancel_scheduled_close(self, *_args: object) -> bool:
+        if self.close_timeout is not None:
+            GLib.source_remove(self.close_timeout)
+            self.close_timeout = None
+        return False
+
+    def close_after_focus_loss(self) -> bool:
+        self.close_timeout = None
+        self.close()
         return False
 
     def internal_changed(self, scale: Gtk.Scale) -> None:
