@@ -63,6 +63,7 @@
         "modules": [
             "privacy",
             "tray",
+            "power-profiles-daemon",
             "battery"
         ]
     },
