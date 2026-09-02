@@ -1,83 +1,141 @@
 {
-    // User-owned copy of HyDE layout 02; preserved across updates.
+    // Polished, compact user layout preserved across HyDE updates.
     "layer": "top",
-    "output": [
-        "*"
-    ],
+    "output": ["*"],
     "height": 10,
+    "margin-top": 3,
     "exclusive": true,
     "reload_style_on_change": true,
     "include": [
         "$XDG_CONFIG_HOME/waybar/modules/*json*",
         "$XDG_CONFIG_HOME/waybar/includes/includes.json"
     ],
+
     "modules-left": [
-        "group/pill#left1",
-        "group/pill#left2"
+        "group/pill#sensors",
+        "group/pill#clock"
     ],
-    "group/pill#left1": {
+    "group/pill#sensors": {
         "orientation": "inherit",
-        "modules": [
-            "cpu",
-            "memory",
-            "custom/cpuinfo",
-            "custom/gpuinfo"
-        ]
+        "modules": ["cpu", "memory", "custom/cpuinfo", "custom/gpuinfo"]
     },
-    "group/pill#left2": {
+    "group/pill#clock": {
         "orientation": "inherit",
-        "modules": [
-            "idle_inhibitor",
-            "clock"
-        ]
+        "modules": ["idle_inhibitor", "clock"]
     },
-    "modules-center": [
-        "group/pill#center"
-    ],
-    "group/pill#center": {
+
+    "modules-center": ["group/pill#navigation"],
+    "group/pill#navigation": {
         "orientation": "inherit",
-        "modules": [
-            "hyprland/workspaces",
-            "hyprland/window"
-        ]
+        "modules": ["hyprland/workspaces", "hyprland/window"]
     },
+    "hyprland/window": {
+        "format": "  {0}",
+        "rotate": 0,
+        "separate-outputs": true,
+        "max-length": 34,
+        "rewrite": {
+            "(.*)@archlinux:(.*)": "$1  ",
+            "(.*) — Mozilla Firefox": "$1 󰈹 ",
+            "(.*)Mozilla Firefox": "Firefox 󰈹 ",
+            "(.*) - Visual Studio Code": "$1 󰨞 ",
+            "(.*)Visual Studio Code": "Code 󰨞 ",
+            "(.*) - Code - OSS": "$1 󰨞 ",
+            "(.*)Code - OSS": "Code 󰨞 ",
+            "(.*) — Dolphin": "$1 󰉋 ",
+            "(.*)Spotify": "Spotify 󰓇 ",
+            "(.*)Steam": "Steam 󰓓 ",
+            "(.*) - Discord": "$1  ",
+            "(.*)Netflix": "Netflix 󰝆 ",
+            "(.*) — Google chrome": "$1  ",
+            "(.*)Google chrome": "Google chrome  ",
+            "(.*) — Github": "$1  ",
+            "(.*)Github": "Github  "
+        }
+    },
+
+    "group/volumecontrol": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 180,
+            "children-class": "volumecontrol-drawer",
+            "transition-left-to-right": false,
+            "click-to-reveal": false
+        },
+        "modules": ["pulseaudio#output", "pulseaudio#input"]
+    },
+    "pulseaudio#output": {
+        "format": "<span font_family='JetBrainsMono Nerd Font'>{icon}</span> {volume}%",
+        "format-muted": "<span font_family='JetBrainsMono Nerd Font'>󰖁</span> {volume}%",
+        "rotate": 0,
+        "on-click": "pavucontrol-qt -t 3 || pavucontrol -t 3",
+        "on-click-right": "hyde-shell volumecontrol -s ''",
+        "on-click-middle": "hyde-shell volumecontrol -o m",
+        "on-scroll-up": "hyde-shell volumecontrol -o i",
+        "on-scroll-down": "hyde-shell volumecontrol -o d",
+        "tooltip-format": "{icon} {desc} // {volume}%",
+        "scroll-step": 5,
+        "format-icons": {
+            "headphone": "󰋋",
+            "hands-free": "󰋋",
+            "headset": "󰋋",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["󰕿", "󰖀", "󰕾"]
+        }
+    },
+    "pulseaudio#input": {
+        "format": "<span font_family='JetBrainsMono Nerd Font'>{format_source}</span> {source_volume}%",
+        "format-source": "󰍬",
+        "format-source-muted": "󰍭",
+        "rotate": 0,
+        "on-click": "pavucontrol-qt -t 4 || pavucontrol -t 4",
+        "on-click-middle": "hyde-shell volumecontrol -i m",
+        "on-scroll-up": "hyde-shell volumecontrol -i i",
+        "on-scroll-down": "hyde-shell volumecontrol -i d",
+        "tooltip-format": "{format_source} {source_desc} // {source_volume}%",
+        "scroll-step": 5
+    },
+
     "modules-right": [
-        "group/pill#right1",
-        "group/pill#right2",
-        "group/pill#right3",
-        "group/pill#right4"
+        "group/pill#controls",
+        "group/pill#status",
+        "group/pill#actions"
     ],
-    "group/pill#right1": {
+    "group/pill#controls": {
         "orientation": "inherit",
         "modules": [
             "custom/brightness-panel",
             "network",
-            "pulseaudio",
-            "pulseaudio#microphone",
+            "group/volumecontrol",
             "custom/updates",
             "custom/keybindhint"
         ]
     },
-    "group/pill#right2": {
+    "group/pill#status": {
         "orientation": "inherit",
         "modules": [
             "privacy",
-            "tray",
+            "group/hide-tray",
             "power-profiles-daemon",
             "battery"
         ]
     },
-    "group/pill#right3": {
+    "group/customize": {
         "orientation": "inherit",
-        "modules": [
-            "custom/wallchange",
-            "custom/theme",
-            "custom/wbar"
-        ]
+        "drawer": {
+            "transition-duration": 180,
+            "children-class": "customize-drawer",
+            "transition-left-to-right": false,
+            "click-to-reveal": false
+        },
+        "modules": ["custom/theme", "custom/wallchange", "custom/wbar"]
     },
-    "group/pill#right4": {
+    "group/pill#actions": {
         "orientation": "inherit",
         "modules": [
+            "group/customize",
             "custom/cliphist",
             "custom/hyde-menu",
             "custom/power"
