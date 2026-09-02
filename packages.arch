@@ -1,0 +1,7 @@
+# Official Arch packages needed by this overlay.
+brightnessctl
+ddcutil
+gtk-layer-shell
+noto-fonts
+python-gobject
+waybar
