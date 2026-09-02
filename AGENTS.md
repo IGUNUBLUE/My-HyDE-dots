@@ -75,6 +75,12 @@ This repository is the installable, update-safe source of truth for the owner's 
 - Do not commit `.zsh_history` or machine-local secrets.
 - Validate shell changes in a fresh interactive Zsh process, not only the current inherited environment.
 
+### Kitty
+
+- Track only `~/.config/kitty/kitty.conf`, which HyDE preserves as the user override.
+- Do not track or replace HyDE-managed `hyde.conf` or theme-managed `theme.conf`.
+- Keep personal overrides after `include hyde.conf` so their precedence is explicit and update-safe.
+
 ## Required validation
 
 Run these before committing:
