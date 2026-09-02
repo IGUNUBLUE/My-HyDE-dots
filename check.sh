@@ -23,6 +23,10 @@ kitty_config="$repo_dir/dotfiles/.config/kitty/kitty.conf"
     printf 'Kitty must define the portable 11 pt default exactly once.\n' >&2
     exit 1
 }
+[[ $(grep -Ec '^[[:space:]]*background_opacity[[:space:]]+0[.]97[[:space:]]*$' "$kitty_config") -eq 1 ]] || {
+    printf 'Kitty must define the portable 0.97 background opacity exactly once.\n' >&2
+    exit 1
+}
 if find "$repo_dir/dotfiles/.config/kitty" -maxdepth 1 -type f \( -name 'hyde.conf' -o -name 'theme.conf' \) -print -quit | grep -q .; then
     printf 'HyDE-managed Kitty files must not be tracked.\n' >&2
     exit 1

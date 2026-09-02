@@ -13,7 +13,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
 - Compact transparent Waybar layout and user CSS.
-- Kitty user configuration with an 11 pt default font while retaining HyDE's font family and theme.
+- Kitty user configuration with an 11 pt default font and subtle 0.97 background opacity while retaining HyDE's font family and theme.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.
 - Zsh paths for Bun, Volta, PNPM, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
