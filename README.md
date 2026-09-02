@@ -4,6 +4,8 @@ Personal, update-safe overlay for [HyDE](https://github.com/HyDE-Project/HyDE) o
 
 This repository intentionally stores only user-owned overrides. It does not fork or overwrite HyDE's shared runtime under `~/.local/share/hyde`, `~/.local/share/hypr`, or `~/.local/lib/hyde`.
 
+Codex and other compatible coding agents should follow [`AGENTS.md`](AGENTS.md) when maintaining or applying this overlay. It defines the upstream boundary, safe change workflow, component-specific rules and required validation.
+
 ## Included
 
 - Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
