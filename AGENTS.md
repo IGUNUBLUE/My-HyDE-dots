@@ -7,6 +7,7 @@ This repository is the installable, update-safe source of truth for the owner's 
 ## Sources of truth
 
 - Treat files under `dotfiles/` as the desired portable state.
+- Read `memory/index.md` and every relevant active memory before changing a component. Memories provide historical evidence and safeguards but do not replace current live or upstream verification.
 - Treat `install.sh`, `restore.sh`, `update-snapshot.sh`, and `check.sh` as the supported lifecycle.
 - Treat the active files under `$HOME/.config/` and `$HOME/.local/bin/` as runtime state, not as the only copy of a change.
 - Before relying on a HyDE option or command, check the current official documentation and the `HyDE-Project/HyDE` repository. Verify consequential behavior against the repository files, not only search summaries.
@@ -37,7 +38,8 @@ This repository is the installable, update-safe source of truth for the owner's 
 3. If the request is for a live desktop change, back up the affected live file, apply the tracked version through `install.sh` or the documented HyDE command, and reload only the affected component.
 4. If the user changed the live desktop manually, run `./update-snapshot.sh` and review the diff before accepting it.
 5. Keep `README.md`, `packages.arch`, install behavior, and rollback behavior synchronized with material changes.
-6. Do not commit or push unless the user asks for publication or the current task explicitly includes maintaining this repository.
+6. Add or update a repository memory when an incident, compatibility constraint, rollback condition, or non-obvious decision must survive future sessions.
+7. Do not commit or push unless the user asks for publication or the current task explicitly includes maintaining this repository.
 
 ## Component rules
 
@@ -48,6 +50,7 @@ This repository is the installable, update-safe source of truth for the owner's 
 - Keep both Spanish layouts (`es,latam`) unless explicitly changed.
 - Treat output names, positions, refresh rates, and scales as hardware-specific. Inspect `hyprctl monitors all` before changing them.
 - After a change, require an empty `hyprctl configerrors` result.
+- Preserve the temporary Hypridle mitigation: dimming remains enabled, while automatic lock, DPMS-off and suspend stay disabled until Hyprlock passes a controlled dual-monitor lock/unlock test.
 
 ### Waybar
 
@@ -112,3 +115,4 @@ Do not describe a change as verified when only static validation ran. Report sep
 - Flag new dependencies missing from `packages.arch`, and packages listed there without a demonstrated runtime need.
 - Flag rollback changes that can delete or restore paths outside the overlay manifest.
 - Flag monitor or DDC changes that silently assume identical hardware on every installation; require documentation or graceful detection.
+- Flag changes that contradict an active repository memory without resolving its exit criteria and updating the memory index.
