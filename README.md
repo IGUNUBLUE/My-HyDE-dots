@@ -11,6 +11,7 @@ Codex and other compatible coding agents should follow [`AGENTS.md`](AGENTS.md) 
 - Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
 - Compact transparent Waybar layout and user CSS.
+- Kitty user configuration with an 11 pt default font while retaining HyDE's font family and theme.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.
 - Zsh paths for Bun, Volta, PNPM, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
 - Optional wallpaper restoration from Nextcloud.
@@ -75,5 +76,6 @@ Edit the two hardware-specific files before installing on a different machine:
 - `~/.config/hypr/hyprland.lua` is HyDE's preserved Lua override.
 - `~/.config/hyde/config.toml` is HyDE's preserved user configuration.
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
+- `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.
 - Shared files managed by HyDE remain untouched.
