@@ -82,6 +82,7 @@ sed "s|@HOME@|$HOME|g" "$config_source" > "$config_tmp"
 
 install_dot "$config_tmp" "$HOME/.config/hyde/config.toml"
 install_dot "$repo_dir/dotfiles/.config/hypr/hyprland.lua" "$HOME/.config/hypr/hyprland.lua"
+install_dot "$repo_dir/dotfiles/.config/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
 install_dot "$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc" "$HOME/.config/waybar/layouts/my-hyde.jsonc"
 install_dot "$repo_dir/dotfiles/.config/waybar/modules/brightness-panel.jsonc" "$HOME/.config/waybar/modules/brightness-panel.jsonc"
 install_dot "$repo_dir/dotfiles/.config/waybar/user-style.css" "$HOME/.config/waybar/user-style.css"
@@ -92,6 +93,7 @@ install_dot "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" "$HOME/.local/
 if ! $dry_run; then
     hyde-shell waybar --set "$HOME/.config/waybar/layouts/my-hyde.jsonc"
     hyprctl reload >/dev/null 2>&1 || true
+    systemctl --user restart hyde-Hyprland-idle.service
 
     wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
     if [[ -f "$wallpaper" ]]; then

@@ -6,12 +6,15 @@ This repository intentionally stores only user-owned overrides. It does not fork
 
 Codex and other compatible coding agents should follow [`AGENTS.md`](AGENTS.md) when maintaining or applying this overlay. It defines the upstream boundary, safe change workflow, component-specific rules and required validation.
 
+Durable operational decisions and incident mitigations live in [`memory/index.md`](memory/index.md). This repository memory is portable and reviewable; it deliberately excludes chat history, secrets and generated machine state.
+
 ## Included
 
 - Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
 - Compact transparent Waybar layout and user CSS.
 - Kitty user configuration with an 11 pt default font while retaining HyDE's font family and theme.
+- Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.
 - Zsh paths for Bun, Volta, PNPM, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
 - Optional wallpaper restoration from Nextcloud.
@@ -58,6 +61,10 @@ git push
 
 Always review the diff before committing. Histories, caches, credentials, KWallet, browser profiles and generated HyDE state are deliberately excluded.
 
+## Repository memory
+
+Before changing a component, read `memory/index.md` and its relevant active entries. Create new memories from `memory/template.md`; resolve rather than delete old decisions so future installations retain the reason behind important safeguards.
+
 ## Hardware assumptions
 
 The current Hyprland override targets:
@@ -74,6 +81,7 @@ Edit the two hardware-specific files before installing on a different machine:
 ## Upstream conventions followed
 
 - `~/.config/hypr/hyprland.lua` is HyDE's preserved Lua override.
+- `~/.config/hypr/hypridle.conf` is HyDE's preserved idle override; automatic locking must be restored only after a controlled lock/unlock test succeeds.
 - `~/.config/hyde/config.toml` is HyDE's preserved user configuration.
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
 - `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.

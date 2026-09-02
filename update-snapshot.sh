@@ -12,6 +12,7 @@ copy_dot() {
 mkdir -p "$repo_dir/dotfiles/.config/hyde"
 sed "s|$HOME|@HOME@|g" "$HOME/.config/hyde/config.toml" > "$repo_dir/dotfiles/.config/hyde/config.toml.in"
 copy_dot "$HOME/.config/hypr/hyprland.lua" "$repo_dir/dotfiles/.config/hypr/hyprland.lua"
+copy_dot "$HOME/.config/hypr/hypridle.conf" "$repo_dir/dotfiles/.config/hypr/hypridle.conf"
 copy_dot "$HOME/.config/waybar/layouts/my-hyde.jsonc" "$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc"
 copy_dot "$HOME/.config/waybar/modules/brightness-panel.jsonc" "$repo_dir/dotfiles/.config/waybar/modules/brightness-panel.jsonc"
 copy_dot "$HOME/.config/waybar/user-style.css" "$repo_dir/dotfiles/.config/waybar/user-style.css"
