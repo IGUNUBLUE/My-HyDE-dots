@@ -10,6 +10,12 @@ bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot
 PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
 python "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" --status | python -m json.tool >/dev/null
 
+waybar_layout="$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc"
+[[ $(grep -Ec '^[[:space:]]*"height"[[:space:]]*:[[:space:]]*22,[[:space:]]*$' "$waybar_layout") -eq 1 ]] || {
+    printf 'Waybar must keep a stable 22-pixel height for the mixed-scale displays.\n' >&2
+    exit 1
+}
+
 zsh_config="$repo_dir/dotfiles/.config/zsh/user.zsh"
 grep -Fqx '    "$PNPM_HOME/bin"' "$zsh_config" || {
     printf 'Zsh must expose PNPM global CLI binaries through $PNPM_HOME/bin.\n' >&2
