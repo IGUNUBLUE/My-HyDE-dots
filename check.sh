@@ -10,6 +10,12 @@ bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot
 PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
 python "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" --status | python -m json.tool >/dev/null
 
+zsh_config="$repo_dir/dotfiles/.config/zsh/user.zsh"
+grep -Fqx '    "$PNPM_HOME/bin"' "$zsh_config" || {
+    printf 'Zsh must expose PNPM global CLI binaries through $PNPM_HOME/bin.\n' >&2
+    exit 1
+}
+
 hypridle_config="$repo_dir/dotfiles/.config/hypr/hypridle.conf"
 [[ -s "$hypridle_config" ]] || { printf 'Hypridle override is missing or empty.\n' >&2; exit 1; }
 if grep -Eq '^[[:space:]]*on-timeout[[:space:]]*=.*(loginctl lock-session|dispatch dpms off|systemctl suspend)' "$hypridle_config"; then

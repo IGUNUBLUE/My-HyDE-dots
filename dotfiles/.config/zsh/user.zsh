@@ -32,6 +32,7 @@ path=(
     "$HOME/.local/bin"
     "$BUN_INSTALL/bin"
     "$VOLTA_HOME/bin"
+    "$PNPM_HOME/bin"
     "$PNPM_HOME"
     $path
 )
