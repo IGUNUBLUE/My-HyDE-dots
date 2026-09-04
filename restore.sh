@@ -27,7 +27,12 @@ if [[ -f "$backup/.created" ]]; then
             printf 'Unsafe entry in .created: %s\n' "$relative" >&2
             exit 1
         }
-        rm -f -- "$HOME/$relative"
+        target="$HOME/$relative"
+        if [[ -d "$target" && ! -L "$target" ]]; then
+            rm -rf -- "$target"
+        else
+            rm -f -- "$target"
+        fi
     done < "$backup/.created"
 fi
 

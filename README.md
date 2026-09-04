@@ -12,6 +12,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 - Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
+- A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Compact transparent Waybar layout with a stable 22-pixel height across mixed-scale displays and user CSS.
 - Kitty user configuration with an 11 pt default font and subtle 0.97 background opacity while retaining HyDE's font family and theme.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
@@ -32,7 +33,7 @@ cd My-HyDE-dots
 ./install.sh
 ```
 
-The installer uses only official Arch packages, backs up every replaced file and then selects the custom Waybar layout through HyDE's own command.
+The installer uses only official Arch packages, backs up every replaced file, derives `Material Sakura Polished` from the installed upstream theme without storing its wallpapers, and selects the theme and custom Waybar layout through HyDE's own commands.
 
 To use another wallpaper:
 
@@ -86,4 +87,5 @@ Edit the two hardware-specific files before installing on a different machine:
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
 - `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.
+- Qt menu changes live in a derived theme under `~/.config/hyde/themes/Material Sakura Polished`; the original `Material Sakura` theme and HyDE's generated `~/.config/Kvantum/wallbash` files remain untouched.
 - Shared files managed by HyDE remain untouched.
