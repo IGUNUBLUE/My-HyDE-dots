@@ -33,7 +33,7 @@ cd My-HyDE-dots
 ./install.sh
 ```
 
-The installer uses only official Arch packages, backs up every replaced file, derives `Material Sakura Polished` from the installed upstream theme without storing its wallpapers, and selects the theme and custom Waybar layout through HyDE's own commands.
+The installer uses only official Arch packages, backs up every replaced file, prepares the user Kvantum template from installed HyDE, and selects the custom Waybar layout through HyDE's own commands.
 
 To use another wallpaper:
 
@@ -89,3 +89,11 @@ Edit the two hardware-specific files before installing on a different machine:
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.
 - Qt menu changes live in a derived theme under `~/.config/hyde/themes/Material Sakura Polished`; the original `Material Sakura` theme and HyDE's generated `~/.config/Kvantum/wallbash` files remain untouched.
 - Shared files managed by HyDE remain untouched.
+
+## Qt menu preferences
+
+Run `./install.sh --qt-menu-only --skip-packages` to apply only the menu settings. New Qt windows use the current theme with your persistent menu preferences. GTK and browser-owned menus are outside this customization. Shadow shape remains defined by the active theme SVG. The old Material Sakura Polished copy may remain locally for rollback but is no longer needed.
+
+The template and callback are recorded in the normal backup manifest. After `./restore.sh`, reselect your current theme to regenerate Kvantum with the restored template. No wallpaper or generated Kvantum configuration is stored in Git.
+
+Reference: [HyDE Wallbash templates and post-processing](https://github.com/HyDE-Project/HyDE/blob/master/Configs/.config/hyde/wallbash/README.md).

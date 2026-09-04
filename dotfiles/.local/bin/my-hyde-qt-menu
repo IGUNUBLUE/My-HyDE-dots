@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Theme-independent Kvantum menu preferences, called by Wallbash after rendering."""
+import configparser
+import os
+from pathlib import Path
+import re
+import sys
+import tempfile
+
+
+def atomic_write(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(dir=path.parent)
+    try:
+        with os.fdopen(fd, 'w') as stream:
+            stream.write(text)
+        os.chmod(temporary, 0o644)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def merge(text, preferences):
+    # Preserve comments, duplicate upstream sections, SVG references and all colors.
+    for section in preferences.sections():
+        pattern = r'(?m)^\[' + re.escape(section) + r'\][ \t]*\n'
+        matches = list(re.finditer(pattern, text))
+        if not matches:
+            text += '\n[' + section + ']\n'
+            matches = list(re.finditer(pattern, text))
+        for match in reversed(matches):
+            start = match.end()
+            end_match = re.search(r'(?m)^\[', text[start:])
+            end = start + end_match.start() if end_match else len(text)
+            block = text[start:end]
+            for key, value in preferences.items(section):
+                entry = key + '=' + value
+                key_pattern = r'(?m)^' + re.escape(key) + r'[ \t]*=.*$'
+                if re.search(key_pattern, block):
+                    block = re.sub(key_pattern, lambda _: entry, block)
+                else:
+                    block = block.rstrip('\n') + '\n' + entry + '\n\n'
+            text = text[:start] + block + text[end:]
+    return text
+
+
+def main():
+    config = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config'))
+    if len(sys.argv) == 4 and sys.argv[1] == '--prepare':
+        source, destination = map(Path, sys.argv[2:])
+        header, body = source.read_text().split('\n', 1)
+        target, _, command = header.partition('|')
+        if not target.endswith('/Kvantum/wallbash/wallbash.kvconfig'):
+            raise SystemExit('Unsupported upstream Kvantum target; review the new HyDE template.')
+        callback = '"$HOME/.local/bin/my-hyde-qt-menu"'
+        command = command + '; ' + callback if command else callback
+        atomic_write(destination, target + '|' + command + '\n' + body)
+        return
+    if len(sys.argv) != 1:
+        raise SystemExit('Usage: my-hyde-qt-menu [--prepare SOURCE DESTINATION]')
+    preferences = configparser.ConfigParser(interpolation=None)
+    preferences.optionxform = str
+    if not preferences.read(config / 'hyde/qt-menu.ini'):
+        raise SystemExit('Missing hyde/qt-menu.ini')
+    target = config / 'Kvantum/wallbash/wallbash.kvconfig'
+    original = target.read_text()
+    updated = merge(original, preferences)
+    if updated != original:
+        atomic_write(target, updated)
+
+
+if __name__ == '__main__':
+    main()

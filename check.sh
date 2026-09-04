@@ -48,22 +48,7 @@ if find "$repo_dir/dotfiles/.config/kitty" -maxdepth 1 -type f \( -name 'hyde.co
     exit 1
 fi
 
-qt_menu_theme="$repo_dir/theme-overrides/material-sakura-polished/kvconfig.theme"
-[[ -s "$qt_menu_theme" ]] || { printf 'Material Sakura Polished Kvantum override is missing.\n' >&2; exit 1; }
-grep -Fqx 'shadowless_popup=false' "$qt_menu_theme" || {
-    printf 'Qt popup shadow customization is missing.\n' >&2
-    exit 1
-}
-grep -Fqx 'iconless_menu=false' "$qt_menu_theme" || {
-    printf 'Qt context-menu icons must remain enabled.\n' >&2
-    exit 1
-}
-for margin in 'text.margin.top=4' 'text.margin.bottom=4' 'text.margin.left=8' 'text.margin.right=8'; do
-    grep -Fqx "$margin" "$qt_menu_theme" || {
-        printf 'Qt context-menu spacing is missing: %s\n' "$margin" >&2
-        exit 1
-    }
-done
+python "$repo_dir/tests/qt-menu.py"
 
 while IFS= read -r memory_link; do
     [[ -f "$repo_dir/memory/$memory_link" ]] || {

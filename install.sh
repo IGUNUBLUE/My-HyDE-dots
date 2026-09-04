@@ -7,10 +7,11 @@ timestamp=$(date +%Y%m%d-%H%M%S)
 backup_dir="$state_dir/backups/$timestamp"
 dry_run=false
 skip_packages=false
+qt_menu_only=false
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--qt-menu-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -20,6 +21,7 @@ EOF
 while (($#)); do
     case "$1" in
         --dry-run) dry_run=true ;;
+        --qt-menu-only) qt_menu_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n' "$1" >&2; usage >&2; exit 2 ;;
@@ -64,24 +66,29 @@ install_dot() {
     run install -Dm"$mode" -- "$source" "$target"
 }
 
-install_material_sakura_variant() {
-    local base_theme="$HOME/.config/hyde/themes/Material Sakura"
-    local custom_theme="$HOME/.config/hyde/themes/Material Sakura Polished"
-    local override="$repo_dir/theme-overrides/material-sakura-polished/kvconfig.theme"
-
-    if [[ ! -d "$base_theme" ]]; then
-        printf 'Base theme not found, skipped Qt menu variant: %s\n' "$base_theme"
-        return 0
-    fi
-
-    if [[ ! -d "$custom_theme" ]]; then
-        backup_target "$custom_theme"
-        run cp -a -- "$base_theme" "$custom_theme"
-    else
-        backup_target "$custom_theme/kvantum/kvconfig.theme"
-    fi
-    run install -Dm0644 -- "$override" "$custom_theme/kvantum/kvconfig.theme"
+install_qt_menu() {
+    local source="" candidate
+    for candidate in "${XDG_DATA_HOME:-$HOME/.local/share}/wallbash/theme/kvantum/kvconfig.dcol" \
+        /usr/local/share/hyde/wallbash/theme/kvantum/kvconfig.dcol \
+        /usr/share/hyde/wallbash/theme/kvantum/kvconfig.dcol; do
+        [[ -f "$candidate" ]] && { source="$candidate"; break; }
+    done
+    [[ -n "$source" ]] || { printf 'Upstream Kvantum template missing.\n' >&2; return 1; }
+    install_dot "$repo_dir/dotfiles/.config/hyde/qt-menu.ini" "$HOME/.config/hyde/qt-menu.ini"
+    install_dot "$repo_dir/dotfiles/.local/bin/my-hyde-qt-menu" "$HOME/.local/bin/my-hyde-qt-menu" 0755
+    local target="$HOME/.config/wallbash/theme/kvantum/kvconfig.dcol"
+    backup_target "$target"
+    run python "$repo_dir/dotfiles/.local/bin/my-hyde-qt-menu" --prepare "$source" "$target"
 }
+
+install_qt_menu
+if $qt_menu_only; then
+    if ! $dry_run; then
+        "$HOME/.local/bin/my-hyde-qt-menu"
+        printf 'Qt menu preferences installed. Backup: %s\n' "$backup_dir"
+    fi
+    exit 0
+fi
 
 if ! $skip_packages; then
     missing=()
@@ -108,10 +115,9 @@ install_dot "$repo_dir/dotfiles/.config/waybar/user-style.css" "$HOME/.config/wa
 install_dot "$repo_dir/dotfiles/.config/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 install_dot "$repo_dir/dotfiles/.config/zsh/user.zsh" "$HOME/.config/zsh/user.zsh"
 install_dot "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" "$HOME/.local/bin/hyde-brightness-panel" 0755
-install_material_sakura_variant
 
 if ! $dry_run; then
-    hyde-shell theme.switch -q -s "Material Sakura Polished"
+    "$HOME/.local/bin/my-hyde-qt-menu"
     hyde-shell waybar --set "$HOME/.config/waybar/layouts/my-hyde.jsonc"
     hyprctl reload >/dev/null 2>&1 || true
     systemctl --user restart hyde-Hyprland-idle.service
