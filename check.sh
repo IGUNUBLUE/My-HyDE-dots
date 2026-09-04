@@ -17,6 +17,10 @@ waybar_layout="$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc"
 }
 
 zsh_config="$repo_dir/dotfiles/.config/zsh/user.zsh"
+if grep -Eq '^[[:space:]]*(pokego|pokemon-colorscripts|fastfetch)([[:space:]]|$)' "$zsh_config"; then
+    printf 'Zsh must not run a system-information banner on every terminal startup.\n' >&2
+    exit 1
+fi
 grep -Fqx '    "$PNPM_HOME/bin"' "$zsh_config" || {
     printf 'Zsh must expose PNPM global CLI binaries through $PNPM_HOME/bin.\n' >&2
     exit 1
