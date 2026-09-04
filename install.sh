@@ -64,6 +64,25 @@ install_dot() {
     run install -Dm"$mode" -- "$source" "$target"
 }
 
+install_material_sakura_variant() {
+    local base_theme="$HOME/.config/hyde/themes/Material Sakura"
+    local custom_theme="$HOME/.config/hyde/themes/Material Sakura Polished"
+    local override="$repo_dir/theme-overrides/material-sakura-polished/kvconfig.theme"
+
+    if [[ ! -d "$base_theme" ]]; then
+        printf 'Base theme not found, skipped Qt menu variant: %s\n' "$base_theme"
+        return 0
+    fi
+
+    if [[ ! -d "$custom_theme" ]]; then
+        backup_target "$custom_theme"
+        run cp -a -- "$base_theme" "$custom_theme"
+    else
+        backup_target "$custom_theme/kvantum/kvconfig.theme"
+    fi
+    run install -Dm0644 -- "$override" "$custom_theme/kvantum/kvconfig.theme"
+}
+
 if ! $skip_packages; then
     missing=()
     while IFS= read -r package; do
@@ -89,8 +108,10 @@ install_dot "$repo_dir/dotfiles/.config/waybar/user-style.css" "$HOME/.config/wa
 install_dot "$repo_dir/dotfiles/.config/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 install_dot "$repo_dir/dotfiles/.config/zsh/user.zsh" "$HOME/.config/zsh/user.zsh"
 install_dot "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" "$HOME/.local/bin/hyde-brightness-panel" 0755
+install_material_sakura_variant
 
 if ! $dry_run; then
+    hyde-shell theme.switch -q -s "Material Sakura Polished"
     hyde-shell waybar --set "$HOME/.config/waybar/layouts/my-hyde.jsonc"
     hyprctl reload >/dev/null 2>&1 || true
     systemctl --user restart hyde-Hyprland-idle.service

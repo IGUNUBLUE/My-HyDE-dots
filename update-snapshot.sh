@@ -20,5 +20,6 @@ copy_dot "$HOME/.config/kitty/kitty.conf" "$repo_dir/dotfiles/.config/kitty/kitt
 copy_dot "$HOME/.config/zsh/user.zsh" "$repo_dir/dotfiles/.config/zsh/user.zsh"
 copy_dot "$HOME/.local/bin/hyde-brightness-panel" "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
 chmod 0755 "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
+copy_dot "$HOME/.config/hyde/themes/Material Sakura Polished/kvantum/kvconfig.theme" "$repo_dir/theme-overrides/material-sakura-polished/kvconfig.theme"
 
 printf 'Snapshot updated. Review with: git diff\n'
