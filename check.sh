@@ -7,12 +7,64 @@ trap 'rm -rf -- "$pycache_dir"' EXIT
 [[ -s "$repo_dir/AGENTS.md" ]] || { printf 'AGENTS.md is missing or empty.\n' >&2; exit 1; }
 [[ -s "$repo_dir/memory/index.md" ]] || { printf 'Repository memory index is missing or empty.\n' >&2; exit 1; }
 bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot.sh" "$repo_dir/check.sh"
+
+for theme in "LAGC Tech Dark" "LAGC Tech Light"; do
+    theme_dir="$repo_dir/dotfiles/.config/hyde/themes/$theme"
+    for theme_file in hypr.theme kitty.theme rofi.theme theme.dcol waybar.theme; do
+        [[ -s "$theme_dir/$theme_file" ]] || {
+            printf 'LAGC Tech theme is missing %s: %s\n' "$theme_file" "$theme" >&2
+            exit 1
+        }
+    done
+    bash -n "$theme_dir/theme.dcol"
+    grep -Fqx '$HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf' "$theme_dir/hypr.theme"
+    grep -Fqx '$HOME/.config/kitty/theme.conf|killall -SIGUSR1 kitty' "$theme_dir/kitty.theme"
+    grep -Fqx '$HOME/.config/rofi/theme.rasi' "$theme_dir/rofi.theme"
+    grep -Fqx '$HOME/.config/waybar/theme.css|${scrDir}/wbarconfgen.sh' "$theme_dir/waybar.theme"
+    grep -Eq '^@define-color main-bg #[0-9A-F]{6};$' "$theme_dir/waybar.theme"
+    grep -Eq '^    main-bg:[[:space:]]+#[0-9A-F]{8};$' "$theme_dir/rofi.theme"
+    grep -Eq '^dcol_[1-4]xa[1-9]_rgba="rgba\([0-9]+,[0-9]+,[0-9]+,\\1\)"$' "$theme_dir/theme.dcol"
+done
+
+rofi_override="$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-opaque.dcol"
+rofi_callback="$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
+[[ -s "$rofi_override" && -s "$rofi_callback" ]] || {
+    printf 'LAGC Rofi selection override is missing.\n' >&2
+    exit 1
+}
+grep -Fqx '$HOME/.config/rofi/theme.rasi|"$HOME/.local/bin/my-hyde-rofi-selection"' "$rofi_override"
+grep -Fqx '    select-bg:          #<wallbash_4xa8>FF;' "$rofi_override"
+grep -Fqx '    select-fg:          #<wallbash_4xa1>FF;' "$rofi_override"
+if grep -Eq '^(#|//)' "$rofi_override"; then
+    printf 'Rofi templates must not add standalone comments to generated Rasi.\n' >&2
+    exit 1
+fi
+grep -Fq 'select-bg:          #17D7E8FF;' "$rofi_callback"
+grep -Fq 'select-fg:          #061B2BFF;' "$rofi_callback"
+bash -n "$rofi_callback"
+
+if find "$repo_dir/dotfiles/.config/hyde/themes" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) -print -quit | grep -q .; then
+    printf 'Theme wallpaper assets must not be tracked; install.sh links an existing user wallpaper instead.\n' >&2
+    exit 1
+fi
+
+python "$repo_dir/tools/package-kiro-theme.py" --check
+if find "$repo_dir/dotfiles/.local/share/kiro/themes" -type f -name '*.vsix' -print -quit | grep -q .; then
+    printf 'Generated Kiro VSIX packages must not be tracked; install.sh packages them temporarily.\n' >&2
+    exit 1
+fi
+
+python "$repo_dir/tools/merge-zed-settings.py" \
+    --settings "$repo_dir/dotfiles/.config/zed/lagc-tech-settings.json" \
+    --theme "$repo_dir/dotfiles/.config/zed/themes/lagc-tech.json" \
+    --check
+
 PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
 python "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" --status | python -m json.tool >/dev/null
 
 waybar_layout="$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc"
-[[ $(grep -Ec '^[[:space:]]*"height"[[:space:]]*:[[:space:]]*22,[[:space:]]*$' "$waybar_layout") -eq 1 ]] || {
-    printf 'Waybar must keep a stable 22-pixel height for the mixed-scale displays.\n' >&2
+[[ $(grep -Ec '^[[:space:]]*"height"[[:space:]]*:[[:space:]]*26,[[:space:]]*$' "$waybar_layout") -eq 1 ]] || {
+    printf 'Waybar must keep a stable 26-pixel height for the mixed-scale displays.\n' >&2
     exit 1
 }
 

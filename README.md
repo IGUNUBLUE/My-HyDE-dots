@@ -13,7 +13,10 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
-- Compact transparent Waybar layout with a stable 22-pixel height across mixed-scale displays and user CSS.
+- Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
+- A portable Kiro IDE extension with selectable `LAGC Tech Dark` and `LAGC Tech Light` color themes, installed only through Kiro's own VSIX CLI.
+- A documented Zed local theme family with selectable `LAGC Tech Dark` and `LAGC Tech Light` appearances, merged safely into the user-owned Zed settings file.
+- Compact transparent Waybar layout with a stable 26-pixel height across mixed-scale displays and user CSS.
 - Kitty user configuration with an 11 pt default font and subtle 0.97 background opacity while retaining HyDE's font family and theme.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.
@@ -40,6 +43,43 @@ To use another wallpaper:
 ```bash
 MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
 ```
+
+## LAGC Tech themes
+
+The overlay installs two native HyDE themes without committing any wallpaper content. When an existing wallpaper is available, `install.sh` creates a reversible `wall.set` link for each theme; alternatively, provide one through `MY_HYDE_WALLPAPER` during installation. Switch themes through HyDE's native command:
+
+```bash
+hyde-shell theme.switch -s "LAGC Tech Dark"
+hyde-shell theme.switch -s "LAGC Tech Light"
+```
+
+The themes use existing `Catppuccin-Mocha` and `Catppuccin-Latte` GTK assets for their GTK base. HyDE's standard Wallbash pipeline applies the LAGC palette to Dunst and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback makes the Light theme's Rofi window-switcher selection Signal Cyan (`#17D7E8`) with Midnight text (`#061B2B`) after the shared opaque-Rofi template runs, without changing Kvantum's Cobalt highlight and link roles.
+
+## Kiro IDE themes
+
+The overlay also includes a VS Code-compatible extension containing selectable `LAGC Tech Dark` and `LAGC Tech Light` themes. It does not copy files into Kiro's private extension directory. Instead, the installer builds a temporary VSIX from `dotfiles/.local/share/kiro/themes/lagc-tech/` and passes it to Kiro's supported CLI:
+
+```bash
+./install.sh --kiro-theme-only
+```
+
+The normal `./install.sh` flow installs or updates the same extension whenever the `kiro` CLI is available. In Kiro, use **Preferences: Color Theme** (`Ctrl+K`, then `Ctrl+T`) and select `LAGC Tech Dark` or `LAGC Tech Light`. To remove only this overlay-owned extension:
+
+```bash
+./restore.sh --kiro-theme-only
+```
+
+## Zed editor themes
+
+Zed loads local theme families from `~/.config/zed/themes/` on Linux. The overlay installs `lagc-tech.json` there and merges only its `theme.light` and `theme.dark` selections into the existing `~/.config/zed/settings.json`; unrelated editor, agent, language, and credential settings remain untouched. Your current Zed theme mode is preserved, or defaults to the documented `system` mode for a new settings file.
+
+```bash
+./install.sh --zed-theme-only
+```
+
+Use Zed’s Theme Selector (`Ctrl+K`, then `Ctrl+T`) to preview either appearance. The theme source is tracked at `dotfiles/.config/zed/themes/lagc-tech.json`; `update-snapshot.sh` captures only that theme file and never copies the full settings file, preventing private Zed configuration from entering this repository.
+
+Reference: [Zed themes](https://zed.dev/docs/themes) and [Zed theme extensions](https://zed.dev/docs/extensions/themes).
 
 ## Restore the previous configuration
 

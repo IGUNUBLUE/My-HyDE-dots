@@ -9,8 +9,24 @@ copy_dot() {
     install -Dm0644 -- "$source" "$destination"
 }
 
+copy_theme() {
+    local theme_name=$1 source_dir
+    source_dir="$HOME/.config/hyde/themes/$theme_name"
+    local source relative
+
+    for source in hypr.theme kitty.theme rofi.theme theme.dcol waybar.theme; do
+        copy_dot "$source_dir/$source" "$repo_dir/dotfiles/.config/hyde/themes/$theme_name/$source"
+    done
+}
+
 mkdir -p "$repo_dir/dotfiles/.config/hyde"
 sed "s|$HOME|@HOME@|g" "$HOME/.config/hyde/config.toml" > "$repo_dir/dotfiles/.config/hyde/config.toml.in"
+copy_dot "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol" "$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-opaque.dcol"
+copy_dot "$HOME/.local/bin/my-hyde-rofi-selection" "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
+chmod 0755 "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
+copy_theme "LAGC Tech Dark"
+copy_theme "LAGC Tech Light"
+copy_dot "$HOME/.config/zed/themes/lagc-tech.json" "$repo_dir/dotfiles/.config/zed/themes/lagc-tech.json"
 copy_dot "$HOME/.config/hypr/hyprland.lua" "$repo_dir/dotfiles/.config/hypr/hyprland.lua"
 copy_dot "$HOME/.config/hypr/hypridle.conf" "$repo_dir/dotfiles/.config/hypr/hypridle.conf"
 copy_dot "$HOME/.config/waybar/layouts/my-hyde.jsonc" "$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc"

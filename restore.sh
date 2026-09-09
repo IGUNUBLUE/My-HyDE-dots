@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+if [[ ${1:-} == "--kiro-theme-only" ]]; then
+    command -v kiro >/dev/null || {
+        printf 'Kiro CLI not found; cannot remove the LAGC Tech Kiro IDE themes.\n' >&2
+        exit 1
+    }
+    kiro --uninstall-extension igunublue.lagc-tech-themes
+    printf 'LAGC Tech Kiro IDE themes removed.\n'
+    exit 0
+fi
+
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/my-hyde-dots/backups"
 backup=${1:-}
 

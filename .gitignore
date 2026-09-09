@@ -1,7 +1,10 @@
 .DS_Store
 *.swp
 *.tmp
+*.vsix
 __pycache__/
 .pytest_cache/
 dist/
 backups/
+/.codebase-memory/
+/graphify-out/
