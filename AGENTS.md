@@ -73,6 +73,14 @@ This repository is the installable, update-safe source of truth for the owner's 
 - Use HyDE's wallpaper command; do not commit the wallpaper image or other Nextcloud content.
 - Wallpaper absence must be non-fatal on a fresh machine.
 
+### Cursor
+
+- Keep the global cursor in HyDE's documented `[desktop.ui]` `cursor_theme` and `cursor_size` keys, not in shared HyDE runtime files.
+- Preserve the pinned GPLv3 Future-cyan XCursor payload and native Hyprcursor source, including their licenses, provenance, aliases, and reviewed hotspot data.
+- Keep `~/.config/environment.d/90-cursor-theme.conf`, both user-owned `default/index.theme` aliases, and the HyDE setting synchronized on the single `Future-cursors` identifier so native Hyprcursor, GTK, legacy and XWayland clients do not select different themes.
+- Use the visually accepted logical size 42 while the active outputs remain scale 1.0 and 1.25; size 36 was too small and size 48 appeared oversized and blurred on the external display.
+- After cursor changes, test the default arrow, link pointer, text beam, resize cursors, clicks on small targets, and pointer crossing on every output. Do not claim hotspot alignment from static inspection alone.
+
 ### Zsh
 
 - Preserve HyDE's Starship and Oh My Zsh ownership while retaining the user's PATH integrations for OMP, Bun, Volta, PNPM, Linuxbrew, and other documented tools.

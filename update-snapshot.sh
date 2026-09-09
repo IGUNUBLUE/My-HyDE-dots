@@ -21,6 +21,9 @@ copy_theme() {
 
 mkdir -p "$repo_dir/dotfiles/.config/hyde"
 sed "s|$HOME|@HOME@|g" "$HOME/.config/hyde/config.toml" > "$repo_dir/dotfiles/.config/hyde/config.toml.in"
+copy_dot "$HOME/.config/environment.d/90-cursor-theme.conf" "$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf"
+copy_dot "$HOME/.icons/default/index.theme" "$repo_dir/dotfiles/.icons/default/index.theme"
+copy_dot "$HOME/.local/share/icons/default/index.theme" "$repo_dir/dotfiles/.local/share/icons/default/index.theme"
 copy_dot "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol" "$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-opaque.dcol"
 copy_dot "$HOME/.local/bin/my-hyde-rofi-selection" "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
 chmod 0755 "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"

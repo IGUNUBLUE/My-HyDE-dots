@@ -3,7 +3,8 @@ set -Eeuo pipefail
 
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 pycache_dir=$(mktemp -d)
-trap 'rm -rf -- "$pycache_dir"' EXIT
+cursor_build_dir=$(mktemp -d)
+trap 'rm -rf -- "$pycache_dir" "$cursor_build_dir"' EXIT
 [[ -s "$repo_dir/AGENTS.md" ]] || { printf 'AGENTS.md is missing or empty.\n' >&2; exit 1; }
 [[ -s "$repo_dir/memory/index.md" ]] || { printf 'Repository memory index is missing or empty.\n' >&2; exit 1; }
 bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot.sh" "$repo_dir/check.sh"
@@ -58,6 +59,67 @@ python "$repo_dir/tools/merge-zed-settings.py" \
     --settings "$repo_dir/dotfiles/.config/zed/lagc-tech-settings.json" \
     --theme "$repo_dir/dotfiles/.config/zed/themes/lagc-tech.json" \
     --check
+
+cursor_dir="$repo_dir/dotfiles/.local/share/icons/Future-cursors"
+cursor_config="$repo_dir/dotfiles/.config/hyde/config.toml.in"
+cursor_env="$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf"
+for cursor_file in index.theme LICENSE SOURCE.md cursors/default cursors/pointer; do
+    [[ -e "$cursor_dir/$cursor_file" ]] || {
+        printf 'Future Cursors payload is missing: %s\n' "$cursor_file" >&2
+        exit 1
+    }
+done
+grep -Fqx 'Name=Future Cursors' "$cursor_dir/index.theme"
+grep -Fq '587c14d2f5bd2dc34095a4efbb1a729eb72a1d36' "$cursor_dir/SOURCE.md"
+[[ $(find "$cursor_dir/cursors" -mindepth 1 -maxdepth 1 | wc -l) -eq 111 ]] || {
+    printf 'Future Cursors payload must contain the complete 111-entry upstream cursor tree.\n' >&2
+    exit 1
+}
+[[ $(find "$cursor_dir/cursors" -xtype l | wc -l) -eq 0 ]] || {
+    printf 'Future Cursors contains broken alias symlinks.\n' >&2
+    exit 1
+}
+[[ $(sha256sum "$cursor_dir/LICENSE" | cut -d' ' -f1) == 605e9047a563c5c8396ffb18232aa4304ec56586aee537c45064c6fb425e44ad ]] || {
+    printf 'Future Cursors GPLv3 license differs from the pinned upstream copy.\n' >&2
+    exit 1
+}
+[[ $(grep -Ec '^[[:space:]]*cursor_theme[[:space:]]*=[[:space:]]*"Future-cursors"[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
+    printf 'HyDE must select Future-cursors exactly once.\n' >&2
+    exit 1
+}
+[[ $(grep -Ec '^[[:space:]]*cursor_size[[:space:]]*=[[:space:]]*42[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
+    printf 'HyDE must keep the accepted logical cursor size 42 for the mixed-scale displays.\n' >&2
+    exit 1
+}
+grep -Fqx 'XCURSOR_THEME=Future-cursors' "$cursor_env"
+grep -Fqx 'XCURSOR_SIZE=42' "$cursor_env"
+grep -Fqx 'HYPRCURSOR_THEME=Future-cursors' "$cursor_env"
+grep -Fqx 'HYPRCURSOR_SIZE=42' "$cursor_env"
+hyprcursor_source="$repo_dir/cursor-sources/Future-cyan-hyprcursor"
+grep -Fqx 'name = Future-cursors' "$hyprcursor_source/manifest.hl"
+grep -Fqx 'hotspot_x = 0.1875' "$hyprcursor_source/hyprcursors/arrow/meta.hl"
+grep -Fqx 'hotspot_y = 0.125' "$hyprcursor_source/hyprcursors/arrow/meta.hl"
+grep -Fqx 'hotspot_x = 0.421875' "$hyprcursor_source/hyprcursors/pointer/meta.hl"
+grep -Fqx 'hotspot_y = 0.21875' "$hyprcursor_source/hyprcursors/pointer/meta.hl"
+grep -Fq 'cf4126d17f4520aceb688d8a60daca4a1f0b9e80' "$hyprcursor_source/SOURCE.md"
+command -v hyprcursor-util >/dev/null || {
+    printf 'hyprcursor-util is required to validate the native Future-cyan build.\n' >&2
+    exit 1
+}
+hyprcursor-util --create "$hyprcursor_source" --output "$cursor_build_dir" >/dev/null
+[[ -s "$cursor_build_dir/theme_Future-cursors/manifest.hl" ]] || {
+    printf 'Native Future-cyan manifest was not generated.\n' >&2
+    exit 1
+}
+[[ $(find "$cursor_build_dir/theme_Future-cursors/hyprcursors" -type f -name '*.hlc' | wc -l) -eq 45 ]] || {
+    printf 'Native Future-cyan build must contain 45 Hyprcursor shapes.\n' >&2
+    exit 1
+}
+for cursor_default in \
+    "$repo_dir/dotfiles/.icons/default/index.theme" \
+    "$repo_dir/dotfiles/.local/share/icons/default/index.theme"; do
+    grep -Fqx 'Inherits=Future-cursors' "$cursor_default"
+done
 
 PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
 python "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" --status | python -m json.tool >/dev/null
