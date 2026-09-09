@@ -1,0 +1,34 @@
+{
+  "name": "lagc-tech-themes",
+  "displayName": "LAGC Tech Themes",
+  "description": "LAGC Tech Dark and Light color themes for Kiro IDE.",
+  "version": "0.1.1",
+  "publisher": "igunublue",
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "lagc",
+    "lagc-tech",
+    "theme",
+    "dark theme",
+    "light theme"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "LAGC Tech Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/lagc-tech-dark-color-theme.json"
+      },
+      {
+        "label": "LAGC Tech Light",
+        "uiTheme": "vs",
+        "path": "./themes/lagc-tech-light-color-theme.json"
+      }
+    ]
+  }
+}
