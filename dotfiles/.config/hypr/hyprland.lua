@@ -60,6 +60,10 @@ hl.monitor({
 
 -- Personal window spacing: keep theme colors, with subtler borders and gaps.
 hl.config({
+	cursor = {
+		-- Use the native Future-cyan Hyprcursor build; XCursor remains the fallback.
+		enable_hyprcursor = true,
+	},
 	input = {
 		kb_layout = "es,latam",
 	},

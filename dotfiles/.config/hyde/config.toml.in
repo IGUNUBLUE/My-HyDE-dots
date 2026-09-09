@@ -14,6 +14,8 @@ icon_size = 9
 font = "Noto Sans SemiBold"
 
 [desktop.ui]
+cursor_theme = "Future-cursors"
+cursor_size = 42
 font = "Noto Sans Medium"
 font_size = 11
 document_font = "Noto Sans Medium"
