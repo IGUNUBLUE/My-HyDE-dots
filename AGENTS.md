@@ -55,7 +55,7 @@ This repository is the installable, update-safe source of truth for the owner's 
 ### Waybar
 
 - Preserve the `my-hyde` custom layout name and select it with `hyde-shell waybar --set`.
-- Keep the layout height at 26 logical pixels unless every active output is retested manually; 25 pixels passed reload/theme-cycle checks but still caused visible resizing during real pointer crossing between the mixed-scale displays.
+- Keep the layout at the historical 22 logical pixels together with the scoped `#pill` `min-height: 0` override; test every active output manually after changing either. The earlier 25-pixel workaround passed reload/theme-cycle checks but still resized during real pointer crossing, while 26 pixels remains the known-safe rollback.
 - Prefer `user-style.css` for visual adjustments and the custom module file for brightness behavior; do not edit generated `config.jsonc` or upstream styles.
 - Maintain usable click targets and readable text when reducing height, padding, icon size, or gaps.
 - After a change, verify that Waybar is running, the active layout in `~/.local/state/hyde/staterc` is `my-hyde`, and the generated config contains every custom module.

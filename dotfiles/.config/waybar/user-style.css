@@ -14,6 +14,12 @@ window#waybar.top #pill {
     margin-bottom: 0;
 }
 
+/* Let the explicit layout height govern the islands instead of GTK defaults. */
+window#waybar.top #pill,
+window#waybar.top #pill * {
+    min-height: 0;
+}
+
 /* Consistent compact rhythm without shrinking click targets too far. */
 window#waybar.top #pill label.module,
 window#waybar.top #pill button,

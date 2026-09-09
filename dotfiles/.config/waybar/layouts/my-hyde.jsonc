@@ -2,7 +2,7 @@
     // Polished, compact user layout preserved across HyDE updates.
     "layer": "top",
     "output": ["*"],
-    "height": 26,
+    "height": 22,
     "margin-top": 3,
     "exclusive": true,
     "reload_style_on_change": true,

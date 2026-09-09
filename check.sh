@@ -63,8 +63,13 @@ PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.loc
 python "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" --status | python -m json.tool >/dev/null
 
 waybar_layout="$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc"
-[[ $(grep -Ec '^[[:space:]]*"height"[[:space:]]*:[[:space:]]*26,[[:space:]]*$' "$waybar_layout") -eq 1 ]] || {
-    printf 'Waybar must keep a stable 26-pixel height for the mixed-scale displays.\n' >&2
+waybar_style="$repo_dir/dotfiles/.config/waybar/user-style.css"
+[[ $(grep -Ec '^[[:space:]]*"height"[[:space:]]*:[[:space:]]*22,[[:space:]]*$' "$waybar_layout") -eq 1 ]] || {
+    printf 'Waybar must keep the historical 22-pixel layout height.\n' >&2
+    exit 1
+}
+grep -Fq $'window#waybar.top #pill * {\n    min-height: 0;\n}' "$waybar_style" || {
+    printf 'Waybar must neutralize GTK minimum heights inside the user-owned pills.\n' >&2
     exit 1
 }
 
