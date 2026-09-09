@@ -8,7 +8,8 @@ window#waybar {
 window#waybar.top #pill {
     background-color: alpha(@main-bg, 0.92);
     border: none;
-    box-shadow: 0 2px 8px alpha(#000000, 0.14);
+    border-radius: 12pt;
+    box-shadow: 0 0 8px alpha(#000000, 0.14);
     margin-top: 0;
     margin-bottom: 0;
 }
