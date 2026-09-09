@@ -16,7 +16,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
 - A portable Kiro IDE extension with selectable `LAGC Tech Dark` and `LAGC Tech Light` color themes, installed only through Kiro's own VSIX CLI.
 - A documented Zed local theme family with selectable `LAGC Tech Dark` and `LAGC Tech Light` appearances, merged safely into the user-owned Zed settings file.
-- Compact transparent Waybar layout with a stable 26-pixel height across mixed-scale displays and user CSS.
+- Compact transparent Waybar layout with a historical 22-pixel height, scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
 - Kitty user configuration with an 11 pt default font and subtle 0.97 background opacity while retaining HyDE's font family and theme.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.

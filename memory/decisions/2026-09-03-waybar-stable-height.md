@@ -7,25 +7,28 @@
 
 ## Context
 
-The custom layout can request a height below the minimum required by its modules. With the LAGC Tech global themes applied, a Waybar reload again recalculated its surfaces as focus crossed between the 1.25-scale internal display and the 1.0-scale external display, visibly moving the exclusive layer and tiled windows.
+The historical custom layout requested 22 pixels, but GTK widget minimums could override that request after a theme refresh. When Waybar recalculated different minimums while focus crossed the 1.25-scale internal display and the 1.0-scale external display, its exclusive layer and tiled windows visibly moved. Raising the layout to 26 pixels prevented the resize but made the bar and window gap larger than the accepted pre-LAGC appearance.
 
 ## Evidence
 
 - On 2026-09-09, Waybar initially logged `Requested height: 22 is less than the minimum height: 24 required by the modules`, followed by 25- and 26-pixel transient minimums while it reloaded the LAGC theme styles.
-- A controlled 25-pixel retest appeared stable during Waybar reload, LAGC Tech Light refresh, and a Dark → Light cycle: both outputs reported 25 pixels and the journal showed no minimum-height diagnostics.
-- The required manual test then reproduced the original jump while moving the pointer between desktops. Synthetic reload and theme-cycle checks therefore cannot establish cross-display stability at 25 pixels.
-- LAGC's `waybar.theme` contains only palette variables; it does not declare a font, size, padding, or height. The change in required minimum is caused by the active module/style combination after a global theme reload, not by a Kiro theme.
+- A 25-pixel workaround appeared stable during reload and theme-cycle checks, but the required manual test reproduced the jump while moving the pointer between desktops.
+- A controlled Material Sakura versus LAGC Tech Light comparison at 26 pixels produced identical layer geometry, margin and typography. Their `waybar.theme` files contain only palette variables, so LAGC colors were not the size cause.
+- Waybar's documented minimal GTK CSS uses `min-height: 0`. Scoping that rule to the user-owned `#pill` and its descendants allowed the historical 22-pixel request on both outputs.
+- A full install, Waybar reload, and Material Sakura → LAGC Tech Light cycle kept both live layers at exactly 22 pixels without minimum-height diagnostics. Real pointer crossing remains the final acceptance test because synthetic checks did not expose the earlier 25-pixel failure.
 
 ## Decision
 
-Keep `height` fixed at 26 in `dotfiles/.config/waybar/layouts/my-hyde.jsonc`. This is the smallest height that has not reproduced the focus-crossing jump in real use with the current modules, styles, and mixed-scale outputs. Do not lower it based only on reload logs or static layer geometry; manual pointer crossing is mandatory.
+Use `height: 22` in `dotfiles/.config/waybar/layouts/my-hyde.jsonc` together with the scoped `#pill` `min-height: 0` rule in `user-style.css`. Keep vertical margins symmetric and do not use negative margins or content offsets. Manual pointer crossing on every active mixed-scale output is mandatory; restore 26 pixels if any geometry jump, clipping or unusable click target appears.
 
 ## Validation
 
+- Install through `./install.sh --skip-packages` so the live files are backed up.
 - Reload Waybar through `hyde-shell waybar --set` using the `my-hyde` layout.
-- Confirm Hyprland reports a 26-pixel Waybar layer on every active output.
-- Cross focus between outputs and confirm no new minimum-height warning or geometry change appears.
+- Confirm Hyprland reports a 22-pixel Waybar layer on every active output and the journal has no minimum-height warning.
+- Cycle Material Sakura and LAGC Tech Light, then repeatedly cross the pointer between outputs while watching the bar and tiled-window edge.
+- Inspect workspace badges, icons, text and click targets for clipping before accepting the change.
 
 ## Exit criteria
 
-Revisit if module content, font size, display scaling, or HyDE's generated base styles change. Any replacement height must be tested on every active output and must produce no minimum-height warning while repeatedly crossing focus between monitors.
+Revisit if module content, font size, display scaling, or HyDE's generated base styles change. If the scoped minimum-size rule no longer preserves 22 pixels without clipping or pointer-triggered geometry changes, restore the known-safe 26-pixel height until a replacement passes the same live tests.
