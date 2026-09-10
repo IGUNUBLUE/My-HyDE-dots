@@ -1,0 +1,22 @@
+---
+# Codacy configuration file.
+# https://docs.codacy.com/repositories-configure/codacy-configuration-file/
+#
+# The security scan is scoped to code that executes. Configuration trees and
+# the reviewed cursor sources are data, and generic linters misread them:
+# the Waybar stylesheet is GTK CSS, which uses @define-color references and
+# alpha(), and HyDE's Wallbash tokens (@wb-*, @main-*) are substituted at
+# render time, so the file is not valid CSS as committed.
+
+exclude_paths:
+  - "cursor-sources/**"
+  - "dotfiles/.config/**"
+  - "dotfiles/.local/share/**"
+
+engines:
+  # Bandit flags `assert` in test code (B101). Tests are not compiled with -O,
+  # and check.sh already scans the whole tree for secrets, so tests are out of
+  # the security-scanning scope.
+  bandit:
+    exclude_paths:
+      - "tests/**"
