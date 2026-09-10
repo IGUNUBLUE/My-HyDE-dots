@@ -77,7 +77,7 @@ These are the properties a valid report would most likely violate. They are deli
 - **No remote code execution at install time.** None of the scripts download or pipe remote content into a shell. Cursor sources are tracked in this repository and compiled locally with `hyprcursor-util`. Packages come from the official Arch repositories, through `pacman`.
 - **Backups before writes.** Every file or managed tree that is replaced is copied to `~/.local/state/my-hyde-dots/backups/` first, and `restore.sh` reverts to that copy.
 - **No shared HyDE runtime is overwritten.** The overlay writes only its own files plus HyDE's documented user-owned override points. It does not touch `~/.local/share/hyde`, `~/.local/share/hypr` or `~/.local/lib/hyde`.
-- **No secrets in the repository.** `check.sh` refuses to pass when it finds a private key, a GitHub token, or a `password=` / `token=` / `api_key=` assignment, and `update-snapshot.sh` deliberately excludes histories, caches, credentials, KWallet and browser profiles.
+- **No secrets in the repository.** `check.sh` refuses to pass when it finds a private key, a GitHub token, or an assignment to a `password`, `token` or `api_key` variable, and `update-snapshot.sh` deliberately excludes histories, caches, credentials, KWallet and browser profiles.
 
 ## Privileges required
 
@@ -88,5 +88,5 @@ These are the properties a valid report would most likely violate. They are deli
 - Run `./install.sh --dry-run` and read the output before the real run.
 - Read `packages.arch`; use `--skip-packages` if you would rather install those yourself.
 - Keep `~/.local/state/my-hyde-dots/backups/` out of any folder that syncs to a third party, since it contains a copy of your configuration.
-- Run `./check.sh` before committing: it is the same gate CI enforces.
+- Run `./check.sh` before committing. It is this repository's own gate; CI does not run it, so it only protects you if you run it yourself.
 - Treat a fork as untrusted input if you take configuration from someone else.
