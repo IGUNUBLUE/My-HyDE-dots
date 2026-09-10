@@ -1,0 +1,121 @@
+name: Bug report
+description: Something in the overlay broke, or did not behave the way the documentation says it does.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a report. Before you continue, please check the
+        [wiki](https://github.com/IGUNUBLUE/My-HYDE-dots/wiki) — [Troubleshooting](https://github.com/IGUNUBLUE/My-HYDE-dots/wiki/Troubleshooting)
+        documents several behaviours that look like bugs but are deliberate.
+
+        Do not report security problems here. Use
+        [private vulnerability reporting](https://github.com/IGUNUBLUE/My-HYDE-dots/security/advisories/new) instead.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
+        - label: I ran `./check.sh` and included its output below.
+          required: true
+        - label: This is not a security vulnerability (those go through private reporting).
+          required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the overlay is involved?
+      options:
+        - install.sh or restore.sh
+        - Hyprland (layout, gaps, opacity, animations, keyboard)
+        - Waybar (layout, height, modules)
+        - Displays or the brightness popup
+        - Themes (LAGC Tech, Material Sakura Polished, Wallbash, Rofi)
+        - Cursors (Future-cursors, Hyprcursor, hotspot, size)
+        - Kiro IDE theme extension
+        - Zed theme
+        - Kitty, fonts or Zsh
+        - Hypridle, locking or suspend
+        - Other or unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you observed. Paste exact command output rather than paraphrasing it.
+      placeholder: |
+        I ran ...
+        I expected ...
+        Instead ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence you have confirmed reproduces it, starting from a known state.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: displays
+    attributes:
+      label: Displays and scale factors
+      description: >
+        Monitor identifiers, scale factors and position, plus the DDC/CI model name if the
+        brightness popup is involved. Most display bugs here are mixed-scale interactions that
+        only reproduce on a specific pair of outputs.
+      placeholder: "eDP-1 scale 1.25; LG ULTRAGEAR scale 1 at 1536x0; DDC/CI: LG ULTRAGEAR"
+    validations:
+      required: true
+
+  - type: input
+    id: hyde-version
+    attributes:
+      label: HyDE version and install flags
+      description: The HyDE revision you installed, and the exact flags you passed to install.sh.
+      placeholder: "HyDE 2026-09-02; ./install.sh --skip-packages"
+    validations:
+      required: true
+
+  - type: textarea
+    id: check-output
+    attributes:
+      label: Output of ./check.sh
+      description: Paste it verbatim. A failure here usually names the invariant that broke.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or configuration
+      description: >
+        Anything else that shows the problem — Hyprland logs, Waybar stderr, the diff you applied.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I read the wiki page for the component above, and its explanation does not cover this.
+          required: false
+        - label: I am willing to test a proposed fix and report back.
+          required: false
