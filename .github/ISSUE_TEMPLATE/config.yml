@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Read the wiki first
+    url: https://github.com/IGUNUBLUE/My-HYDE-dots/wiki
+    about: Installation, themes, cursors, displays, backup and troubleshooting.
+  - name: Troubleshooting
+    url: https://github.com/IGUNUBLUE/My-HYDE-dots/wiki/Troubleshooting
+    about: Several behaviours that look like bugs are deliberate and documented here.
+  - name: Report a vulnerability privately
+    url: https://github.com/IGUNUBLUE/My-HYDE-dots/security/advisories/new
+    about: Please do not open a public issue for a security problem.
