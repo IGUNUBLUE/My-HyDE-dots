@@ -42,9 +42,10 @@ jobs:
     name: Codacy Security Scan
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository to the GitHub Actions runner
+      # Checkout code. v5 or later targets Node 24; v4 still targets the
+      # deprecated Node 20 runtime and makes every run emit an annotation.
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Python security analysis
       - name: Run Codacy Analysis CLI (Bandit)
@@ -75,15 +76,16 @@ jobs:
           max-allowed-issues: 2147483647
 
       # Each upload needs its own category, otherwise the second upload
-      # supersedes the results of the first
+      # supersedes the results of the first. upload-sarif must stay on v4 or
+      # later: v3 targets Node 20 and is deprecated in December 2026.
       - name: Upload Bandit SARIF results file
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: bandit.sarif
           category: bandit
 
       - name: Upload ShellCheck SARIF results file
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: shellcheck.sarif
           category: shellcheck
