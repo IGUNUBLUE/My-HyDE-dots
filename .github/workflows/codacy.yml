@@ -3,10 +3,18 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-# This workflow checks out code, performs a Codacy security scan
-# and integrates the results with the
-# GitHub Advanced Security code scanning feature.  For more information on
-# the Codacy security scan action usage and parameters, see
+# This workflow checks out code, runs a scoped Codacy security scan and
+# integrates the results with the GitHub Advanced Security code scanning
+# feature.
+#
+# The scan is deliberately restricted to Bandit and ShellCheck. Running the
+# Codacy CLI default toolset over this repository produces mostly false
+# positives: the Waybar stylesheet is GTK CSS that uses @define-color
+# references and alpha(), and the Python tools use PEP 563/585 annotations
+# that the bundled legacy Pylint and Prospector cannot parse. .codacy.yaml
+# backs this up with path exclusions for the non-executable trees.
+#
+# For more information on the Codacy security scan action usage and parameters, see
 # https://github.com/codacy/codacy-analysis-cli-action.
 # For more information on Codacy Analysis CLI in general, see
 # https://github.com/codacy/codacy-analysis-cli.
@@ -38,15 +46,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
-      - name: Run Codacy Analysis CLI
+      # Python security analysis
+      - name: Run Codacy Analysis CLI (Bandit)
         uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
         with:
-          # Check https://github.com/codacy/codacy-analysis-cli#project-token to get your project token from your Codacy repository
-          # You can also omit the token and run the tools that support default configurations
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
-          output: results.sarif
+          tool: bandit
+          output: bandit.sarif
           format: sarif
           # Adjust severity of non-security issues
           gh-code-scanning-compat: true
@@ -54,8 +61,29 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
 
-      # Upload the SARIF file generated in the previous step
-      - name: Upload SARIF results file
+      # Shell safety analysis: install.sh, restore.sh, update-snapshot.sh,
+      # check.sh and the dotfiles/.local/bin helpers
+      - name: Run Codacy Analysis CLI (ShellCheck)
+        uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          verbose: true
+          tool: shellcheck
+          output: shellcheck.sarif
+          format: sarif
+          gh-code-scanning-compat: true
+          max-allowed-issues: 2147483647
+
+      # Each upload needs its own category, otherwise the second upload
+      # supersedes the results of the first
+      - name: Upload Bandit SARIF results file
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results.sarif
+          sarif_file: bandit.sarif
+          category: bandit
+
+      - name: Upload ShellCheck SARIF results file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: shellcheck.sarif
+          category: shellcheck
