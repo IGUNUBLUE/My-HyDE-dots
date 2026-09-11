@@ -282,12 +282,15 @@ install_dot "$repo_dir/dotfiles/.config/waybar/user-style.css" "$HOME/.config/wa
 install_dot "$repo_dir/dotfiles/.config/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 install_dot "$repo_dir/dotfiles/.config/zsh/user.zsh" "$HOME/.config/zsh/user.zsh"
 install_dot "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" "$HOME/.local/bin/hyde-brightness-panel" 0755
-install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-opaque.dcol" "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
+install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-frosted.dcol" "$HOME/.config/hyde/wallbash/always/rofi-frosted.dcol"
+install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/btop.dcol" "$HOME/.config/hyde/wallbash/always/btop.dcol"
+install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-btop.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-btop.sh" 0755
 install_dot "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection" "$HOME/.local/bin/my-hyde-rofi-selection" 0755
 
 install_theme_files "LAGC Tech Dark"
 install_theme_files "LAGC Tech Light"
 install_kiro_theme
+remove_target "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
 remove_target "$HOME/.config/hyde/wallbash/theme/lagc-tech-dark-kitty.dcol"
 remove_target "$HOME/.config/hyde/wallbash/always/lagc-tech-dark-waybar.dcol"
 for stale_wallpaper in \

@@ -6,7 +6,7 @@ window#waybar {
 
 /* Theme-aware floating islands with quiet depth. */
 window#waybar.top #pill {
-    background-color: alpha(@main-bg, 0.92);
+    background-color: alpha(@main-bg, 0.99);
     border: none;
     border-radius: 12pt;
     box-shadow: 0 0 8px alpha(#000000, 0.14);
@@ -84,7 +84,7 @@ window#waybar.top #pill #workspaces button.active:focus {
 }
 
 tooltip {
-    background-color: alpha(@main-bg, 0.97);
+    background-color: alpha(@main-bg, 1.0);
     color: @main-fg;
     border: 1px solid alpha(@main-fg, 0.16);
     border-radius: 10pt;

@@ -27,13 +27,14 @@ for theme in "LAGC Tech Dark" "LAGC Tech Light"; do
     grep -Eq '^dcol_[1-4]xa[1-9]_rgba="rgba\([0-9]+,[0-9]+,[0-9]+,\\1\)"$' "$theme_dir/theme.dcol"
 done
 
-rofi_override="$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-opaque.dcol"
+rofi_override="$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-frosted.dcol"
 rofi_callback="$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
 [[ -s "$rofi_override" && -s "$rofi_callback" ]] || {
     printf 'LAGC Rofi selection override is missing.\n' >&2
     exit 1
 }
 grep -Fqx '$HOME/.config/rofi/theme.rasi|"$HOME/.local/bin/my-hyde-rofi-selection"' "$rofi_override"
+grep -Fqx '    main-bg:            #<wallbash_pry1>F7;' "$rofi_override"
 grep -Fqx '    select-bg:          #<wallbash_4xa8>FF;' "$rofi_override"
 grep -Fqx '    select-fg:          #<wallbash_4xa1>FF;' "$rofi_override"
 if grep -Eq '^(#|//)' "$rofi_override"; then
@@ -89,6 +90,10 @@ grep -Fq '587c14d2f5bd2dc34095a4efbb1a729eb72a1d36' "$cursor_dir/SOURCE.md"
 }
 [[ $(grep -Ec '^[[:space:]]*cursor_size[[:space:]]*=[[:space:]]*42[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
     printf 'HyDE must keep the accepted logical cursor size 42 for the mixed-scale displays.\n' >&2
+    exit 1
+}
+[[ $(grep -Ec '^[[:space:]]*duration_scale[[:space:]]*=[[:space:]]*0[.]9[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
+    printf 'HyDE must keep the animation duration scale in config.toml, where the preset can read it.\n' >&2
     exit 1
 }
 grep -Fqx 'XCURSOR_THEME=Future-cursors' "$cursor_env"
@@ -166,6 +171,33 @@ if find "$repo_dir/dotfiles/.config/kitty" -maxdepth 1 -type f \( -name 'hyde.co
     printf 'HyDE-managed Kitty files must not be tracked.\n' >&2
     exit 1
 fi
+
+hyprland_config="$repo_dir/dotfiles/.config/hypr/hyprland.lua"
+[[ -s "$hyprland_config" ]] || { printf 'Hyprland override is missing or empty.\n' >&2; exit 1; }
+grep -Fq $'\t\tblur = {\n\t\t\tenabled = true,' "$hyprland_config" || {
+    printf 'Hyprland must enable the blur that the translucent surfaces rely on.\n' >&2
+    exit 1
+}
+if grep -Eq '^[[:space:]]*opaque[[:space:]]*=[[:space:]]*true,$' "$hyprland_config"; then
+    printf 'Hyprland must not force application windows opaque; it flattens blur, shadow and glow.\n' >&2
+    exit 1
+fi
+for opacity_key in active_opacity inactive_opacity; do
+    [[ $(grep -Ec "^[[:space:]]*$opacity_key[[:space:]]*=[[:space:]]*1,$" "$hyprland_config") -eq 1 ]] || {
+        printf 'Application windows must stay fully opaque: %s = 1.\n' "$opacity_key" >&2
+        exit 1
+    }
+done
+
+btop_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/btop.dcol"
+btop_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-btop.sh"
+[[ -s "$btop_template" && -x "$btop_script" ]] || {
+    printf 'Btop Wallbash template or theme selector is missing.\n' >&2
+    exit 1
+}
+grep -Fqx '$HOME/.config/btop/themes/hyde-wallbash.theme|"$WALLBASH_SCRIPTS/my-hyde-btop.sh"' "$btop_template"
+grep -Fqx 'theme[title]="#<wallbash_4xa8>"' "$btop_template"
+bash -n "$btop_script"
 
 python "$repo_dir/tests/qt-menu.py"
 
