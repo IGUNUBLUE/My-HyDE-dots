@@ -69,7 +69,8 @@ This repository is the installable, update-safe source of truth for the owner's 
 ### Fonts, themes, and wallpaper
 
 - Keep font changes consistent across HyDE, GTK, Qt, notifications, and Waybar where applicable.
-- Preserve full opacity and disabled blur unless the user explicitly requests transparency.
+- Keep application windows fully opaque (`active_opacity` and `inactive_opacity` = 1). The current solid-first profile disables compositor blur and inner glow because diffuse blur causes eye strain; retain only small alpha transparency on Waybar islands, Rofi, Dunst and Kitty. The user-owned layer override intentionally disables blur for `rofi`, `notifications`, `waybar` and `logout_dialog`. Do not add a `class = ".*"` rule with `opaque = true`; opacity 1 in the compositor config is enough and keeps future surface-level transparency possible.
+- Verify any decoration snippet against the installed release with `hyprctl getoption` before using it; the Hyprland wiki documents `latest git`. With the Lua parser, apply live experiments with `hyprctl eval 'hl.config({...})'` and revert with `hyde-shell -r`; `hyprctl keyword` no longer works.
 - Use HyDE's wallpaper command; do not commit the wallpaper image or other Nextcloud content.
 - Wallpaper absence must be non-fatal on a fresh machine.
 
