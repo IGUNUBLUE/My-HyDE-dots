@@ -3,7 +3,7 @@ $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 # Palette: frost #F7FCFD, cobalt #1B5CFF, cyan #17D7E8, ember #FF7A3D.
 
 $GTK_THEME=Catppuccin-Latte
-$ICON_THEME=Tela-circle-grey
+$ICON_THEME=Pebble
 $COLOR_SCHEME=prefer-light
 
 general {
