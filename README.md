@@ -10,7 +10,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 ## Included
 
-- Hyprland monitor layout, Spanish keyboard layouts, gaps, rounding, opacity and faster animations.
+- Hyprland monitor layout, Spanish keyboard layouts, and a solid-first visual layer: opaque windows, 12 px squircle corners, palette-driven shadows, a looping border gradient, and only small alpha transparency on selected surfaces.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
@@ -18,11 +18,35 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - A documented Zed local theme family with selectable `LAGC Tech Dark` and `LAGC Tech Light` appearances, merged safely into the user-owned Zed settings file.
 - Compact transparent Waybar layout with a historical 22-pixel height, scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
 - Pinned GPLv3 `Future-cyan` cursor theme at visually accepted logical size 42, with native Hyprcursor plus XCursor fallback, reviewed hotspot corrections, and consistent HyDE/session/GTK defaults.
-- Kitty user configuration with an 11 pt default font and subtle 0.97 background opacity while retaining HyDE's font family and theme.
+- Kitty user configuration with an 11 pt default font and 0.90 background opacity for slight transparency without compositor blur.
+- Semi-transparent Rofi launcher (90 % wallpaper-matched background) and a Wallbash-generated `hyde-wallbash` theme for btop, both driven by the tracked templates under `~/.config/hyde/wallbash/`.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.
 - Clean Zsh startup without an automatic Fastfetch banner, plus paths for Bun, Volta, PNPM global CLIs, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
 - Optional wallpaper restoration from Nextcloud.
+
+## Visual layer
+
+The visual profile is intentionally solid-first because diffuse blur causes eye strain. Windows remain fully opaque, shadows and borders preserve depth, and selected surfaces keep only small alpha transparency.
+
+- `dotfiles/.config/hypr/hyprland.lua` disables compositor blur and inner glow, keeps `decoration.shadow` plus the LAGC border gradient, and uses `rounding = 12` with `rounding_power = 2.4` (squircle).
+- Waybar islands use `alpha(@main-bg, 0.99)`, Rofi uses alpha `F7`, Dunst stays theme-controlled, and Kitty uses 0.97. These values leave only a minimal amount of transparency without a diffuse backdrop.
+- HyDE's shared layer rules enable blur by default, so the user override explicitly disables it for `rofi`, `notifications`, `waybar` and `logout_dialog`. The Waybar layer keeps its 22 px geometry and the same mixed-scale validation requirement.
+- HyDE owns the animation timings. Choose a preset with `SUPER + SHIFT + Y` and scale every preset from `config.toml` with `[hyprland.anim] duration_scale = 0.9` (`0.9` is 10 % faster).
+
+Companion selectors ship with HyDE and are deliberately not tracked here, because they are per-machine state:
+
+```bash
+hyde-shell animations --select   # SUPER + SHIFT + Y
+hyde-shell hyprlock --select     # SUPER + SHIFT + U
+hyde-shell shaders --select      # screen shader: vibrance, wallbash, custom
+hyde-shell theme.import --select # gallery themes with GTK, icon and font assets
+```
+
+Notes for later changes:
+
+- The Hyprland wiki documents the `latest git` branch. This machine runs 0.56.2, which has no `decoration.blur.variant` (the `acrylic`, `frost`, `aurora`, `water` liquid-glass variants) and no `decoration.wobble`. Verify any option with `hyprctl getoption` before trusting a snippet.
+- With the Lua parser `hyprctl keyword` no longer works (`keyword can't work with non-legacy parsers. Use eval`). Preview a change with `hyprctl eval 'hl.config({...})'` and revert with `hyde-shell -r`.
 
 ## Fresh installation
 
@@ -138,6 +162,7 @@ Edit the two hardware-specific files before installing on a different machine:
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
 - `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.
+- `~/.config/hyde/wallbash/` is HyDE's documented user template directory and takes precedence over the shared templates that ship with HyDE. Only the overlay's own templates are tracked: `always/rofi-frosted.dcol`, `always/btop.dcol` and `scripts/my-hyde-btop.sh`.
 - Qt menu changes live in a derived theme under `~/.config/hyde/themes/Material Sakura Polished`; the original `Material Sakura` theme and HyDE's generated `~/.config/Kvantum/wallbash` files remain untouched.
 - Shared files managed by HyDE remain untouched.
 
