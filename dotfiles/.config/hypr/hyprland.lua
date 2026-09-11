@@ -58,7 +58,9 @@ hl.monitor({
 	scale = 1,
 })
 
--- Personal window spacing: keep theme colors, with subtler borders and gaps.
+-- Solid-first spacing and depth: keep windows opaque and use only small alpha
+-- values on the user-owned surfaces (Waybar islands, Rofi and Kitty). Blur is
+-- intentionally disabled because the diffuse backdrop is uncomfortable to use.
 hl.config({
 	cursor = {
 		-- Use the native Future-cyan Hyprcursor build; XCursor remains the fallback.
@@ -70,10 +72,14 @@ hl.config({
 	general = {
 		border_size = 2,
 		gaps_in = 2,
-		gaps_out = 4,
+		-- Top edge: a hairline under the bar, which already sits 3px below the
+		-- screen edge. The other edges keep a small, symmetric margin.
+		gaps_out = { top = 3, left = 4, right = 4, bottom = 4 },
 	},
 	decoration = {
-		rounding = 8,
+		rounding = 12,
+		-- 2.0 is a circle and 4.0 a squircle; 2.4 keeps corners soft, not squared.
+		rounding_power = 2.4,
 		active_opacity = 1,
 		inactive_opacity = 1,
 		fullscreen_opacity = 1,
@@ -81,20 +87,27 @@ hl.config({
 			enabled = false,
 			popups = false,
 			special = false,
+			input_methods = false,
+		},
+		-- Palette-driven depth without a diffuse backdrop.
+		shadow = {
+			enabled = true,
+			range = 22,
+			render_power = 3,
+			offset = { 0, 6 },
+			color = "rgba(061b2b47)",
+			color_inactive = "rgba(061b2b26)",
+		},
+		glow = {
+			enabled = false,
 		},
 	},
 })
 
--- Keep application windows opaque without forcing RGBX, which can damage rounded edges.
-hl.window_rule({
-	name = "user_opaque_windows",
-	match = { class = ".*" },
-	opaque = true,
-})
-
--- HyDE launchers and notifications are layer surfaces, so disable their blur separately.
+-- HyDE enables blur on these layer surfaces by default. Keep their small alpha
+-- values for a little transparency, but disable the diffuse backdrop entirely.
 hl.layer_rule({
-	name = "user_disable_layer_blur",
+	name = "user_solid_layer_surfaces",
 	match = {
 		namespace = "^(rofi|notifications|swaync-(notification-window|control-center)|logout_dialog|waybar)$",
 	},
@@ -102,12 +115,17 @@ hl.layer_rule({
 	blur_popups = false,
 })
 
--- Faster global animations while preserving the current easing and effects.
+-- Animation timings belong to the selected HyDE preset (SUPER + SHIFT + Y);
+-- a global override here would flatten every preset into one speed. Only the
+-- border gradient is animated: the theme draws a cyan-to-cobalt 45deg gradient
+-- and rotating it slowly is the cheapest premium touch available.
+hl.curve("user_linear", { type = "bezier", points = { { 1, 1 }, { 1, 1 } } })
 hl.animation({
-	leaf = "global",
+	leaf = "borderangle",
 	enabled = true,
-	speed = 5,
-	bezier = "default",
+	speed = 60,
+	bezier = "user_linear",
+	style = "loop",
 })
 
 -- Keep the user-selected readable fonts after theme changes and reloads.

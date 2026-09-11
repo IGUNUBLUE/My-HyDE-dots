@@ -44,3 +44,8 @@ monospace_font_size = 10
 [notification]
 font = "Noto Sans Medium"
 font_size = 11
+
+# HyDE reads duration_scale while it loads the animation preset, so the value
+# has to live here and not in hyprland.lua, which runs after the preset.
+[hyprland.anim]
+duration_scale = 0.9
