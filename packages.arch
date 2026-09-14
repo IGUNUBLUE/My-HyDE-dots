@@ -1,4 +1,5 @@
-# Official Arch packages needed by this overlay.
+# Arch packages needed by this overlay (official repos or configured trusted Arch-compatible repos).
+fluent-icon-theme-git
 brightnessctl
 ddcutil
 gtk-layer-shell
