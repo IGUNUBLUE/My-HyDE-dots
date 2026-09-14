@@ -3,7 +3,7 @@ $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 # Palette: midnight #061B2B, cyan #17D7E8, cobalt #1B5CFF, ember #FF7A3D.
 
 $GTK_THEME=Catppuccin-Mocha
-$ICON_THEME=Pebble
+$ICON_THEME=Fluent-dark
 $COLOR_SCHEME=prefer-dark
 
 general {
