@@ -23,7 +23,7 @@ document_font_size = 11
 monospace_font = "CaskaydiaCove Nerd Font Mono"
 monospace_font_size = 10
 font_antialiasing = "rgba"
-font_hinting = "full"
+font_hinting = "slight"
 
 [gtk3]
 font = "Noto Sans Medium"
