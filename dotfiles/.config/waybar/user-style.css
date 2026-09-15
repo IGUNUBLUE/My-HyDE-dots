@@ -48,8 +48,8 @@ window#waybar.top #pill * {
 window#waybar.top #pill label.module,
 window#waybar.top #pill button,
 window#waybar.top #pill box.module {
-    margin-left: 0.18em;
-    margin-right: 0.18em;
+    margin-left: 0.38em;
+    margin-right: 0.38em;
 }
 
 window#waybar.top #pill button {
