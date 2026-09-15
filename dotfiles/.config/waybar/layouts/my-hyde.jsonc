@@ -4,6 +4,8 @@
     "output": ["*"],
     "height": 22,
     "margin-top": 3,
+    "margin-left": 4,
+    "margin-right": 4,
     "exclusive": true,
     "reload_style_on_change": true,
     "include": [
