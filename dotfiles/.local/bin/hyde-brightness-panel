@@ -81,12 +81,12 @@ def status() -> None:
     internal = internal_brightness()
     external = external_brightness()
     write_status_cache(internal, external)
-    external_text = f"{external}%" if external is not None else "no detectado"
+    external_text = f"{external}%" if external is not None else "Not detected"
     print(
         json.dumps(
             {
                 "text": "󰃠",
-                "tooltip": f"Brillo interno: {internal}%\nLG ULTRAGEAR: {external_text}\n\nClic derecho para ajustar ambos",
+                "tooltip": f"Internal: {internal}%\nLG ULTRAGEAR: {external_text}\n\nRight-click to adjust both",
                 "class": "dual-brightness",
             }
         )
@@ -97,7 +97,7 @@ class BrightnessPopup(Gtk.Window):
     def __init__(self) -> None:
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
         self.set_name("brightness-popup")
-        self.set_title("Brillo de pantallas")
+        self.set_title("Display brightness")
         self.set_decorated(False)
         self.set_resizable(False)
         self.set_size_request(390, -1)
@@ -151,12 +151,12 @@ class BrightnessPopup(Gtk.Window):
         box.set_border_width(16)
         self.add(box)
 
-        title = Gtk.Label(label="Brillo de pantallas", xalign=0)
+        title = Gtk.Label(label="Display brightness", xalign=0)
         title.set_name("brightness-title")
         box.pack_start(title, False, False, 0)
 
         self.internal_scale, self.internal_label = self.add_control(
-            box, "Pantalla interna (eDP-1)", internal_brightness()
+            box, "Internal display (eDP-1)", internal_brightness()
         )
         self.internal_timeout: int | None = None
         self.internal_scale.connect("value-changed", self.internal_changed)
@@ -167,7 +167,7 @@ class BrightnessPopup(Gtk.Window):
         )
         if external is None:
             self.external_scale.set_sensitive(False)
-            self.external_label.set_text("No detectado")
+            self.external_label.set_text("Not detected")
         else:
             self.external_scale.connect("value-changed", self.external_changed)
             self.external_scale.connect("button-release-event", self.apply_external)

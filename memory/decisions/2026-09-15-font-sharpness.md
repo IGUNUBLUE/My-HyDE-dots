@@ -13,7 +13,7 @@ Text on the external LG 1080p monitor looked blurry. The system had no `10-sub-p
 
 - Before: `fc-match -v "Noto Sans"` showed `hintstyle: 1`, `hinting: True`, `lcdfilter: 1`, no `rgba` line.
 - After candidate user config: same query shows `rgba: 1` with unchanged hintslight path.
-- External panel is физически ~81 DPI, so it cannot become retina; the fix only restores proper subpixel rendering.
+- External panel is physically ~81 DPI, so it cannot become retina; the fix only restores proper subpixel rendering.
 - Native Wayland clients stay sharp; XWayland clients (observed: VirtualBox) remain limited by XWayland scaling.
 
 ## Decision
