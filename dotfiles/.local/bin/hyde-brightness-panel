@@ -19,6 +19,11 @@ gi.require_version("GtkLayerShell", "0.1")
 from gi.repository import Gdk, GLib, Gtk, GtkLayerShell
 
 EXTERNAL_MODEL = "LG ULTRAGEAR"
+THEME_CSS = os.path.join(
+    os.environ.get("XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config")),
+    "waybar",
+    "theme.css",
+)
 DDC_LOCK = os.path.join(
     os.environ.get("XDG_RUNTIME_DIR", f"/tmp/runtime-{os.getuid()}"),
     "hyde-ddcutil.lock",
@@ -77,6 +82,82 @@ def write_status_cache(internal: int, external: int | None) -> None:
         pass
 
 
+def theme_colors() -> dict[str, str]:
+    """Read the active LAGC palette from HyDE's generated Waybar theme.
+
+    Falls back to GTK theme colors when the file or a key is missing, so a
+    fresh machine or an unfinished theme switch never breaks the popup.
+    """
+    colors = {"bg": "@theme_bg_color", "fg": "@theme_fg_color", "accent": "@theme_selected_bg_color"}
+    try:
+        with open(THEME_CSS, encoding="utf-8") as theme_file:
+            theme = theme_file.read()
+    except OSError:
+        return colors
+    found = dict(re.findall(r"@define-color\s+([\w-]+)\s+([^;]+);", theme))
+    if found.get("main-bg"):
+        colors["bg"] = found["main-bg"].strip()
+    if found.get("main-fg"):
+        colors["fg"] = found["main-fg"].strip()
+    if found.get("wb-act-bg"):
+        colors["accent"] = found["wb-act-bg"].strip()
+    return colors
+
+
+def popup_css(colors: dict[str, str]) -> bytes:
+    return (
+        "#brightness-popup {{\n"
+        "    background-color: {bg};\n"
+        "    color: {fg};\n"
+        "    border: 1px solid alpha({fg}, 0.18);\n"
+        "    border-radius: 12px;\n"
+        "}}\n"
+        "#brightness-title {{ font-size: 16px; font-weight: 600; }}\n"
+        "#brightness-value {{ font-weight: 600; }}\n"
+        "scale {{ min-height: 22px; }}\n"
+        "scale trough {{\n"
+        "    background-color: alpha({fg}, 0.18);\n"
+        "    background-image: none;\n"
+        "    border: none;\n"
+        "    box-shadow: none;\n"
+        "    border-radius: 6px;\n"
+        "}}\n"
+        "scale highlight {{\n"
+        "    background-color: {accent};\n"
+        "    background-image: none;\n"
+        "    border: none;\n"
+        "    box-shadow: none;\n"
+        "    border-radius: 6px;\n"
+        "}}\n"
+        "scale slider {{{slider_base}}}\n"
+        "scale slider:hover {{{slider_hover}}}\n"
+        "scale slider:active {{{slider_base}}}\n"
+        "scale slider:focus {{{slider_base}}}\n"
+        "scale slider:backdrop {{{slider_base}}}\n"
+        "scale slider:disabled {{{slider_base}}}\n"
+        "scale trough highlight:active {{{highlight_active}}}\n"
+    ).format(
+        bg=colors["bg"],
+        fg=colors["fg"],
+        accent=colors["accent"],
+        slider_base=(
+            "background-color: {bg}; background-image: none; "
+            "border: 2px solid {accent}; box-shadow: none; outline: none; transition: none; "
+            "-gtk-icon-shadow: none; border-radius: 50%; "
+            "min-height: 14px; min-width: 14px;"
+        ).format(**colors),
+        slider_hover=(
+            "background-color: {bg}; background-image: none; "
+            "border: 2px solid {accent}; outline: none; transition: none; "
+            "box-shadow: 0 0 0 5px alpha({accent}, 0.22); border-radius: 50%; "
+            "min-height: 14px; min-width: 14px;"
+        ).format(**colors),
+        highlight_active=(
+            "background-color: {accent}; background-image: none; border: none; transition: none;"
+        ).format(**colors),
+    ).encode("utf-8")
+
+
 def status() -> None:
     internal = internal_brightness()
     external = external_brightness()
@@ -130,19 +211,7 @@ class BrightnessPopup(Gtk.Window):
         self.connect("key-press-event", self.on_key_press)
 
         css = Gtk.CssProvider()
-        css.load_from_data(
-            b"""
-            #brightness-popup {
-                background-color: @theme_bg_color;
-                color: @theme_fg_color;
-                border: 1px solid alpha(@theme_fg_color, 0.18);
-                border-radius: 12px;
-            }
-            #brightness-title { font-size: 16px; font-weight: 600; }
-            #brightness-value { font-weight: 600; }
-            scale { min-height: 22px; }
-            """
-        )
+        css.load_from_data(popup_css(theme_colors()))
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
