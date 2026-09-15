@@ -32,27 +32,27 @@
         "modules": ["hyprland/workspaces", "hyprland/window"]
     },
     "hyprland/window": {
-        "format": "  {0}",
+        "format": "   {0}",
         "rotate": 0,
         "separate-outputs": true,
         "max-length": 34,
         "rewrite": {
-            "(.*)@archlinux:(.*)": "$1  ",
-            "(.*) — Mozilla Firefox": "$1 󰈹 ",
-            "(.*)Mozilla Firefox": "Firefox 󰈹 ",
-            "(.*) - Visual Studio Code": "$1 󰨞 ",
-            "(.*)Visual Studio Code": "Code 󰨞 ",
-            "(.*) - Code - OSS": "$1 󰨞 ",
-            "(.*)Code - OSS": "Code 󰨞 ",
-            "(.*) — Dolphin": "$1 󰉋 ",
-            "(.*)Spotify": "Spotify 󰓇 ",
-            "(.*)Steam": "Steam 󰓓 ",
-            "(.*) - Discord": "$1  ",
-            "(.*)Netflix": "Netflix 󰝆 ",
-            "(.*) — Google chrome": "$1  ",
-            "(.*)Google chrome": "Google chrome  ",
-            "(.*) — Github": "$1  ",
-            "(.*)Github": "Github  "
+            "(.*)@archlinux:(.*)": "$1   ",
+            "(.*) — Mozilla Firefox": "$1 󰈹  ",
+            "(.*)Mozilla Firefox": "Firefox 󰈹  ",
+            "(.*) - Visual Studio Code": "$1 󰨞  ",
+            "(.*)Visual Studio Code": "Code 󰨞  ",
+            "(.*) - Code - OSS": "$1 󰨞  ",
+            "(.*)Code - OSS": "Code 󰨞  ",
+            "(.*) — Dolphin": "$1 󰉋  ",
+            "(.*)Spotify": "Spotify 󰓇  ",
+            "(.*)Steam": "Steam 󰓓  ",
+            "(.*) - Discord": "$1   ",
+            "(.*)Netflix": "Netflix 󰝆  ",
+            "(.*) — Google chrome": "$1   ",
+            "(.*)Google chrome": "Google chrome   ",
+            "(.*) — Github": "$1   ",
+            "(.*)Github": "Github   "
         }
     },
 
@@ -67,8 +67,8 @@
         "modules": ["pulseaudio#output", "pulseaudio#input"]
     },
     "pulseaudio#output": {
-        "format": "<span font_family='JetBrainsMono Nerd Font'>{icon}</span> {volume}%",
-        "format-muted": "<span font_family='JetBrainsMono Nerd Font'>󰖁</span> {volume}%",
+        "format": "<span font_family='JetBrainsMono Nerd Font'>{icon}</span>  {volume}%",
+        "format-muted": "<span font_family='JetBrainsMono Nerd Font'>󰖁</span>  {volume}%",
         "rotate": 0,
         "on-click": "pavucontrol-qt -t 3 || pavucontrol -t 3",
         "on-click-right": "hyde-shell volumecontrol -s ''",
@@ -88,7 +88,7 @@
         }
     },
     "pulseaudio#input": {
-        "format": "<span font_family='JetBrainsMono Nerd Font'>{format_source}</span> {source_volume}%",
+        "format": "<span font_family='JetBrainsMono Nerd Font'>{format_source}</span>  {source_volume}%",
         "format-source": "󰍬",
         "format-source-muted": "󰍭",
         "rotate": 0,
@@ -142,5 +142,53 @@
             "custom/hyde-menu",
             "custom/power"
         ]
-    }
+    },
+
+    // User-owned icon spacing. Full copies of the shared HyDE module
+    // definitions from ~/.local/share/waybar/modules/ (cpu, memory,
+    // battery) taken on 2026-09-15. Only change: double space between
+    // icon and text so glyphs do not stick at 22 px. Re-sync the bodies
+    // if upstream changes intervals, states or tooltips.
+    "cpu": {
+        "interval": 10,
+        "format": "󰍛  {usage}%",
+        "rotate": 0,
+        "format-alt": "{icon0}{icon1}{icon2}{icon3}",
+        "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+      },
+    "memory": {
+        "states": {
+          "critical": 90,
+          "high": 60,
+          "medium": 30,
+          "low": 0
+        },
+        "interval": 30,
+        "format": "{icon}  {used:0.1f}G",
+        "format-alt": "{icon}  {percentage}%",
+        "format-icons": {
+          "critical": "\uf421",
+          "high": "\udb81\udcc5",
+          "medium": "\udb83\udf85",
+          "low": "\udb83\udf86"
+        },
+        "rotate": 0,
+        "max-length": 10,
+        "tooltip": true,
+        //"tooltip-format": "\udb83\udf86 {percentage}%\n\ue266 {used:0.1f}GB/{total:0.1f}GB",
+        "tooltip-format": "\udb83\udf86 Memory usage: {percentage}%\n\ue266 Used: {used:0.2f} GiB / {total:0.2f} GiB\n\udb80\udf5b Available: {avail:0.2f} GiB\n\uf233 Swap used: {swapUsed:0.2f} GiB / {swapTotal:0.2f} GiB ({swapPercentage}%)"
+      },
+    "battery": {
+        "states": {
+          // "good": 95,
+          // "warning": 30,
+          // "critical": 20
+        },
+        "format": "{icon}  {capacity}%",
+        "rotate": 0,
+        "format-charging": "  {capacity}%",
+        "format-plugged": "  {capacity}%",
+        "format-alt": "{time}  {icon}",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+      }
 }
