@@ -10,3 +10,4 @@ Read active and monitoring entries relevant to a component before modifying it.
 | superseded | Hyprland, Waybar, Rofi, Kitty, btop, Wallbash, NVIDIA | [Glass panels with opaque windows](decisions/2026-09-11-glass-panels-opaque-windows.md) | Historical glass profile; replaced after diffuse blur caused eye strain. |
 | active | Hyprland, Waybar, Rofi, Kitty, Dunst, NVIDIA | [Solid-first eye comfort profile](decisions/2026-09-11-solid-first-eye-comfort.md) | Keep windows and islands solid-ish, retain small alpha transparency, disable compositor and layer blur. |
 | active | Qt, Kvantum, Wallbash | [Global Qt menus](decisions/2026-09-04-global-qt-menus.md) | Apply qt-menu.ini through the documented Wallbash callback across themes. |
+| active | fontconfig, HyDE fonts, displays | [Sharp LCD font baseline](decisions/2026-09-15-font-sharpness.md) | Keep user-owned hintslight + rgb + lcddefault baseline and matching HyDE slight hinting; system /etc/fonts stays untouched. |

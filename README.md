@@ -11,7 +11,8 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 ## Included
 
 - Hyprland monitor layout, Spanish keyboard layouts, and a solid-first visual layer: opaque windows, 8 px squircle corners, palette-driven shadows, a looping border gradient, and only small alpha transparency on selected surfaces.
-- Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
+- Readable Noto Sans font settings for GTK, Qt, notifications and Waybar, with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`).
+- User-owned fontconfig baseline at `~/.config/fontconfig/fonts.conf`, installed and snapshotted by this overlay.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
 - A portable Kiro IDE extension with selectable `LAGC Tech Dark` and `LAGC Tech Light` color themes, installed only through Kiro's own VSIX CLI.
@@ -159,6 +160,7 @@ Edit the two hardware-specific files before installing on a different machine:
 - `~/.config/hypr/hyprland.lua` is HyDE's preserved Lua override.
 - `~/.config/hypr/hypridle.conf` is HyDE's preserved idle override; automatic locking must be restored only after a controlled lock/unlock test succeeds.
 - `~/.config/hyde/config.toml` is HyDE's preserved user configuration.
+- `~/.config/fontconfig/fonts.conf` is the user-owned font rendering baseline; system `/etc/fonts` presets stay untouched.
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
 - `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.

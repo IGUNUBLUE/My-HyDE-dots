@@ -272,6 +272,7 @@ cp -a -- "$repo_dir/cursor-sources/Future-cyan-hyprcursor/SOURCE.md" "$cursor_st
 install_dot "$config_tmp" "$HOME/.config/hyde/config.toml"
 install_dot "$repo_dir/dotfiles/.config/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
 install_dot "$repo_dir/dotfiles/.config/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
+install_dot "$repo_dir/dotfiles/.config/fontconfig/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
 install_dot "$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf" "$HOME/.config/environment.d/90-cursor-theme.conf"
 install_tree "$cursor_stage" "$HOME/.local/share/icons/Future-cursors"
 install_dot "$repo_dir/dotfiles/.icons/default/index.theme" "$HOME/.icons/default/index.theme"
