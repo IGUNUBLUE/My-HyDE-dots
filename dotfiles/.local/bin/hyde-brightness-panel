@@ -105,57 +105,51 @@ def theme_colors() -> dict[str, str]:
 
 
 def popup_css(colors: dict[str, str]) -> bytes:
-    return (
-        "#brightness-popup {{\n"
-        "    background-color: {bg};\n"
-        "    color: {fg};\n"
-        "    border: 1px solid alpha({fg}, 0.18);\n"
-        "    border-radius: 12px;\n"
-        "}}\n"
-        "#brightness-title {{ font-size: 16px; font-weight: 600; }}\n"
-        "#brightness-value {{ font-weight: 600; }}\n"
-        "scale {{ min-height: 22px; }}\n"
-        "scale trough {{\n"
-        "    background-color: alpha({fg}, 0.18);\n"
-        "    background-image: none;\n"
-        "    border: none;\n"
-        "    box-shadow: none;\n"
-        "    border-radius: 6px;\n"
-        "}}\n"
-        "scale highlight {{\n"
-        "    background-color: {accent};\n"
-        "    background-image: none;\n"
-        "    border: none;\n"
-        "    box-shadow: none;\n"
-        "    border-radius: 6px;\n"
-        "}}\n"
-        "scale slider {{{slider_base}}}\n"
-        "scale slider:hover {{{slider_hover}}}\n"
-        "scale slider:active {{{slider_base}}}\n"
-        "scale slider:focus {{{slider_base}}}\n"
-        "scale slider:backdrop {{{slider_base}}}\n"
-        "scale slider:disabled {{{slider_base}}}\n"
-        "scale trough highlight:active {{{highlight_active}}}\n"
-    ).format(
-        bg=colors["bg"],
-        fg=colors["fg"],
-        accent=colors["accent"],
-        slider_base=(
-            "background-color: {bg}; background-image: none; "
-            "border: 2px solid {accent}; box-shadow: none; outline: none; transition: none; "
-            "-gtk-icon-shadow: none; border-radius: 50%; "
-            "min-height: 14px; min-width: 14px;"
-        ).format(**colors),
-        slider_hover=(
-            "background-color: {bg}; background-image: none; "
-            "border: 2px solid {accent}; outline: none; transition: none; "
-            "box-shadow: 0 0 0 5px alpha({accent}, 0.22); border-radius: 50%; "
-            "min-height: 14px; min-width: 14px;"
-        ).format(**colors),
-        highlight_active=(
-            "background-color: {accent}; background-image: none; border: none; transition: none;"
-        ).format(**colors),
-    ).encode("utf-8")
+    bg, fg, accent = colors["bg"], colors["fg"], colors["accent"]
+    slider_base = (
+        f"background-color: {bg}; background-image: none; "
+        f"border: 2px solid {accent}; box-shadow: none; outline: none; "
+        "transition: none; -gtk-icon-shadow: none; border-radius: 50%; "
+        "min-height: 14px; min-width: 14px;"
+    )
+    slider_hover = (
+        f"background-color: {bg}; background-image: none; "
+        f"border: 2px solid {accent}; box-shadow: 0 0 0 5px alpha({accent}, 0.22); "
+        "outline: none; transition: none; border-radius: 50%; "
+        "min-height: 14px; min-width: 14px;"
+    )
+    return f"""
+#brightness-popup {{
+    background-color: {bg};
+    color: {fg};
+    border: 1px solid alpha({fg}, 0.18);
+    border-radius: 12px;
+}}
+#brightness-title {{ font-size: 16px; font-weight: 600; }}
+#brightness-value {{ font-weight: 600; }}
+scale {{ min-height: 22px; }}
+scale trough {{
+    background-color: alpha({fg}, 0.18);
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 6px;
+}}
+scale highlight,
+scale trough highlight:active {{
+    background-color: {accent};
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 6px;
+}}
+scale slider,
+scale slider:active,
+scale slider:focus,
+scale slider:backdrop,
+scale slider:disabled {{ {slider_base} }}
+scale.pointer-hover slider {{ {slider_hover} }}
+""".encode("utf-8")
 
 
 def status() -> None:
@@ -228,6 +222,8 @@ class BrightnessPopup(Gtk.Window):
             box, "Internal display (eDP-1)", internal_brightness()
         )
         self.internal_timeout: int | None = None
+        self.internal_scale.connect("enter-notify-event", self.slider_entered)
+        self.internal_scale.connect("leave-notify-event", self.slider_left)
         self.internal_scale.connect("value-changed", self.internal_changed)
 
         external = cached_external_brightness()
@@ -238,6 +234,8 @@ class BrightnessPopup(Gtk.Window):
             self.external_scale.set_sensitive(False)
             self.external_label.set_text("Not detected")
         else:
+            self.external_scale.connect("enter-notify-event", self.slider_entered)
+            self.external_scale.connect("leave-notify-event", self.slider_left)
             self.external_scale.connect("value-changed", self.external_changed)
             self.external_scale.connect("button-release-event", self.apply_external)
 
@@ -262,6 +260,16 @@ class BrightnessPopup(Gtk.Window):
             self.cancel_scheduled_close()
             self.close()
             return True
+        return False
+
+    @staticmethod
+    def slider_entered(scale: Gtk.Scale, _event: Gdk.EventCrossing) -> bool:
+        scale.get_style_context().add_class("pointer-hover")
+        return False
+
+    @staticmethod
+    def slider_left(scale: Gtk.Scale, _event: Gdk.EventCrossing) -> bool:
+        scale.get_style_context().remove_class("pointer-hover")
         return False
 
     def schedule_close(self, *_args: object) -> bool:
