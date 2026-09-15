@@ -70,7 +70,7 @@ hl.config({
 		kb_layout = "es,latam",
 	},
 	general = {
-		border_size = 2,
+		border_size = 1,
 		gaps_in = 2,
 		-- Top edge: a hairline under the bar, which already sits 3px below the
 		-- screen edge. The other edges keep a small, symmetric margin.
