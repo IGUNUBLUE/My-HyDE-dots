@@ -77,7 +77,7 @@ hl.config({
 		gaps_out = { top = 3, left = 4, right = 4, bottom = 4 },
 	},
 	decoration = {
-		rounding = 12,
+		rounding = 8,
 		-- 2.0 is a circle and 4.0 a squircle; 2.4 keeps corners soft, not squared.
 		rounding_power = 2.4,
 		active_opacity = 1,

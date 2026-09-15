@@ -10,7 +10,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 ## Included
 
-- Hyprland monitor layout, Spanish keyboard layouts, and a solid-first visual layer: opaque windows, 12 px squircle corners, palette-driven shadows, a looping border gradient, and only small alpha transparency on selected surfaces.
+- Hyprland monitor layout, Spanish keyboard layouts, and a solid-first visual layer: opaque windows, 8 px squircle corners, palette-driven shadows, a looping border gradient, and only small alpha transparency on selected surfaces.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
@@ -29,7 +29,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 The visual profile is intentionally solid-first because diffuse blur causes eye strain. Windows remain fully opaque, shadows and borders preserve depth, and selected surfaces keep only small alpha transparency.
 
-- `dotfiles/.config/hypr/hyprland.lua` disables compositor blur and inner glow, keeps `decoration.shadow` plus the LAGC border gradient, and uses `rounding = 12` with `rounding_power = 2.4` (squircle).
+- `dotfiles/.config/hypr/hyprland.lua` disables compositor blur and inner glow, keeps `decoration.shadow` plus the LAGC border gradient, and uses `rounding = 8` with `rounding_power = 2.4` (squircle).
 - Waybar islands use `alpha(@main-bg, 0.99)`, Rofi uses alpha `F7`, Dunst stays theme-controlled, and Kitty uses 0.97. These values leave only a minimal amount of transparency without a diffuse backdrop.
 - HyDE's shared layer rules enable blur by default, so the user override explicitly disables it for `rofi`, `notifications`, `waybar` and `logout_dialog`. The Waybar layer keeps its 22 px geometry and the same mixed-scale validation requirement.
 - HyDE owns the animation timings. Choose a preset with `SUPER + SHIFT + Y` and scale every preset from `config.toml` with `[hyprland.anim] duration_scale = 0.9` (`0.9` is 10 % faster).
