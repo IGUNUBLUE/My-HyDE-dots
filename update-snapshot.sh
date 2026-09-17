@@ -36,6 +36,7 @@ copy_dot "$HOME/.config/waybar/layouts/my-hyde.jsonc" "$repo_dir/dotfiles/.confi
 copy_dot "$HOME/.config/waybar/modules/brightness-panel.jsonc" "$repo_dir/dotfiles/.config/waybar/modules/brightness-panel.jsonc"
 copy_dot "$HOME/.config/waybar/user-style.css" "$repo_dir/dotfiles/.config/waybar/user-style.css"
 copy_dot "$HOME/.config/swaync/user-style.css" "$repo_dir/dotfiles/.config/swaync/user-style.css"
+copy_dot "$HOME/.config/wlogout/style_1.css" "$repo_dir/dotfiles/.config/wlogout/style_1.css"
 copy_dot "$HOME/.config/kitty/kitty.conf" "$repo_dir/dotfiles/.config/kitty/kitty.conf"
 copy_dot "$HOME/.config/zsh/user.zsh" "$repo_dir/dotfiles/.config/zsh/user.zsh"
 copy_dot "$HOME/.local/bin/hyde-brightness-panel" "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
