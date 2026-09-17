@@ -14,7 +14,7 @@ copy_theme() {
     source_dir="$HOME/.config/hyde/themes/$theme_name"
     local source relative
 
-    for source in hypr.theme kitty.theme rofi.theme theme.dcol waybar.theme; do
+    for source in .sort hypr.theme kitty.theme rofi.theme theme.dcol waybar.theme; do
         copy_dot "$source_dir/$source" "$repo_dir/dotfiles/.config/hyde/themes/$theme_name/$source"
     done
 }

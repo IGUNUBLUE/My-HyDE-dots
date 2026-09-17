@@ -191,7 +191,9 @@ link_theme_wallpaper() {
     wallpaper_dir="$theme_dir/wallpapers"
     target="$theme_dir/wall.set"
 
-    [[ -f "$wallpaper" ]] || return 0
+    if ! $dry_run && [[ ! -f "$wallpaper" ]]; then
+        return 0
+    fi
     if [[ ! -d "$wallpaper_dir" ]]; then
         backup_target "$wallpaper_dir"
         run mkdir -p -- "$wallpaper_dir"
@@ -200,11 +202,39 @@ link_theme_wallpaper() {
     backup_target "$target"
     run rm -f -- "$target"
     run ln -s -- "$wallpaper" "$target"
+}
 
-    target="$wallpaper_dir/lagc-tech-wallpaper.${wallpaper##*.}"
+generate_theme_wallpaper() {
+    local theme_name=$1 source=$2 variant=$3
+    local wallpaper_dir target
+    wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
+    target="$wallpaper_dir/lagc-tech-$variant.png"
+
+    if [[ ! -d "$wallpaper_dir" ]]; then
+        backup_target "$wallpaper_dir"
+        run mkdir -p -- "$wallpaper_dir"
+    fi
     backup_target "$target"
-    run rm -f -- "$target"
-    run ln -s -- "$wallpaper" "$target"
+
+    case "$variant" in
+        dark)
+            run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
+                -fill '#061B2B' -colorize 30 -modulate 88,105,100 "$target"
+            ;;
+        light)
+            run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
+                -fill '#EAFBFF' -colorize 36 -modulate 108,92,100 "$target"
+            ;;
+        *)
+            printf 'Unknown LAGC Tech wallpaper variant: %s\n' "$variant" >&2
+            return 1
+            ;;
+    esac
+
+    link_theme_wallpaper "$theme_name" "$target"
+    # Cache only the generated image. Caching the whole theme also walks every
+    # configured custom wallpaper path, which can be unnecessarily expensive.
+    run hyde-shell wallpaper --cache wall "$target"
 }
 
 remove_target() {
@@ -300,18 +330,20 @@ for stale_wallpaper in \
     "$HOME/.config/hyde/themes/LAGC Tech Dark/wallpapers/1-dark.png" \
     "$HOME/.config/hyde/themes/LAGC Tech Dark/wallpapers/2-dark.png" \
     "$HOME/.config/hyde/themes/LAGC Tech Dark/wallpapers/3-dark.png" \
+    "$HOME/.config/hyde/themes/LAGC Tech Dark/wallpapers/lagc-tech-wallpaper.png" \
     "$HOME/.config/hyde/themes/LAGC Tech Light/wallpapers/1-light.png" \
     "$HOME/.config/hyde/themes/LAGC Tech Light/wallpapers/2-light.png" \
-    "$HOME/.config/hyde/themes/LAGC Tech Light/wallpapers/3-light.png"; do
+    "$HOME/.config/hyde/themes/LAGC Tech Light/wallpapers/3-light.png" \
+    "$HOME/.config/hyde/themes/LAGC Tech Light/wallpapers/lagc-tech-wallpaper.png"; do
     remove_target "$stale_wallpaper"
 done
 
 theme_wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
 if [[ -f "$theme_wallpaper" ]]; then
-    link_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper"
-    link_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper"
+    generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark
+    generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light
 else
-    printf 'LAGC Tech theme wallpapers were not linked; select a wallpaper first or set MY_HYDE_WALLPAPER when installing.\n' >&2
+    printf 'LAGC Tech theme wallpapers were not generated; select a wallpaper first or set MY_HYDE_WALLPAPER when installing.\n' >&2
 fi
 
 if ! $dry_run; then

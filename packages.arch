@@ -3,6 +3,7 @@ fluent-icon-theme-git
 brightnessctl
 ddcutil
 gtk-layer-shell
+imagemagick
 noto-fonts
 python-gobject
 waybar
