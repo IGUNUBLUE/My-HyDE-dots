@@ -15,7 +15,26 @@
   --noti-close-bg: @sw-noti-bg-hover;
   --noti-close-bg-hover: @wallbash_1xa2;
   --noti-bg-focus: @sw-noti-bg-hover;
+  --noti-bg-hover: @sw-noti-bg-hover;
   --noti-bg-darker: @wallbash_1xa2;
+}
+
+/* --noti-bg stays the stock dark gray (48,48,48) and cannot take a theme
+ * color because it is consumed as an rgba() channel triplet. The rules below
+ * re-point its remaining themed-surface consumers to theme colors: hovered
+ * notification cards, collapsed-group hover, inline-reply buttons and the
+ * control-center menubar strip would otherwise render dark-on-dark text. */
+.notification-row .notification-background .notification .notification-default-action .notification-content .inline-reply .inline-reply-button,
+.widget-menubar {
+  background-color: @sw-noti-window-bg;
+}
+
+/* Upstream paints a collapsed notification stack cobalt on hover
+ * (sw-noti-gr-collapse-but-hvr = the accent border color), which leaves dark
+ * text unreadable on the light theme. Use the same subtle surface tint as the
+ * other hover states instead. */
+.notification-group.collapsed:hover .notification-row:not(:only-child) .notification {
+  background-color: @wallbash_1xa2;
 }
 
 /* Solid-first profile: the generated theme.css sets opacity 0.9 on the
