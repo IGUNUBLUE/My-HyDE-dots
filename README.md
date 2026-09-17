@@ -74,6 +74,7 @@ The overlay stays within HyDE's documented user-owned extension points. It does 
 | Hypridle safety policy | `~/.config/hypr/hypridle.conf` |
 | Waybar layout, module and CSS | `~/.config/waybar/layouts/`, `modules/`, and `user-style.css` |
 | Swaync notification CSS | `~/.config/swaync/user-style.css` |
+| Wlogout power menu style | `~/.config/wlogout/style_1.css` |
 | Themes and wallpapers | `~/.config/hyde/themes/<theme>/` with `wallpapers/` and `wall.set` |
 | Wallbash templates and callbacks | `~/.config/hyde/wallbash/always/` and `scripts/` |
 | Shell and terminal overrides | `~/.config/zsh/user.zsh` and `~/.config/kitty/kitty.conf` |
@@ -191,6 +192,7 @@ Edit the two hardware-specific files before installing on a different machine:
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
 - `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.
+- `~/.config/wlogout/style_1.css` is the envsubst template consumed by `logoutlaunch.sh` for the default `WLOGOUT_STYLE=1`. The overlay adds a soft drop shadow to the buttons and paints the focused selection in Signal Cyan through the `wb-hvr-bg`/`wb-hvr-fg` tokens imported from `waybar/theme.css`, keeping it theme-relative. HyDE continues to own `layout_*`, `icons/` and the launcher script.
 - `~/.config/swaync/user-style.css` is swaync's preserved user stylesheet, imported after the generated `theme.css`. The overlay uses it to re-map the hardcoded white `text-color`/`--text-color` onto the active theme's own notification text color, keeping notification popups and the control center readable on light themes. HyDE continues to own `style.css`, `theme.css` and `config.json`.
 - `~/.config/hyde/wallbash/` is HyDE's documented user template directory and takes precedence over the shared templates that ship with HyDE. Only the overlay's own templates are tracked: `always/rofi-frosted.dcol`, `always/btop.dcol` and `scripts/my-hyde-btop.sh`.
 - Qt menu changes live in a derived theme under `~/.config/hyde/themes/Material Sakura Polished`; the original `Material Sakura` theme and HyDE's generated `~/.config/Kvantum/wallbash` files remain untouched.
