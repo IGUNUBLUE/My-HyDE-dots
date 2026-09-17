@@ -1,0 +1,46 @@
+/* User custom styles */
+
+/* HyDE's generated theme.css and swaync's stock stylesheet both assume dark
+ * surfaces: text-color is hardcoded #FFFFFF and --text-color is white.
+ * Re-map them onto the active theme's own notification text color so light
+ * themes keep readable notification popups and control-center text. */
+@define-color text-color @sw-noti-window-txt;
+@define-color text-color-disabled @wallbash_1xa4;
+@define-color noti-bg-opaque @wallbash_1xa1;
+@define-color noti-bg-hover-opaque @wallbash_1xa2;
+
+:root {
+  --text-color: @sw-noti-window-txt;
+  --text-color-disabled: @wallbash_1xa4;
+  --noti-close-bg: @sw-noti-bg-hover;
+  --noti-close-bg-hover: @wallbash_1xa2;
+  --noti-bg-focus: @sw-noti-bg-hover;
+  --noti-bg-darker: @wallbash_1xa2;
+}
+
+/* Solid-first profile: the generated theme.css sets opacity 0.9 on the
+ * control center and 0.8 on notification popups; keep both fully opaque. */
+.control-center,
+.notification-row .notification-background .notification {
+  opacity: 1;
+}
+
+/* Stock button colors also assume a dark shell; give panel buttons the
+ * theme's surface tint and text color so they stay readable on light themes. */
+.control-center .widget-title > button,
+.control-center .widget-buttons-grid flowboxchild > button {
+  color: @sw-noti-window-txt;
+  background: @sw-noti-bg-hover;
+  border: 1px solid @sw-noti-window-br;
+}
+
+.control-center .widget-title > button:hover,
+.control-center .widget-buttons-grid flowboxchild > button:hover {
+  background: @wallbash_1xa2;
+}
+
+/* Media player cards keep a dark album-art overlay; keep their text light. */
+.widget-mpris .widget-mpris-player .mpris-overlay,
+.widget-mpris .widget-mpris-player .mpris-overlay * {
+  color: #ffffff;
+}

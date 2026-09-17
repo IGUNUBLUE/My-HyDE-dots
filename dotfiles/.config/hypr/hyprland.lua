@@ -58,8 +58,8 @@ hl.monitor({
 	scale = 1,
 })
 
--- Solid-first spacing and depth: keep windows opaque and use only small alpha
--- values on the user-owned surfaces (Waybar islands, Rofi and Kitty). Blur is
+-- Solid-first spacing and depth: keep windows opaque and every user-owned
+-- surface fully solid; only Kitty retains a small transparency. Blur is
 -- intentionally disabled because the diffuse backdrop is uncomfortable to use.
 hl.config({
 	cursor = {
@@ -104,8 +104,8 @@ hl.config({
 	},
 })
 
--- HyDE enables blur on these layer surfaces by default. Keep their small alpha
--- values for a little transparency, but disable the diffuse backdrop entirely.
+-- HyDE enables blur on these layer surfaces by default. Disable the diffuse
+-- backdrop entirely; the surfaces themselves stay fully opaque.
 hl.layer_rule({
 	name = "user_solid_layer_surfaces",
 	match = {

@@ -6,7 +6,7 @@ window#waybar {
 
 /* Theme-aware floating islands with quiet depth. */
 window#waybar.top #pill {
-    background-color: alpha(@main-bg, 0.99);
+    background-color: @main-bg;
     border: 1px solid alpha(@main-fg, 0.20);
     border-radius: 12pt;
     box-shadow: 0 0 8px alpha(#000000, 0.14);
@@ -88,18 +88,22 @@ window#waybar.top #pill #workspaces button.active:focus {
     padding-right: 0.35em;
 }
 
-/* State is communicated with color only when it matters. */
+/* State is communicated with color only when it matters. The wb-*-fg tokens
+   are defined per theme in waybar.theme and meet WCAG AA >=4.5:1 on main-bg. */
 #power-profiles-daemon.power-saver {
-    color: @wb-hvr-bg;
+    color: @wb-ok-fg;
 }
 
-#power-profiles-daemon.performance,
+#power-profiles-daemon.performance {
+    color: @wb-info-fg;
+}
+
 #battery.warning {
-    color: @wb-act-bg;
+    color: @wb-warn-fg;
 }
 
 #battery.critical:not(.charging) {
-    color: #c94f6d;
+    color: @wb-crit-fg;
 }
 
 #privacy-item.screenshare,
