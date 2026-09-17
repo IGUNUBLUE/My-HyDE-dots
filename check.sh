@@ -52,7 +52,7 @@ rofi_callback="$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
     exit 1
 }
 grep -Fqx '$HOME/.config/rofi/theme.rasi|"$HOME/.local/bin/my-hyde-rofi-selection"' "$rofi_override"
-grep -Fqx '    main-bg:            #<wallbash_pry1>F7;' "$rofi_override"
+grep -Fqx '    main-bg:            #<wallbash_pry1>FF;' "$rofi_override"
 grep -Fqx '    select-bg:          #<wallbash_4xa8>FF;' "$rofi_override"
 grep -Fqx '    select-fg:          #<wallbash_4xa1>FF;' "$rofi_override"
 if grep -Eq '^(#|//)' "$rofi_override"; then
@@ -157,6 +157,21 @@ grep -Fq $'window#waybar.top #pill * {\n    min-height: 0;\n}' "$waybar_style" |
     printf 'Waybar must neutralize GTK minimum heights inside the user-owned pills.\n' >&2
     exit 1
 }
+for theme_name in "LAGC Tech Dark" "LAGC Tech Light"; do
+    waybar_theme="$repo_dir/dotfiles/.config/hyde/themes/$theme_name/waybar.theme"
+    for token in wb-ok-fg wb-info-fg wb-warn-fg wb-crit-fg; do
+        grep -Eq "^@define-color $token #[0-9A-Fa-f]{6};$" "$waybar_theme" || {
+            printf 'Waybar theme %s is missing the %s semantic state color.\n' "$theme_name" "$token" >&2
+            exit 1
+        }
+    done
+done
+for token in wb-ok-fg wb-info-fg wb-warn-fg wb-crit-fg; do
+    grep -Fq "@$token" "$waybar_style" || {
+        printf 'Waybar user-style.css must consume the %s semantic state color.\n' "$token" >&2
+        exit 1
+    }
+done
 
 zsh_config="$repo_dir/dotfiles/.config/zsh/user.zsh"
 if grep -Eq '^[[:space:]]*(pokego|pokemon-colorscripts|fastfetch)([[:space:]]|$)' "$zsh_config"; then

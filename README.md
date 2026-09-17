@@ -10,17 +10,17 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 ## Included
 
-- Hyprland monitor layout, Spanish keyboard layouts, and a solid-first visual layer: opaque windows, 8 px squircle corners, palette-driven shadows, a looping border gradient, and only small alpha transparency on selected surfaces.
+- Hyprland monitor layout, Spanish keyboard layouts, and a fully solid visual layer: opaque windows and surfaces, 8 px squircle corners, palette-driven shadows, a looping border gradient, and WCAG AA state colors defined per theme.
 - Readable Noto Sans font settings for GTK, Qt, notifications and Waybar, with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`).
 - User-owned fontconfig baseline at `~/.config/fontconfig/fonts.conf`, installed and snapshotted by this overlay.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
 - A portable Kiro IDE extension with selectable `LAGC Tech Dark` and `LAGC Tech Light` color themes, installed only through Kiro's own VSIX CLI.
 - A documented Zed local theme family with selectable `LAGC Tech Dark` and `LAGC Tech Light` appearances, merged safely into the user-owned Zed settings file.
-- Compact transparent Waybar layout with a historical 22-pixel height, scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
+- Compact solid Waybar layout with a historical 22-pixel height, scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
 - Pinned GPLv3 `Future-cyan` cursor theme at visually accepted logical size 42, with native Hyprcursor plus XCursor fallback, reviewed hotspot corrections, and consistent HyDE/session/GTK defaults.
-- Kitty user configuration with an 11 pt default font and 0.90 background opacity for slight transparency without compositor blur.
-- Semi-transparent Rofi launcher (90 % wallpaper-matched background) and a Wallbash-generated `hyde-wallbash` theme for btop, both driven by the tracked templates under `~/.config/hyde/wallbash/`.
+- Kitty user configuration with an 11 pt default font and 0.97 background opacity: the only remaining transparency in the profile.
+- Solid Rofi launcher (opaque wallpaper-matched background) and a Wallbash-generated `hyde-wallbash` theme for btop, both driven by the tracked templates under `~/.config/hyde/wallbash/`.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
 - Dual-screen brightness popup for the laptop panel and LG ULTRAGEAR through DDC/CI.
 - Clean Zsh startup without an automatic Fastfetch banner, plus paths for Bun, Volta, PNPM global CLIs, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
@@ -28,10 +28,11 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 ## Visual layer
 
-The visual profile is intentionally solid-first because diffuse blur causes eye strain. Windows remain fully opaque, shadows and borders preserve depth, and selected surfaces keep only small alpha transparency.
+The visual profile is intentionally solid-first because diffuse blur causes eye strain. Windows and every user-owned surface remain fully opaque; shadows and borders preserve depth, and Kitty is the only surface that keeps a small transparency.
 
 - `dotfiles/.config/hypr/hyprland.lua` disables compositor blur and inner glow, keeps `decoration.shadow` plus the LAGC border gradient, and uses `rounding = 8` with `rounding_power = 2.4` (squircle).
-- Waybar islands use `alpha(@main-bg, 0.99)`, Rofi uses alpha `F7`, Dunst stays theme-controlled, and Kitty uses 0.97. These values leave only a minimal amount of transparency without a diffuse backdrop.
+- Waybar `bar-bg` and islands render at full opacity, Rofi uses an opaque `main-bg`, and the swaync control center and notification popups are forced to `opacity: 1` from `user-style.css`. Kitty keeps `background_opacity 0.97`.
+- Each `waybar.theme` defines per-theme semantic state colors (`wb-ok-fg`, `wb-info-fg`, `wb-warn-fg`, `wb-crit-fg`) chosen to meet WCAG AA (>= 4.5:1) on `main-bg`; the stock Signal Cyan and Cobalt text accents failed that bar on the opposite theme.
 - HyDE's shared layer rules enable blur by default, so the user override explicitly disables it for `rofi`, `notifications`, `waybar` and `logout_dialog`. The Waybar layer keeps its 22 px geometry and the same mixed-scale validation requirement.
 - HyDE owns the animation timings. Choose a preset with `SUPER + SHIFT + Y` and scale every preset from `config.toml` with `[hyprland.anim] duration_scale = 0.9` (`0.9` is 10 % faster).
 
@@ -72,6 +73,7 @@ The overlay stays within HyDE's documented user-owned extension points. It does 
 | Hyprland Lua overrides | `~/.config/hypr/hyprland.lua` |
 | Hypridle safety policy | `~/.config/hypr/hypridle.conf` |
 | Waybar layout, module and CSS | `~/.config/waybar/layouts/`, `modules/`, and `user-style.css` |
+| Swaync notification CSS | `~/.config/swaync/user-style.css` |
 | Themes and wallpapers | `~/.config/hyde/themes/<theme>/` with `wallpapers/` and `wall.set` |
 | Wallbash templates and callbacks | `~/.config/hyde/wallbash/always/` and `scripts/` |
 | Shell and terminal overrides | `~/.config/zsh/user.zsh` and `~/.config/kitty/kitty.conf` |
@@ -189,6 +191,7 @@ Edit the two hardware-specific files before installing on a different machine:
 - Custom Waybar layouts and modules live under `~/.config/waybar/`.
 - `~/.config/kitty/kitty.conf` is the preserved Kitty override; HyDE remains responsible for `hyde.conf` and `theme.conf`.
 - `~/.config/zsh/user.zsh` is the preserved Zsh customization point.
+- `~/.config/swaync/user-style.css` is swaync's preserved user stylesheet, imported after the generated `theme.css`. The overlay uses it to re-map the hardcoded white `text-color`/`--text-color` onto the active theme's own notification text color, keeping notification popups and the control center readable on light themes. HyDE continues to own `style.css`, `theme.css` and `config.json`.
 - `~/.config/hyde/wallbash/` is HyDE's documented user template directory and takes precedence over the shared templates that ship with HyDE. Only the overlay's own templates are tracked: `always/rofi-frosted.dcol`, `always/btop.dcol` and `scripts/my-hyde-btop.sh`.
 - Qt menu changes live in a derived theme under `~/.config/hyde/themes/Material Sakura Polished`; the original `Material Sakura` theme and HyDE's generated `~/.config/Kvantum/wallbash` files remain untouched.
 - Shared files managed by HyDE remain untouched.
