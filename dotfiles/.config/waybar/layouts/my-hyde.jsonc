@@ -121,7 +121,8 @@
             "privacy",
             "group/hide-tray",
             "power-profiles-daemon",
-            "battery"
+            "battery",
+            "custom/swaync"
         ]
     },
     "group/customize": {
