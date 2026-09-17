@@ -62,6 +62,22 @@ cd My-HyDE-dots
 ./install.sh
 ```
 
+## Official HyDE integration
+
+The overlay stays within HyDE's documented user-owned extension points. It does not patch the shared runtime, generated Waybar files, or theme output in place.
+
+| Customization | Supported HyDE location |
+| --- | --- |
+| Main preferences and cursor | `~/.config/hyde/config.toml` with the upstream schema |
+| Hyprland Lua overrides | `~/.config/hypr/hyprland.lua` |
+| Hypridle safety policy | `~/.config/hypr/hypridle.conf` |
+| Waybar layout, module and CSS | `~/.config/waybar/layouts/`, `modules/`, and `user-style.css` |
+| Themes and wallpapers | `~/.config/hyde/themes/<theme>/` with `wallpapers/` and `wall.set` |
+| Wallbash templates and callbacks | `~/.config/hyde/wallbash/always/` and `scripts/` |
+| Shell and terminal overrides | `~/.config/zsh/user.zsh` and `~/.config/kitty/kitty.conf` |
+
+HyDE continues to own `~/.local/share/hyde`, `~/.local/share/hypr`, `~/.local/share/waybar`, `~/.local/lib/hyde`, and Waybar's generated `config.jsonc`, `style.css`, and `theme.css`.
+
 The installer uses only official Arch packages, backs up every replaced file or symlink-rich managed tree, installs the pinned user-owned cursor payload, prepares the user Kvantum template from installed HyDE, and selects the custom Waybar layout through HyDE's own commands.
 
 To use another wallpaper:
@@ -72,11 +88,20 @@ MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
 
 ## LAGC Tech themes
 
-The overlay installs two native HyDE themes without committing any wallpaper content. When an existing wallpaper is available, `install.sh` creates a reversible `wall.set` link for each theme; alternatively, provide one through `MY_HYDE_WALLPAPER` during installation. Switch themes through HyDE's native command:
+The overlay installs two native HyDE themes without committing any private wallpaper content. HyDE's graphical theme selector identifies themes only by the image referenced by each theme's `wall.set`; it hides the theme name. To keep the Dark and Light cards recognizable, `install.sh` uses ImageMagick to create distinct palette-tinted variants of the selected wallpaper under each theme's supported `wallpapers/` directory, points `wall.set` to that local variant, and refreshes each theme through HyDE's documented wallpaper-cache command. The generated images are reversible installation state and are never added to Git.
+
+The default source is `~/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png`. Provide another source with `MY_HYDE_WALLPAPER`:
 
 ```bash
-hyde-shell theme.switch -s "LAGC Tech Dark"
-hyde-shell theme.switch -s "LAGC Tech Light"
+MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
+```
+
+Open HyDE's official selector or switch directly:
+
+```bash
+hydectl theme select
+hydectl theme set "LAGC Tech Dark"
+hydectl theme set "LAGC Tech Light"
 ```
 
 The themes use existing `Catppuccin-Mocha` and `Catppuccin-Latte` GTK assets for their GTK base. HyDE's standard Wallbash pipeline applies the LAGC palette to Dunst and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback makes the Light theme's Rofi window-switcher selection Signal Cyan (`#17D7E8`) with Midnight text (`#061B2B`) after the shared opaque-Rofi template runs, without changing Kvantum's Cobalt highlight and link roles.

@@ -8,6 +8,11 @@ trap 'rm -rf -- "$pycache_dir" "$cursor_build_dir"' EXIT
 [[ -s "$repo_dir/AGENTS.md" ]] || { printf 'AGENTS.md is missing or empty.\n' >&2; exit 1; }
 [[ -s "$repo_dir/memory/index.md" ]] || { printf 'Repository memory index is missing or empty.\n' >&2; exit 1; }
 bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot.sh" "$repo_dir/check.sh"
+grep -Fqx 'imagemagick' "$repo_dir/packages.arch"
+command -v magick >/dev/null || {
+    printf 'ImageMagick is required to generate distinct HyDE theme wallpapers.\n' >&2
+    exit 1
+}
 
 for theme in "LAGC Tech Dark" "LAGC Tech Light"; do
     theme_dir="$repo_dir/dotfiles/.config/hyde/themes/$theme"
@@ -17,6 +22,10 @@ for theme in "LAGC Tech Dark" "LAGC Tech Light"; do
             exit 1
         }
     done
+    [[ $(<"$theme_dir/.sort") =~ ^[0-9]+$ ]] || {
+        printf 'LAGC Tech theme has an invalid or missing HyDE .sort value: %s\n' "$theme" >&2
+        exit 1
+    }
     bash -n "$theme_dir/theme.dcol"
     grep -Fqx '$HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf' "$theme_dir/hypr.theme"
     grep -Fqx '$HOME/.config/kitty/theme.conf|killall -SIGUSR1 kitty' "$theme_dir/kitty.theme"
@@ -26,6 +35,15 @@ for theme in "LAGC Tech Dark" "LAGC Tech Light"; do
     grep -Eq '^    main-bg:[[:space:]]+#[0-9A-F]{8};$' "$theme_dir/rofi.theme"
     grep -Eq '^dcol_[1-4]xa[1-9]_rgba="rgba\([0-9]+,[0-9]+,[0-9]+,\\1\)"$' "$theme_dir/theme.dcol"
 done
+
+[[ $(<"$repo_dir/dotfiles/.config/hyde/themes/LAGC Tech Dark/.sort") -lt \
+   $(<"$repo_dir/dotfiles/.config/hyde/themes/LAGC Tech Light/.sort") ]] || {
+    printf 'LAGC Tech Dark must sort before LAGC Tech Light in the HyDE selector.\n' >&2
+    exit 1
+}
+grep -Fq 'generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark' "$repo_dir/install.sh"
+grep -Fq 'generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light' "$repo_dir/install.sh"
+grep -Fq 'run hyde-shell wallpaper --cache wall "$target"' "$repo_dir/install.sh"
 
 rofi_override="$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-frosted.dcol"
 rofi_callback="$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection"
@@ -174,8 +192,8 @@ fi
 
 hyprland_config="$repo_dir/dotfiles/.config/hypr/hyprland.lua"
 [[ -s "$hyprland_config" ]] || { printf 'Hyprland override is missing or empty.\n' >&2; exit 1; }
-grep -Fq $'\t\tblur = {\n\t\t\tenabled = true,' "$hyprland_config" || {
-    printf 'Hyprland must enable the blur that the translucent surfaces rely on.\n' >&2
+grep -Pzq 'blur\s*=\s*\{\s*enabled\s*=\s*false,' "$hyprland_config" || {
+    printf 'Hyprland must keep compositor blur disabled for the solid-first profile.\n' >&2
     exit 1
 }
 if grep -Eq '^[[:space:]]*opaque[[:space:]]*=[[:space:]]*true,$' "$hyprland_config"; then
