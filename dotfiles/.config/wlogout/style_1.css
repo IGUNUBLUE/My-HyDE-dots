@@ -20,18 +20,24 @@ button {
     background-position: center;
     background-size: 20%;
     border-radius: 0px;
+    /* Dividers between items plus the bar's top/bottom outline use the
+     * palette's divider tone (Ice line in the LAGC themes). GTK3 ignores
+     * box-shadow spread, so the drop shadow stacks hard offsets at
+     * decreasing alpha: it fades below the bar with zero sideways bleed. */
+    border-top: 1px solid @wallbash_1xa3;
     border-right: 1px solid @wallbash_1xa3;
-    box-shadow: 0 14px 22px -18px rgba(6, 27, 43, 0.38);
+    border-bottom: 1px solid @wallbash_1xa3;
+    box-shadow: 0 4px 0 rgba(6, 27, 43, 0.10),
+                0 9px 0 rgba(6, 27, 43, 0.07),
+                0 15px 0 rgba(6, 27, 43, 0.05),
+                0 24px 0 rgba(6, 27, 43, 0.03);
     text-shadow: none;
     animation: gradient_f 20s ease-in infinite;
 }
 
-/* Item separators use the palette's divider tone (Ice line in the LAGC
- * themes); the last button carries none. The button shadow keeps a large
- * negative spread so the blur drops below the bar instead of bleeding
- * sideways into fake separators. */
-#reboot {
-    border-right: none;
+/* The first button closes the bar's outline on the left. */
+#lock {
+    border-left: 1px solid @wallbash_1xa3;
 }
 
 button:focus {
@@ -43,6 +49,7 @@ button:focus {
 button:hover {
     background-color: @wb-hvr-bg;
     background-size: 40%;
+    border: 1px solid @wallbash_1xa3;
     border-radius: ${active_rad}px;
     animation: gradient_f 20s ease-in infinite;
     transition: all 0.3s cubic-bezier(.55,0.0,.28,1.682);
