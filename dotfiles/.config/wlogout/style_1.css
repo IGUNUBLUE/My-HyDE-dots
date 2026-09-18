@@ -4,6 +4,7 @@
 }
 
 @import "$HOME/.config/waybar/theme.css";
+@import "$HOME/.cache/hyde/wallbash/gtk.css";
 
 window {
     background-color: transparent;
@@ -19,9 +20,18 @@ button {
     background-position: center;
     background-size: 20%;
     border-radius: 0px;
-    box-shadow: 0 6px 18px rgba(6, 27, 43, 0.35);
+    border-right: 1px solid @wallbash_1xa3;
+    box-shadow: 0 14px 22px -18px rgba(6, 27, 43, 0.38);
     text-shadow: none;
     animation: gradient_f 20s ease-in infinite;
+}
+
+/* Item separators use the palette's divider tone (Ice line in the LAGC
+ * themes); the last button carries none. The button shadow keeps a large
+ * negative spread so the blur drops below the bar instead of bleeding
+ * sideways into fake separators. */
+#reboot {
+    border-right: none;
 }
 
 button:focus {
