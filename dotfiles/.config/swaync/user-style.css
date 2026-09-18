@@ -58,6 +58,14 @@
   background: @wallbash_1xa2;
 }
 
+/* Match the wlogout outline: upstream borders notification cards and the
+ * control center in the cobalt accent; use the palette's divider tone
+ * (Ice line) at the same 2px weight for a quieter, consistent edge. */
+.control-center,
+.notification-row .notification-background .notification {
+  border: 2px solid @wallbash_1xa3;
+}
+
 /* Media player cards keep a dark album-art overlay; keep their text light. */
 .widget-mpris .widget-mpris-player .mpris-overlay,
 .widget-mpris .widget-mpris-player .mpris-overlay * {
