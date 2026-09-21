@@ -237,6 +237,41 @@ generate_theme_wallpaper() {
     run hyde-shell wallpaper --cache wall "$target"
 }
 
+generate_calm_wallpaper() {
+    local theme_name=$1 variant=$2
+    local wallpaper_dir target
+    wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
+    target="$wallpaper_dir/lagc-calm-$variant.png"
+
+    if [[ ! -d "$wallpaper_dir" ]]; then
+        backup_target "$wallpaper_dir"
+        run mkdir -p -- "$wallpaper_dir"
+    fi
+    backup_target "$target"
+
+    case "$variant" in
+        dark)
+            run magick -size 1920x1080 gradient:'#332C26'-'#211D1B' \
+                \( -size 1920x1080 xc:black -fill '#A9C080' \
+                -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.10 \) \
+                -compose screen -composite "$target"
+            ;;
+        light)
+            run magick -size 1920x1080 gradient:'#F4EEE2'-'#E2D7C4' \
+                \( -size 1920x1080 xc:black -fill '#DDE7C8' \
+                -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.45 \) \
+                -compose screen -composite "$target"
+            ;;
+        *)
+            printf 'Unknown LAGC Calm wallpaper variant: %s\n' "$variant" >&2
+            return 1
+            ;;
+    esac
+
+    link_theme_wallpaper "$theme_name" "$target"
+    run hyde-shell wallpaper --cache wall "$target"
+}
+
 remove_target() {
     local target=$1
 
@@ -324,6 +359,8 @@ install_dot "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection" "$HOME/.local
 
 install_theme_files "LAGC Tech Dark"
 install_theme_files "LAGC Tech Light"
+install_theme_files "LAGC Calm Dark"
+install_theme_files "LAGC Calm Light"
 install_kiro_theme
 remove_target "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
 remove_target "$HOME/.config/hyde/wallbash/theme/lagc-tech-dark-kitty.dcol"
@@ -347,6 +384,9 @@ if [[ -f "$theme_wallpaper" ]]; then
 else
     printf 'LAGC Tech theme wallpapers were not generated; select a wallpaper first or set MY_HYDE_WALLPAPER when installing.\n' >&2
 fi
+
+generate_calm_wallpaper "LAGC Calm Dark" dark
+generate_calm_wallpaper "LAGC Calm Light" light
 
 if ! $dry_run; then
     "$HOME/.local/bin/my-hyde-qt-menu"

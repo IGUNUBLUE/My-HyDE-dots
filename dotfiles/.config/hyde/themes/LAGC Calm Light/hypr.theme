@@ -1,0 +1,35 @@
+$HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
+# LAGC Calm Light: warm paper theme. Palette: paper #F4EEE2, ink #3A342C,
+# olive #5C7040, amber #8A5A1E, brick #9E4F43 (attention only).
+
+$GTK_THEME=adw-gtk3
+$ICON_THEME=Tela-circle-yellow
+$CURSOR_THEME=Future-cursors
+$CURSOR_SIZE=42
+$COLOR_SCHEME=prefer-light
+
+general {
+    gaps_in = 2
+    gaps_out = 4
+    border_size = 2
+    col.active_border = rgba(5c7040ff) rgba(a06830ff) 45deg
+    col.inactive_border = rgba(8c7d6c80)
+    layout = dwindle
+    resize_on_border = true
+}
+
+group {
+    col.border_active = rgba(5c7040ff) rgba(a06830ff) 45deg
+    col.border_inactive = rgba(8c7d6c80)
+    col.border_locked_active = rgba(9e4f43ff) rgba(a06830ff) 45deg
+    col.border_locked_inactive = rgba(8c7d6c80)
+}
+
+decoration {
+    rounding = 10
+    shadow:enabled = false
+
+    blur {
+        enabled = no
+    }
+}

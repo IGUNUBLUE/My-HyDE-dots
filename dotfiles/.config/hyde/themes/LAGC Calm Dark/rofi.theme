@@ -1,0 +1,12 @@
+$HOME/.config/rofi/theme.rasi
+/* LAGC Calm Dark: documented HyDE Rofi color contract. */
+* {
+    main-bg:            #2B2522FF;
+    main-fg:            #E9DFCEFF;
+    main-br:            #4A423BFF;
+    main-ex:            #352E29FF;
+    select-bg:          #A9C080FF;
+    select-fg:          #2B2522FF;
+    separatorcolor:     transparent;
+    border-color:       transparent;
+}

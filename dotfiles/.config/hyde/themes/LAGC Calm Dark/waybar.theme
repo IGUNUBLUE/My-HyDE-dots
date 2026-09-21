@@ -1,0 +1,18 @@
+$HOME/.config/waybar/theme.css|${scrDir}/wbarconfgen.sh
+/* LAGC Calm Dark: documented HyDE Waybar color contract. */
+@define-color bar-bg rgba(43, 37, 34, 1.0);
+
+@define-color main-bg #2B2522;
+@define-color main-fg #E9DFCE;
+
+@define-color wb-act-bg #A9C080;
+@define-color wb-act-fg #2B2522;
+
+@define-color wb-hvr-bg #D4A55C;
+@define-color wb-hvr-fg #2B2522;
+
+/* Semantic state colors; every value meets WCAG AA >=4.5:1 on main-bg. */
+@define-color wb-ok-fg #A9C080;
+@define-color wb-info-fg #8FA8A0;
+@define-color wb-warn-fg #D4A55C;
+@define-color wb-crit-fg #D67A6E;

@@ -16,7 +16,7 @@ window#waybar.top #pill {
     margin-right: 4px;
 }
 
-/* Align outer edges with windows (gaps_out 4px + bar 4px). */
+/* Align outer edges with windows (bar margin matches gaps_out 4px). */
 window#waybar.top .modules-left,
 window#waybar.top .modules-center,
 window#waybar.top .modules-right {

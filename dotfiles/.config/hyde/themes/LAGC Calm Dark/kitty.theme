@@ -1,0 +1,40 @@
+$HOME/.config/kitty/theme.conf|killall -SIGUSR1 kitty
+# LAGC Calm Dark terminal palette: warm low-glare, sage accent.
+
+foreground              #E9DFCE
+background              #2B2522
+selection_foreground    #F0EAD8
+selection_background    #455437
+cursor                  #A9C080
+cursor_text_color       #2B2522
+url_color               #B9CC94
+active_border_color     #A9C080
+inactive_border_color   #6B5F53
+bell_border_color       #D67A6E
+active_tab_foreground   #2B2522
+active_tab_background   #A9C080
+inactive_tab_foreground #B5A796
+inactive_tab_background #352E29
+tab_bar_background      #2B2522
+mark1_foreground        #2B2522
+mark1_background        #A9C080
+mark2_foreground        #2B2522
+mark2_background        #D4A55C
+mark3_foreground        #F0EAD8
+mark3_background        #6B5F53
+color0  #352E29
+color1  #D67A6E
+color2  #A9C080
+color3  #D4A55C
+color4  #8FA8A0
+color5  #C98A6B
+color6  #9DB8A0
+color7  #E9DFCE
+color8  #6B5F53
+color9  #E0877B
+color10 #B9CC94
+color11 #E0B876
+color12 #A8BDB0
+color13 #D8A188
+color14 #ADD0B8
+color15 #F4EEE2
