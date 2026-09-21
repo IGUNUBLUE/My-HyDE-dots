@@ -21,6 +21,8 @@ Ship `LAGC Calm Dark` (`.sort` 11) and `LAGC Calm Light` (`.sort` 12) with stati
 
 Reload coverage after a switch: live via `.dcol` hooks — kitty, Waybar, Swaync, Rofi, Hyprland, Hyprlock, Dunst, qtct/Kvantum. Needs restart or extra tooling — GTK2/3 and Qt apps, VS Code (`code.dcol` output consumed only by a Wallbash-aware theme), vim, Discord (BetterDiscord), Spotify (spicetify). Dark/light only via `prefers-color-scheme` — Slack, browsers, Electron. TUIs inside kitty inherit the palette live.
 
+Separate gap found during the same audit: `theme.switch.sh` writes `~/.config/xsettingsd/xsettingsd.conf` but nothing in HyDE starts or reloads `xsettingsd`, and no XSETTINGS provider was running. X11/XWayland clients therefore never receive live icon/theme/cursor changes. `install.sh` now pulls `xsettingsd.service` into `graphical-session.target.wants` and starts it (same mechanism `swaync.service` already uses).
+
 ## Validation
 
 `./check.sh`, `./install.sh --dry-run --skip-packages`, and `git diff --check` clean; live cycle verified consistent generated artifacts and `hyprctl configerrors` empty on both modes.

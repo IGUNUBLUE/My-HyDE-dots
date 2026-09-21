@@ -393,6 +393,10 @@ if ! $dry_run; then
     hyde-shell waybar --set "$HOME/.config/waybar/layouts/my-hyde.jsonc"
     hyprctl reload >/dev/null 2>&1 || true
     systemctl --user restart hyde-Hyprland-idle.service
+    # HyDE's theme.switch writes xsettingsd.conf but nothing starts the daemon;
+    # without it X11/XWayland clients never see live icon/theme changes.
+    systemctl --user add-wants graphical-session.target xsettingsd.service
+    systemctl --user start xsettingsd.service 2>/dev/null || true
 
     wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
     if [[ -f "$wallpaper" ]]; then
