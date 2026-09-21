@@ -1,0 +1,35 @@
+$HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
+# LAGC Calm Dark: warm low-glare theme. Palette: charcoal #2B2522, parchment
+# #E9DFCE, sage #A9C080, amber #D4A55C, terracotta #D67A6E (attention only).
+
+$GTK_THEME=Gruvbox-Retro
+$ICON_THEME=Tela-circle-yellow
+$CURSOR_THEME=Future-cursors
+$CURSOR_SIZE=42
+$COLOR_SCHEME=prefer-dark
+
+general {
+    gaps_in = 2
+    gaps_out = 4
+    border_size = 2
+    col.active_border = rgba(a9c080ff) rgba(d4a55cff) 45deg
+    col.inactive_border = rgba(6b5f5380)
+    layout = dwindle
+    resize_on_border = true
+}
+
+group {
+    col.border_active = rgba(a9c080ff) rgba(d4a55cff) 45deg
+    col.border_inactive = rgba(6b5f5380)
+    col.border_locked_active = rgba(d67a6eff) rgba(d4a55cff) 45deg
+    col.border_locked_inactive = rgba(6b5f5380)
+}
+
+decoration {
+    rounding = 10
+    shadow:enabled = false
+
+    blur {
+        enabled = no
+    }
+}

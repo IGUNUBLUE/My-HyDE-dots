@@ -11,10 +11,11 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 ## Included
 
 - Hyprland monitor layout, Spanish keyboard layouts, and a fully solid visual layer: opaque windows and surfaces, 8 px squircle corners, palette-driven shadows, a looping border gradient, and WCAG AA state colors defined per theme.
-- Readable Noto Sans font settings for GTK, Qt, notifications and Waybar, with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`).
+- Readable Atkinson Hyperlegible font settings for GTK, Qt, notifications and Waybar, with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`).
 - User-owned fontconfig baseline at `~/.config/fontconfig/fonts.conf`, installed and snapshotted by this overlay.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
+- Native `LAGC Calm Dark` and `LAGC Calm Light` warm low-glare themes with static `theme.dcol` palettes (sage/olive accents, WCAG AA state colors) and installer-generated gradient wallpapers.
 - A portable Kiro IDE extension with selectable `LAGC Tech Dark` and `LAGC Tech Light` color themes, installed only through Kiro's own VSIX CLI.
 - A documented Zed local theme family with selectable `LAGC Tech Dark` and `LAGC Tech Light` appearances, merged safely into the user-owned Zed settings file.
 - Compact solid Waybar layout with a historical 22-pixel height, scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
@@ -30,7 +31,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 The visual profile is intentionally solid-first because diffuse blur causes eye strain. Windows and every user-owned surface remain fully opaque; shadows and borders preserve depth, and Kitty is the only surface that keeps a small transparency.
 
-- `dotfiles/.config/hypr/hyprland.lua` disables compositor blur and inner glow, keeps `decoration.shadow` plus the LAGC border gradient, and uses `rounding = 8` with `rounding_power = 2.4` (squircle).
+- `dotfiles/.config/hypr/hyprland.lua` disables compositor blur and inner glow, keeps `decoration.shadow` plus the LAGC border gradient, and uses `rounding = 10` with `rounding_power = 2.4` (squircle).
 - Waybar `bar-bg` and islands render at full opacity, Rofi uses an opaque `main-bg`, and the swaync control center and notification popups are forced to `opacity: 1` from `user-style.css`. Kitty keeps `background_opacity 0.97`.
 - Each `waybar.theme` defines per-theme semantic state colors (`wb-ok-fg`, `wb-info-fg`, `wb-warn-fg`, `wb-crit-fg`) chosen to meet WCAG AA (>= 4.5:1) on `main-bg`; the stock Signal Cyan and Cobalt text accents failed that bar on the opposite theme.
 - HyDE's shared layer rules enable blur by default, so the user override explicitly disables it for `rofi`, `notifications`, `waybar` and `logout_dialog`. The Waybar layer keeps its 22 px geometry and the same mixed-scale validation requirement.
@@ -107,7 +108,18 @@ hydectl theme set "LAGC Tech Dark"
 hydectl theme set "LAGC Tech Light"
 ```
 
-The themes use existing `Catppuccin-Mocha` and `Catppuccin-Latte` GTK assets for their GTK base. HyDE's standard Wallbash pipeline applies the LAGC palette to Dunst and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback makes the Light theme's Rofi window-switcher selection Signal Cyan (`#17D7E8`) with Midnight text (`#061B2B`) after the shared opaque-Rofi template runs, without changing Kvantum's Cobalt highlight and link roles.
+The themes use the neutral `adw-gtk3` and `adw-gtk3-dark` GTK bases with the `Fluent-teal-light` and `Fluent-teal-dark` icon variants, so app interiors stay monochrome-neutral while the cyan/cobalt family owns every interactive accent. HyDE's standard Wallbash pipeline applies the LAGC palette to Dunst and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback makes the Light theme's Rofi window-switcher selection Signal Cyan (`#17D7E8`) with Midnight text (`#061B2B`) after the shared opaque-Rofi template runs, without changing Kvantum's Cobalt highlight and link roles.
+
+## LAGC Calm themes
+
+`LAGC Calm Dark` and `LAGC Calm Light` are a warm low-glare pair designed for eye comfort: charcoal `#2B2522`/parchment `#E9DFCE` with a sage `#A9C080` accent on dark, and sepia paper `#F4EEE2`/ink `#3A342C` with a deep olive `#5C7040` accent on light. Both ship a `theme.dcol` static Wallbash palette, so `colors.conf`, Waybar, Rofi, Swaync, Kvantum and Kitty always render the same palette instead of deriving colors from the wallpaper (the default HyDE behavior for themes without `theme.dcol`, which makes a switch look partially applied).
+
+Dark pairs `Gruvbox-Retro` GTK with `Tela-circle-yellow` icons; Light pairs `adw-gtk3` with the same icon theme. `install.sh` generates both wallpapers deterministically with ImageMagick (`generate_calm_wallpaper`), so no source image or committed binary is required. All interactive and state colors meet WCAG AA on their surfaces.
+
+```bash
+hydectl theme set "LAGC Calm Dark"
+hydectl theme set "LAGC Calm Light"
+```
 
 ## Future-cyan cursor
 

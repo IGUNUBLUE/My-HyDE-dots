@@ -1,0 +1,40 @@
+$HOME/.config/kitty/theme.conf|killall -SIGUSR1 kitty
+# LAGC Calm Light terminal palette: warm paper, olive accent.
+
+foreground              #3A342C
+background              #F4EEE2
+selection_foreground    #3A342C
+selection_background    #CBDCA8
+cursor                  #5C7040
+cursor_text_color       #F4EEE2
+url_color               #6B8350
+active_border_color     #5C7040
+inactive_border_color   #8C7D6C
+bell_border_color       #9E4F43
+active_tab_foreground   #F4EEE2
+active_tab_background   #5C7040
+inactive_tab_foreground #6B6154
+inactive_tab_background #EAE3D5
+tab_bar_background      #C9BCA6
+mark1_foreground        #F4EEE2
+mark1_background        #5C7040
+mark2_foreground        #3A342C
+mark2_background        #D4A55C
+mark3_foreground        #F4EEE2
+mark3_background        #9E4F43
+color0  #DDD2BE
+color1  #B05A4E
+color2  #5C7040
+color3  #8A5A1E
+color4  #55655E
+color5  #9E5F4A
+color6  #6B8350
+color7  #3A342C
+color8  #8C7D6C
+color9  #C96B5C
+color10 #7F9A5E
+color11 #A06830
+color12 #71807A
+color13 #B07156
+color14 #8FA66B
+color15 #FDF9EF

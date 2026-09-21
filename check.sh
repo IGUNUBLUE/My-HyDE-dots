@@ -14,16 +14,16 @@ command -v magick >/dev/null || {
     exit 1
 }
 
-for theme in "LAGC Tech Dark" "LAGC Tech Light"; do
+for theme in "LAGC Tech Dark" "LAGC Tech Light" "LAGC Calm Dark" "LAGC Calm Light"; do
     theme_dir="$repo_dir/dotfiles/.config/hyde/themes/$theme"
     for theme_file in hypr.theme kitty.theme rofi.theme theme.dcol waybar.theme; do
         [[ -s "$theme_dir/$theme_file" ]] || {
-            printf 'LAGC Tech theme is missing %s: %s\n' "$theme_file" "$theme" >&2
+            printf 'HyDE theme is missing %s: %s\n' "$theme_file" "$theme" >&2
             exit 1
         }
     done
     [[ $(<"$theme_dir/.sort") =~ ^[0-9]+$ ]] || {
-        printf 'LAGC Tech theme has an invalid or missing HyDE .sort value: %s\n' "$theme" >&2
+        printf 'HyDE theme has an invalid or missing .sort value: %s\n' "$theme" >&2
         exit 1
     }
     bash -n "$theme_dir/theme.dcol"
@@ -41,8 +41,15 @@ done
     printf 'LAGC Tech Dark must sort before LAGC Tech Light in the HyDE selector.\n' >&2
     exit 1
 }
+[[ $(<"$repo_dir/dotfiles/.config/hyde/themes/LAGC Calm Dark/.sort") -lt \
+   $(<"$repo_dir/dotfiles/.config/hyde/themes/LAGC Calm Light/.sort") ]] || {
+    printf 'LAGC Calm Dark must sort before LAGC Calm Light in the HyDE selector.\n' >&2
+    exit 1
+}
 grep -Fq 'generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark' "$repo_dir/install.sh"
 grep -Fq 'generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light' "$repo_dir/install.sh"
+grep -Fq 'generate_calm_wallpaper "LAGC Calm Dark" dark' "$repo_dir/install.sh"
+grep -Fq 'generate_calm_wallpaper "LAGC Calm Light" light' "$repo_dir/install.sh"
 grep -Fq 'run hyde-shell wallpaper --cache wall "$target"' "$repo_dir/install.sh"
 
 rofi_override="$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-frosted.dcol"

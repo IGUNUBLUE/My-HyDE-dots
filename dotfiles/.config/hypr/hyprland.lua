@@ -72,12 +72,12 @@ hl.config({
 	general = {
 		border_size = 2,
 		gaps_in = 2,
-		-- Top edge: a hairline under the bar, which already sits 3px below the
-		-- screen edge. The other edges keep a small, symmetric margin.
-		gaps_out = { top = 3, left = 4, right = 4, bottom = 4 },
+		-- Compact uniform air on every edge: the bar keeps its own 3px float
+		-- above the 22px layout, and windows hold a matching rhythm around.
+		gaps_out = 4,
 	},
 	decoration = {
-		rounding = 8,
+		rounding = 10,
 		-- 2.0 is a circle and 4.0 a squircle; 2.4 keeps corners soft, not squared.
 		rounding_power = 2.4,
 		active_opacity = 1,
