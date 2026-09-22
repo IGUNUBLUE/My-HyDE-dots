@@ -419,6 +419,9 @@ if ! $dry_run; then
             || printf 'Atkinson Next %s download failed; fontconfig will fall back.\n' "$weight" >&2
     done
     fc-cache -f "$atkinson_dir" >/dev/null 2>&1 || true
+    # Processes keep a stale fontconfig map until restarted; without this a
+    # running swaync renders notification text as tofu after font install.
+    systemctl --user restart swaync.service 2>/dev/null || true
 
     wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
     if [[ -f "$wallpaper" ]]; then
