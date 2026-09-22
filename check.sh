@@ -117,9 +117,22 @@ grep -Fq '587c14d2f5bd2dc34095a4efbb1a729eb72a1d36' "$cursor_dir/SOURCE.md"
     exit 1
 }
 grep -Fqx 'XCURSOR_THEME=Future-cursors' "$cursor_env"
-grep -Fqx 'XCURSOR_SIZE=46' "$cursor_env"
+# XCursor and Hyprcursor sizes are not 1:1: GTK/Qt/XWayland use 32 while the
+# compositor keeps the visually equivalent 46.
+grep -Fqx 'XCURSOR_SIZE=32' "$cursor_env"
 grep -Fqx 'HYPRCURSOR_THEME=Future-cursors' "$cursor_env"
 grep -Fqx 'HYPRCURSOR_SIZE=46' "$cursor_env"
+# The gtk3-cursor-fix watcher restores the GTK3/XSETTINGS cursor size after
+# each HyDE theme switch rewrites it with the compositor size.
+cursor_fix="$repo_dir/dotfiles/.local/bin/gtk3-cursor-fix"
+cursor_fix_path="$repo_dir/dotfiles/.config/systemd/user/gtk3-cursor-fix.path"
+cursor_fix_service="$repo_dir/dotfiles/.config/systemd/user/gtk3-cursor-fix.service"
+bash -n "$cursor_fix"
+grep -Fq 'gtk-cursor-theme-size' "$cursor_fix"
+grep -Fq 'Gtk/CursorThemeSize' "$cursor_fix"
+grep -Fq 'PathModified=%h/.config/gtk-3.0/settings.ini' "$cursor_fix_path"
+grep -Fq 'PathModified=%h/.config/xsettingsd/xsettingsd.conf' "$cursor_fix_path"
+grep -Fq 'ExecStart=%h/.local/bin/gtk3-cursor-fix' "$cursor_fix_service"
 hyprcursor_source="$repo_dir/cursor-sources/Future-cyan-hyprcursor"
 grep -Fqx 'name = Future-cursors' "$hyprcursor_source/manifest.hl"
 grep -Fqx 'hotspot_x = 0.16875' "$hyprcursor_source/hyprcursors/arrow/meta.hl"
