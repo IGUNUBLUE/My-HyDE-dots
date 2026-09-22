@@ -92,6 +92,9 @@ MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
 
 ## LAGC Tech themes
 
+![LAGC Tech Dark](assets/previews/lagc-tech-dark.png)
+![LAGC Tech Light](assets/previews/lagc-tech-light.png)
+
 The overlay installs two native HyDE themes without committing any private wallpaper content. HyDE's graphical theme selector identifies themes only by the image referenced by each theme's `wall.set`; it hides the theme name. To keep the Dark and Light cards recognizable, `install.sh` uses ImageMagick to create distinct palette-tinted variants of the selected wallpaper under each theme's supported `wallpapers/` directory, points `wall.set` to that local variant, and refreshes each theme through HyDE's documented wallpaper-cache command. The generated images are reversible installation state and are never added to Git.
 
 The default source is `~/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png`. Provide another source with `MY_HYDE_WALLPAPER`:
@@ -108,13 +111,16 @@ hydectl theme set "LAGC Tech Dark"
 hydectl theme set "LAGC Tech Light"
 ```
 
-The themes use the neutral `adw-gtk3` and `adw-gtk3-dark` GTK bases with the `Fluent-teal-light` and `Fluent-teal-dark` icon variants, so app interiors stay monochrome-neutral while the cyan/cobalt family owns every interactive accent. HyDE's standard Wallbash pipeline applies the LAGC palette to Dunst and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback makes the Light theme's Rofi window-switcher selection Signal Cyan (`#17D7E8`) with Midnight text (`#061B2B`) after the shared opaque-Rofi template runs, without changing Kvantum's Cobalt highlight and link roles.
+Both themes render GTK3/GTK4 apps through the Wallbash-generated `Wallbash-Gtk` theme and use `Tela-circle-blue` icons, so app interiors follow the active palette exactly. The palette itself is an eye-comfort refresh of the original neon set: a uniform HSL transform desaturates accents ~28% and clamps extreme lightness while preserving the navy/cyan/cobalt identity. HyDE's standard Wallbash pipeline applies the palette to Swaync and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback keeps the Light theme's Rofi window-switcher selection on the softened cyan accent after the shared opaque-Rofi template runs, without changing Kvantum's highlight and link roles.
 
 ## LAGC Calm themes
 
+![LAGC Calm Dark](assets/previews/lagc-calm-dark.png)
+![LAGC Calm Light](assets/previews/lagc-calm-light.png)
+
 `LAGC Calm Dark` and `LAGC Calm Light` are a warm low-glare pair designed for eye comfort: charcoal `#2B2522`/parchment `#E9DFCE` with a sage `#A9C080` accent on dark, and sepia paper `#F4EEE2`/ink `#3A342C` with a deep olive `#5C7040` accent on light. Both ship a `theme.dcol` static Wallbash palette, so `colors.conf`, Waybar, Rofi, Swaync, Kvantum and Kitty always render the same palette instead of deriving colors from the wallpaper (the default HyDE behavior for themes without `theme.dcol`, which makes a switch look partially applied).
 
-Dark pairs `Gruvbox-Retro` GTK with `Tela-circle-yellow` icons; Light pairs `adw-gtk3` with the same icon theme. `install.sh` downloads each theme's wallpaper from Wallhaven (dark: `7jwx8v`, a misty golden forest path originally from Flickr user peste76; light: `ly8xwr`, a foggy morning garden originally from Unsplash photo `m1Jnyio2pUs`) and falls back to a deterministic ImageMagick gradient when offline, so no wallpaper binary is committed and installs never fail on a missing image. All interactive and state colors meet WCAG AA on their surfaces.
+Both variants use `Wallbash-Gtk` for GTK3/GTK4 apps and `Tela-circle-green` icons, matching the sage/olive accent family. `install.sh` downloads each theme's wallpaper from Wallhaven (dark: `7jwx8v`, a misty golden forest path originally from Flickr user peste76; light: `ly8xwr`, a foggy morning garden originally from Unsplash photo `m1Jnyio2pUs`) and falls back to a deterministic ImageMagick gradient when offline, so no wallpaper binary is committed and installs never fail on a missing image. All interactive and state colors meet WCAG AA on their surfaces.
 
 ```bash
 hydectl theme set "LAGC Calm Dark"
