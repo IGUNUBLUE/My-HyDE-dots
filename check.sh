@@ -75,16 +75,11 @@ if find "$repo_dir/dotfiles/.config/hyde/themes" -type f \( -iname '*.png' -o -i
     exit 1
 fi
 
-python "$repo_dir/tools/package-kiro-theme.py" --check
-if find "$repo_dir/dotfiles/.local/share/kiro/themes" -type f -name '*.vsix' -print -quit | grep -q .; then
-    printf 'Generated Kiro VSIX packages must not be tracked; install.sh packages them temporarily.\n' >&2
+python "$repo_dir/tools/package-vscodium-theme.py" --check
+if find "$repo_dir/dotfiles/.local/share/vscodium/themes" -type f -name '*.vsix' -print -quit | grep -q .; then
+    printf 'Generated VSCodium VSIX packages must not be tracked; install.sh packages them temporarily.\n' >&2
     exit 1
 fi
-
-python "$repo_dir/tools/merge-zed-settings.py" \
-    --settings "$repo_dir/dotfiles/.config/zed/lagc-tech-settings.json" \
-    --theme "$repo_dir/dotfiles/.config/zed/themes/lagc-tech.json" \
-    --check
 
 cursor_dir="$repo_dir/dotfiles/.local/share/icons/Future-cursors"
 cursor_config="$repo_dir/dotfiles/.config/hyde/config.toml.in"

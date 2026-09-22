@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and package the portable LAGC Tech Kiro IDE theme extension."""
+"""Validate and package the portable LAGC Calm VSCodium theme extension."""
 
 from __future__ import annotations
 
@@ -12,11 +12,11 @@ import zipfile
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-EXTENSION_ROOT = REPOSITORY_ROOT / "dotfiles/.local/share/kiro/themes/lagc-tech"
-PACKAGE_NAME = "igunublue.lagc-tech-themes-0.1.1.vsix"
+EXTENSION_ROOT = REPOSITORY_ROOT / "dotfiles/.local/share/vscodium/themes/lagc-calm"
+PACKAGE_NAME = "igunublue.lagc-calm-themes-0.1.0.vsix"
 THEMES = {
-    "LAGC Tech Dark": ("dark", "themes/lagc-tech-dark-color-theme.json"),
-    "LAGC Tech Light": ("light", "themes/lagc-tech-light-color-theme.json"),
+    "LAGC Calm Dark": ("dark", "themes/lagc-calm-dark-color-theme.json"),
+    "LAGC Calm Light": ("light", "themes/lagc-calm-light-color-theme.json"),
 }
 HEX_COLOR = re.compile(r"#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$")
 
@@ -85,10 +85,10 @@ def validate_extension(source: Path) -> tuple[dict, list[Path]]:
     readme_path = source / "README.md"
     package = load_json(package_path)
     expected_package = {
-        "name": "lagc-tech-themes",
-        "displayName": "LAGC Tech Themes",
+        "name": "lagc-calm-themes",
+        "displayName": "LAGC Calm Themes",
         "publisher": "igunublue",
-        "version": "0.1.1",
+        "version": "0.1.0",
     }
     for key, expected in expected_package.items():
         if package.get(key) != expected:
@@ -98,7 +98,7 @@ def validate_extension(source: Path) -> tuple[dict, list[Path]]:
 
     contributed = package.get("contributes", {}).get("themes")
     if not isinstance(contributed, list) or len(contributed) != len(THEMES):
-        raise ValueError("The extension must contribute exactly the two LAGC themes")
+        raise ValueError("The extension must contribute exactly the two LAGC Calm themes")
 
     theme_paths: list[Path] = []
     seen_labels: set[str] = set()
@@ -118,7 +118,7 @@ def validate_extension(source: Path) -> tuple[dict, list[Path]]:
         theme_paths.append(theme_path)
         seen_labels.add(label)
     if seen_labels != THEMES.keys():
-        raise ValueError("Both LAGC theme labels must be present")
+        raise ValueError("Both LAGC Calm theme labels must be present")
     return package, theme_paths
 
 
@@ -196,7 +196,7 @@ def main() -> int:
         return 1
 
     if arguments.check:
-        print("LAGC Tech Kiro IDE theme source is valid.")
+        print("LAGC Calm VSCodium theme source is valid.")
     elif arguments.output:
         print(f"Created {arguments.output}")
     else:

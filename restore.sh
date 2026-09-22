@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-if [[ ${1:-} == "--kiro-theme-only" ]]; then
-    command -v kiro >/dev/null || {
-        printf 'Kiro CLI not found; cannot remove the LAGC Tech Kiro IDE themes.\n' >&2
+if [[ ${1:-} == "--vscodium-theme-only" ]]; then
+    command -v codium >/dev/null || {
+        printf 'VSCodium CLI not found; cannot remove the LAGC Calm VSCodium themes.\n' >&2
         exit 1
     }
-    kiro --uninstall-extension igunublue.lagc-tech-themes
-    printf 'LAGC Tech Kiro IDE themes removed.\n'
+    codium --uninstall-extension igunublue.lagc-calm-themes
+    printf 'LAGC Calm VSCodium themes removed.\n'
     exit 0
 fi
 

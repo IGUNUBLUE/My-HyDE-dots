@@ -131,31 +131,19 @@ HyDE and native Hyprcursor, the login environment, GSettings, XCursor and both u
 
 Reference: [HyDE main configuration](https://hydeproject.pages.dev/en/configuring/config_toml/) and [HyDE cursor guidance](https://github.com/HyDE-Project/HyDE/discussions/624).
 
-## Kiro IDE themes
+## VSCodium themes
 
-The overlay also includes a VS Code-compatible extension containing selectable `LAGC Tech Dark` and `LAGC Tech Light` themes. It does not copy files into Kiro's private extension directory. Instead, the installer builds a temporary VSIX from `dotfiles/.local/share/kiro/themes/lagc-tech/` and passes it to Kiro's supported CLI:
-
-```bash
-./install.sh --kiro-theme-only
-```
-
-The normal `./install.sh` flow installs or updates the same extension whenever the `kiro` CLI is available. In Kiro, use **Preferences: Color Theme** (`Ctrl+K`, then `Ctrl+T`) and select `LAGC Tech Dark` or `LAGC Tech Light`. To remove only this overlay-owned extension:
+The overlay also includes a VS Code-compatible extension containing selectable `LAGC Calm Dark` and `LAGC Calm Light` themes, matching the LAGC Calm desktop family (charcoal-brown base, parchment text, sage accent). It does not copy files into VSCodium's extension directory. Instead, the installer builds a temporary VSIX from `dotfiles/.local/share/vscodium/themes/lagc-calm/` and passes it to VSCodium's supported CLI:
 
 ```bash
-./restore.sh --kiro-theme-only
+./install.sh --vscodium-theme-only
 ```
 
-## Zed editor themes
-
-Zed loads local theme families from `~/.config/zed/themes/` on Linux. The overlay installs `lagc-tech.json` there and merges only its `theme.light` and `theme.dark` selections into the existing `~/.config/zed/settings.json`; unrelated editor, agent, language, and credential settings remain untouched. Your current Zed theme mode is preserved, or defaults to the documented `system` mode for a new settings file.
+The normal `./install.sh` flow installs or updates the same extension whenever the `codium` CLI is available. In VSCodium, use **Preferences: Color Theme** (`Ctrl+K`, then `Ctrl+T`) and select `LAGC Calm Dark` or `LAGC Calm Light`. To remove only this overlay-owned extension:
 
 ```bash
-./install.sh --zed-theme-only
+./restore.sh --vscodium-theme-only
 ```
-
-Use Zed’s Theme Selector (`Ctrl+K`, then `Ctrl+T`) to preview either appearance. The theme source is tracked at `dotfiles/.config/zed/themes/lagc-tech.json`; `update-snapshot.sh` captures only that theme file and never copies the full settings file, preventing private Zed configuration from entering this repository.
-
-Reference: [Zed themes](https://zed.dev/docs/themes) and [Zed theme extensions](https://zed.dev/docs/extensions/themes).
 
 ## Restore the previous configuration
 

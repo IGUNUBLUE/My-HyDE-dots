@@ -8,12 +8,11 @@ backup_dir="$state_dir/backups/$timestamp"
 dry_run=false
 skip_packages=false
 qt_menu_only=false
-kiro_theme_only=false
-zed_theme_only=false
+vscodium_theme_only=false
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--qt-menu-only] [--kiro-theme-only] [--zed-theme-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--qt-menu-only] [--vscodium-theme-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -24,8 +23,7 @@ while (($#)); do
     case "$1" in
         --dry-run) dry_run=true ;;
         --qt-menu-only) qt_menu_only=true; skip_packages=true ;;
-        --kiro-theme-only) kiro_theme_only=true; skip_packages=true ;;
-        --zed-theme-only) zed_theme_only=true; skip_packages=true ;;
+        --vscodium-theme-only) vscodium_theme_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n' "$1" >&2; usage >&2; exit 2 ;;
@@ -43,63 +41,49 @@ run() {
     fi
 }
 
-install_kiro_theme() {
+install_vscodium_theme() {
     local required=${1:-false} temporary_dir package
 
-    if ! command -v kiro >/dev/null; then
-        printf 'Kiro CLI not found; LAGC Tech Kiro IDE themes were not installed.\n' >&2
+    if ! command -v codium >/dev/null; then
+        printf 'VSCodium CLI not found; LAGC Calm VSCodium themes were not installed.\n' >&2
         $required && return 1
         return 0
     fi
 
     if $dry_run; then
-        run python "$repo_dir/tools/package-kiro-theme.py" --output "/tmp/igunublue.lagc-tech-themes-0.1.1.vsix"
-        run kiro --install-extension "/tmp/igunublue.lagc-tech-themes-0.1.1.vsix" --force
+        run python "$repo_dir/tools/package-vscodium-theme.py" --output "/tmp/igunublue.lagc-calm-themes-0.1.0.vsix"
+        run codium --install-extension "/tmp/igunublue.lagc-calm-themes-0.1.0.vsix" --force
         return 0
     fi
 
     temporary_dir=$(mktemp -d)
-    package="$temporary_dir/igunublue.lagc-tech-themes-0.1.1.vsix"
-    if ! python "$repo_dir/tools/package-kiro-theme.py" --output "$package"; then
+    package="$temporary_dir/igunublue.lagc-calm-themes-0.1.0.vsix"
+    if ! python "$repo_dir/tools/package-vscodium-theme.py" --output "$package"; then
         rm -rf -- "$temporary_dir"
         return 1
     fi
-    if ! kiro --install-extension "$package" --force; then
+    if ! codium --install-extension "$package" --force; then
         rm -rf -- "$temporary_dir"
         return 1
     fi
     rm -rf -- "$temporary_dir"
 }
 
-install_zed_theme() {
-    local theme_source="$repo_dir/dotfiles/.config/zed/themes/lagc-tech.json"
-    local settings_source="$repo_dir/dotfiles/.config/zed/lagc-tech-settings.json"
-    local settings_target="$HOME/.config/zed/settings.json"
-
-    install_dot "$theme_source" "$HOME/.config/zed/themes/lagc-tech.json"
-    backup_target "$settings_target"
-    run python "$repo_dir/tools/merge-zed-settings.py" \
-        --settings "$settings_source" \
-        --theme "$theme_source" \
-        --target "$settings_target"
-}
-
 only_install_count=0
 $qt_menu_only && ((only_install_count += 1))
-$kiro_theme_only && ((only_install_count += 1))
-$zed_theme_only && ((only_install_count += 1))
+$vscodium_theme_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
-    printf 'Use only one of --qt-menu-only, --kiro-theme-only or --zed-theme-only.\n' >&2
+    printf 'Use only one of --qt-menu-only or --vscodium-theme-only.\n' >&2
     exit 2
 fi
 
-if $kiro_theme_only; then
-    install_kiro_theme true
-    printf 'LAGC Tech Kiro IDE themes installed. Select one with Preferences: Color Theme.\n'
+if $vscodium_theme_only; then
+    install_vscodium_theme true
+    printf 'LAGC Calm VSCodium themes installed. Select one with Preferences: Color Theme.\n'
     exit 0
 fi
 
-if ! $zed_theme_only && { [[ ! -f "$HOME/.local/share/hypr/hyde.lua" ]] || ! command -v hyde-shell >/dev/null; }; then
+if [[ ! -f "$HOME/.local/share/hypr/hyde.lua" ]] || ! command -v hyde-shell >/dev/null; then
     printf 'HyDE is not installed. Install/update official HyDE first, then rerun this overlay.\n' >&2
     exit 1
 fi
@@ -166,13 +150,6 @@ backup_cursor_state() {
     printf 'theme=%s\nsize=%s\n' "$cursor_theme" "$cursor_size" > "$backup_dir/.cursor-state"
 }
 
-if $zed_theme_only; then
-    install_zed_theme
-    printf 'LAGC Tech Zed themes installed and selected in ~/.config/zed/settings.json.\n'
-    exit 0
-fi
-
-install_zed_theme
 
 install_theme_files() {
     local theme_name=$1 source_dir
@@ -369,7 +346,7 @@ install_theme_files "LAGC Tech Dark"
 install_theme_files "LAGC Tech Light"
 install_theme_files "LAGC Calm Dark"
 install_theme_files "LAGC Calm Light"
-install_kiro_theme
+install_vscodium_theme
 remove_target "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
 remove_target "$HOME/.config/hyde/wallbash/theme/lagc-tech-dark-kitty.dcol"
 remove_target "$HOME/.config/hyde/wallbash/always/lagc-tech-dark-waybar.dcol"
@@ -430,11 +407,11 @@ if ! $dry_run; then
         printf 'Wallpaper not found, skipped: %s\n' "$wallpaper"
     fi
 
-    hyprctl setcursor Future-cursors 42 >/dev/null 2>&1 || true
+    hyprctl setcursor Future-cursors 46 >/dev/null 2>&1 || true
     gsettings set org.gnome.desktop.interface cursor-theme Future-cursors
-    gsettings set org.gnome.desktop.interface cursor-size 42
-    systemctl --user set-environment XCURSOR_THEME=Future-cursors XCURSOR_SIZE=42 HYPRCURSOR_THEME=Future-cursors HYPRCURSOR_SIZE=42
-    dbus-update-activation-environment --systemd XCURSOR_THEME=Future-cursors XCURSOR_SIZE=42 HYPRCURSOR_THEME=Future-cursors HYPRCURSOR_SIZE=42
+    gsettings set org.gnome.desktop.interface cursor-size 46
+    systemctl --user set-environment XCURSOR_THEME=Future-cursors XCURSOR_SIZE=46 HYPRCURSOR_THEME=Future-cursors HYPRCURSOR_SIZE=46
+    dbus-update-activation-environment --systemd XCURSOR_THEME=Future-cursors XCURSOR_SIZE=46 HYPRCURSOR_THEME=Future-cursors HYPRCURSOR_SIZE=46
 
     printf 'Installed successfully. Backup: %s\n' "$backup_dir"
     printf 'Open a new terminal to load the restored Zsh environment.\n'

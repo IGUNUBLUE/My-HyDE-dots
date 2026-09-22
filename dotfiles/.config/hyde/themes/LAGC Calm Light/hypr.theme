@@ -2,8 +2,8 @@ $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 # LAGC Calm Light: warm paper theme. Palette: paper #F4EEE2, ink #3A342C,
 # olive #5C7040, amber #8A5A1E, brick #9E4F43 (attention only).
 
-$GTK_THEME=adw-gtk3
-$ICON_THEME=Tela-circle-yellow
+$GTK_THEME=Wallbash-Gtk
+$ICON_THEME=Tela-circle-green
 $CURSOR_THEME=Future-cursors
 $CURSOR_SIZE=46
 $COLOR_SCHEME=prefer-light
