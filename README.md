@@ -114,7 +114,7 @@ The themes use the neutral `adw-gtk3` and `adw-gtk3-dark` GTK bases with the `Fl
 
 `LAGC Calm Dark` and `LAGC Calm Light` are a warm low-glare pair designed for eye comfort: charcoal `#2B2522`/parchment `#E9DFCE` with a sage `#A9C080` accent on dark, and sepia paper `#F4EEE2`/ink `#3A342C` with a deep olive `#5C7040` accent on light. Both ship a `theme.dcol` static Wallbash palette, so `colors.conf`, Waybar, Rofi, Swaync, Kvantum and Kitty always render the same palette instead of deriving colors from the wallpaper (the default HyDE behavior for themes without `theme.dcol`, which makes a switch look partially applied).
 
-Dark pairs `Gruvbox-Retro` GTK with `Tela-circle-yellow` icons; Light pairs `adw-gtk3` with the same icon theme. `install.sh` generates both wallpapers deterministically with ImageMagick (`generate_calm_wallpaper`), so no source image or committed binary is required. All interactive and state colors meet WCAG AA on their surfaces.
+Dark pairs `Gruvbox-Retro` GTK with `Tela-circle-yellow` icons; Light pairs `adw-gtk3` with the same icon theme. `install.sh` downloads each theme's wallpaper from Wallhaven (dark: `7jwx8v`, a misty golden forest path originally from Flickr user peste76; light: `ly8xwr`, a foggy morning garden originally from Unsplash photo `m1Jnyio2pUs`) and falls back to a deterministic ImageMagick gradient when offline, so no wallpaper binary is committed and installs never fail on a missing image. All interactive and state colors meet WCAG AA on their surfaces.
 
 ```bash
 hydectl theme set "LAGC Calm Dark"
