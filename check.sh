@@ -113,8 +113,8 @@ grep -Fq '587c14d2f5bd2dc34095a4efbb1a729eb72a1d36' "$cursor_dir/SOURCE.md"
     printf 'HyDE must select Future-cursors exactly once.\n' >&2
     exit 1
 }
-[[ $(grep -Ec '^[[:space:]]*cursor_size[[:space:]]*=[[:space:]]*42[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
-    printf 'HyDE must keep the accepted logical cursor size 42 for the mixed-scale displays.\n' >&2
+[[ $(grep -Ec '^[[:space:]]*cursor_size[[:space:]]*=[[:space:]]*46[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
+    printf 'HyDE must keep the accepted logical cursor size 46 for the mixed-scale displays.\n' >&2
     exit 1
 }
 [[ $(grep -Ec '^[[:space:]]*duration_scale[[:space:]]*=[[:space:]]*0[.]9[[:space:]]*$' "$cursor_config") -eq 1 ]] || {
@@ -122,9 +122,9 @@ grep -Fq '587c14d2f5bd2dc34095a4efbb1a729eb72a1d36' "$cursor_dir/SOURCE.md"
     exit 1
 }
 grep -Fqx 'XCURSOR_THEME=Future-cursors' "$cursor_env"
-grep -Fqx 'XCURSOR_SIZE=42' "$cursor_env"
+grep -Fqx 'XCURSOR_SIZE=46' "$cursor_env"
 grep -Fqx 'HYPRCURSOR_THEME=Future-cursors' "$cursor_env"
-grep -Fqx 'HYPRCURSOR_SIZE=42' "$cursor_env"
+grep -Fqx 'HYPRCURSOR_SIZE=46' "$cursor_env"
 hyprcursor_source="$repo_dir/cursor-sources/Future-cyan-hyprcursor"
 grep -Fqx 'name = Future-cursors' "$hyprcursor_source/manifest.hl"
 grep -Fqx 'hotspot_x = 0.16875' "$hyprcursor_source/hyprcursors/arrow/meta.hl"
