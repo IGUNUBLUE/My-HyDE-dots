@@ -11,14 +11,14 @@ custom_paths = [
 [waybar]
 scale = 12
 icon_size = 9
-font = "Atkinson Hyperlegible"
+font = "Atkinson Hyperlegible Next SemiBold"
 
 [desktop.ui]
 cursor_theme = "Future-cursors"
 cursor_size = 42
-font = "Atkinson Hyperlegible"
+font = "Atkinson Hyperlegible Next Medium"
 font_size = 11
-document_font = "Atkinson Hyperlegible"
+document_font = "Atkinson Hyperlegible Next Medium"
 document_font_size = 11
 monospace_font = "CaskaydiaCove Nerd Font Mono"
 monospace_font_size = 10
@@ -26,23 +26,23 @@ font_antialiasing = "rgba"
 font_hinting = "slight"
 
 [gtk3]
-font = "Atkinson Hyperlegible"
+font = "Atkinson Hyperlegible Next Medium"
 font_size = 11
 
 [qt5]
-font = "Atkinson Hyperlegible"
+font = "Atkinson Hyperlegible Next Medium"
 font_size = 11
 monospace_font = "CaskaydiaCove Nerd Font Mono"
 monospace_font_size = 10
 
 [qt6]
-font = "Atkinson Hyperlegible"
+font = "Atkinson Hyperlegible Next Medium"
 font_size = 11
 monospace_font = "CaskaydiaCove Nerd Font Mono"
 monospace_font_size = 10
 
 [notification]
-font = "Atkinson Hyperlegible"
+font = "Atkinson Hyperlegible Next Medium"
 font_size = 11
 
 # HyDE reads duration_scale while it loads the animation preset, so the value

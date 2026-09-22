@@ -406,6 +406,20 @@ if ! $dry_run; then
     systemctl --user add-wants graphical-session.target xsettingsd.service
     systemctl --user start xsettingsd.service 2>/dev/null || true
 
+    # config.toml references Atkinson Hyperlegible Next static weights
+    # (Medium UI, SemiBold Waybar). They are not in the official repos, so
+    # install them user-locally; offline failure is non-fatal (fontconfig
+    # falls back to the packaged classic family or the default sans).
+    atkinson_dir="$HOME/.local/share/fonts/atkinson"
+    mkdir -p "$atkinson_dir"
+    atkinson_base="https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/main/fonts/ttf"
+    for weight in Regular Medium SemiBold Bold Italic MediumItalic; do
+        curl -fsSL --max-time 30 -o "$atkinson_dir/AtkinsonHyperlegibleNext-$weight.ttf" \
+            "$atkinson_base/AtkinsonHyperlegibleNext-$weight.ttf" \
+            || printf 'Atkinson Next %s download failed; fontconfig will fall back.\n' "$weight" >&2
+    done
+    fc-cache -f "$atkinson_dir" >/dev/null 2>&1 || true
+
     wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
     if [[ -f "$wallpaper" ]]; then
         hyde-shell wallpaper --set "$wallpaper" --global
