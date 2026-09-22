@@ -5,7 +5,7 @@ $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 $GTK_THEME=Gruvbox-Retro
 $ICON_THEME=Tela-circle-yellow
 $CURSOR_THEME=Future-cursors
-$CURSOR_SIZE=42
+$CURSOR_SIZE=46
 $COLOR_SCHEME=prefer-dark
 
 general {
