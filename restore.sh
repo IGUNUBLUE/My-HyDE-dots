@@ -59,6 +59,8 @@ remove_path() {
     fi
 }
 
+systemctl --user disable --now gtk3-cursor-fix.path 2>/dev/null || true
+
 printf 'Restoring files from %s\n' "$backup"
 if [[ -f "$backup/.created" ]]; then
     while IFS= read -r relative; do

@@ -30,3 +30,20 @@ Separate gap found during the same audit: `theme.switch.sh` writes `~/.config/xs
 ## Exit criteria
 
 Revert by deleting the two theme directories, restoring `config.toml` font keys to `Noto Sans Medium`/`Noto Sans SemiBold`, and re-running `theme.switch.sh`; `git checkout` restores tracked state.
+
+## Follow-up: UI font is Atkinson, code font stays CaskaydiaCove
+
+- Atkinson Hyperlegible Next remains the UI face everywhere (GTK, Qt, Waybar, Rofi, Swaync). A trial of `AtkynsonMono Nerd Font Mono` / proportional Atkinson in Kitty was reverted: the user prefers CaskaydiaCove Nerd Font Mono for terminal and code surfaces. Do not retarget monospace fonts to Atkinson variants.
+
+## Follow-up: Hyprcursor/XCursor size split + gtk3-cursor-fix watcher
+
+- Hyprcursor and XCursor sizes are not 1:1: `HYPRCURSOR_SIZE=46` (compositor) visually matches `XCURSOR_SIZE=32` (GTK/Qt/XWayland). `environment.d/90-cursor-theme.conf` carries the split; `config.toml` `cursor_size` stays 46 because HyDE feeds it to `hyprctl setcursor`.
+- HyDE's `theme.switch.sh` rewrites `gtk-cursor-theme-size` in `gtk-3.0/settings.ini` AND `Gtk/CursorThemeSize` in `xsettingsd.conf` with 46 on every theme switch — a single `$CURSOR_SIZE` feeds both, so it cannot be decoupled upstream. `gtk3-cursor-fix.path` (systemd user path unit) watches both files and `gtk3-cursor-fix` restores 32 idempotently, then HUPs xsettingsd. Verified live: 46 -> 32 in ~1s on both files.
+- `xsettingsd.service` races Xwayland at graphical-session start ("Unable to open connection to X server", exit 1). Overlay drop-in `xsettingsd.service.d/10-restart.conf` adds Restart=on-failure/3s.
+
+## Follow-up: interactive installer (gum, clack-style)
+
+- `install.sh` now runs a guided UI when `gum` + TTY are present: `◆/◇/●/│/└` chrome in the LAGC Calm palette (sage `A9C080`, amber `D4A55C`, terracotta `D67A6E`), module choose/multiselect, one `sudo -v` + keepalive loop, `gum spin` per step with output to `~/.local/state/my-hyde-dots/install-*.log`, and a `✔` summary.
+- gum is bootstrapped via pacman on first interactive run and listed in `packages.arch`. Non-interactive (`--yes`, `--dry-run`, pipe, missing gum/TTY) keeps the old plain output — same behavior, CI-safe (the Omarchy no-TTY bug class is avoided by the `[[ -t 0 ]]` gate).
+- Steps were refactored into `step_{packages,cursor,config,themes,apply}` run through `gum spin -- bash -ec`; functions are `export -f`'d and module membership travels as `MODULES_CSV` (arrays cannot be exported). `--only a,b` selects modules non-interactively.
+- `packages.arch` audit: dropped `fluent-icon-theme-git` (themes no longer reference Fluent) and `tela-circle-icon-theme-yellow`; added `tela-circle-icon-theme-{green,blue}` (the variants themes actually use, official `extra` repo) and `gum`.

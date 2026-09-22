@@ -16,10 +16,9 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
 - Native `LAGC Calm Dark` and `LAGC Calm Light` warm low-glare themes with static `theme.dcol` palettes (sage/olive accents, WCAG AA state colors) and installer-generated gradient wallpapers.
-- A portable Kiro IDE extension with selectable `LAGC Tech Dark` and `LAGC Tech Light` color themes, installed only through Kiro's own VSIX CLI.
-- A documented Zed local theme family with selectable `LAGC Tech Dark` and `LAGC Tech Light` appearances, merged safely into the user-owned Zed settings file.
+- A portable VSCodium extension (`igunublue.lagc-themes`) with all four `LAGC` color themes — Calm and Tech, dark and light — installed only through VSCodium's own VSIX CLI.
 - Compact solid Waybar layout with a historical 22-pixel height, scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
-- Pinned GPLv3 `Future-cyan` cursor theme at visually accepted logical size 46, with native Hyprcursor plus XCursor fallback, reviewed hotspot corrections, and consistent HyDE/session/GTK defaults.
+- Pinned GPLv3 `Future-cyan` cursor theme at visually accepted logical size 46, with native Hyprcursor plus XCursor fallback, reviewed hotspot corrections, and consistent HyDE/session/GTK defaults. Because Hyprcursor and XCursor sizes do not translate 1:1, GTK/Qt/XWayland clients use `XCURSOR_SIZE=32` (via `environment.d`) while the compositor keeps `HYPRCURSOR_SIZE=46`; a `gtk3-cursor-fix` systemd path unit restores the GTK3 value after each HyDE theme switch, which rewrites `settings.ini` with the compositor size.
 - Kitty user configuration with an 11 pt default font and 0.97 background opacity: the only remaining transparency in the profile.
 - Solid Rofi launcher (opaque wallpaper-matched background) and a Wallbash-generated `hyde-wallbash` theme for btop, both driven by the tracked templates under `~/.config/hyde/wallbash/`.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
@@ -63,6 +62,8 @@ cd My-HyDE-dots
 ./install.sh --dry-run
 ./install.sh
 ```
+
+Run interactively on a terminal and the installer shows a guided flow — module picker (full, themes-only, cursor-only, or custom), a pacman confirmation, one up-front `sudo` prompt kept alive while steps run, a spinner per step, and a closing summary with the backup path. It bootstraps `gum` (official Arch package) for the UI when missing. Non-interactive runs — piped input, `--yes`, `--dry-run`, or no `gum` — print plain output and accept defaults, so CI and scripts are unaffected. Modules can also be selected explicitly with `--only packages,cursor,config,themes,apply`; every step logs to `~/.local/state/my-hyde-dots/install-<timestamp>.log`.
 
 ## Official HyDE integration
 
@@ -133,7 +134,7 @@ The default cursor is the GPLv3 [Future-cyan](https://www.gnome-look.org/p/14653
 
 For native compositor support, the overlay also pins the GPLv3 [Future Cyan Hyprcursor port](https://gitlab.com/Pummelfisch/future-cyan-hyprcursor) at `cf4126d17f4520aceb688d8a60daca4a1f0b9e80`. Its reviewed SVG working source lives under `cursor-sources/Future-cyan-hyprcursor/` and is compiled locally with `hyprcursor-util` during installation. The overlay uses one `Future-cursors` identifier for both formats and adjusts the native arrow and link-pointer hotspots to the corrected original ratios.
 
-HyDE and native Hyprcursor, the login environment, GSettings, XCursor and both user default aliases select `Future-cursors` at the visually accepted logical size 46. On the mixed-scale outputs, 36 was too small while 48 appeared oversized and blurred on the scale-1.0 external monitor. Existing applications can retain their inherited cursor environment, so log out and back in after the first installation before judging every GTK/XWayland client. Hotspot acceptance still requires clicking small targets and checking arrow, link, text and resize shapes on both monitors.
+HyDE and native Hyprcursor select `Future-cursors` at the visually accepted logical size 46, while the login environment, GSettings and XCursor clients use the visually equivalent size 32 — Hyprcursor and XCursor sizes are not 1:1, and equal values render GTK/Qt cursors roughly 1.4x larger. On the mixed-scale outputs, 36 was too small while 48 appeared oversized and blurred on the scale-1.0 external monitor. Existing applications can retain their inherited cursor environment, so log out and back in after the first installation before judging every GTK/XWayland client. Hotspot acceptance still requires clicking small targets and checking arrow, link, text and resize shapes on both monitors.
 
 Reference: [HyDE main configuration](https://hydeproject.pages.dev/en/configuring/config_toml/) and [HyDE cursor guidance](https://github.com/HyDE-Project/HyDE/discussions/624).
 

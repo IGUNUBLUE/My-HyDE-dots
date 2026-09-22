@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# HyDE's theme.switch.sh rewrites the cursor size in gtk-3.0/settings.ini and
+# xsettingsd.conf with the compositor size (46) on every theme switch. GTK3
+# and XSETTINGS clients need the smaller XCursor value, so restore it whenever
+# either file changes, then reload xsettingsd if it is running.
+# Idempotent: exits without writing when everything is already correct, which
+# keeps the triggering systemd path unit from looping.
+set -u
+
+ini="$HOME/.config/gtk-3.0/settings.ini"
+xset="$HOME/.config/xsettingsd/xsettingsd.conf"
+env_file="$HOME/.config/environment.d/90-cursor-theme.conf"
+
+want="$(grep -m1 '^XCURSOR_SIZE=' "$env_file" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]')"
+[ -n "$want" ] || exit 0
+
+changed=0
+
+if [ -f "$ini" ]; then
+    current="$(grep -m1 '^gtk-cursor-theme-size=' "$ini" | cut -d= -f2 | tr -d '[:space:]')"
+    if [ "$current" != "$want" ]; then
+        sed -i "s/^gtk-cursor-theme-size=.*/gtk-cursor-theme-size=$want/" "$ini"
+        changed=1
+    fi
+fi
+
+if [ -f "$xset" ]; then
+    current="$(grep -m1 '^Gtk/CursorThemeSize ' "$xset" | awk '{print $2}' | tr -d '[:space:]')"
+    if [ -z "$current" ]; then
+        printf 'Gtk/CursorThemeSize %s\n' "$want" >> "$xset"
+        changed=1
+    elif [ "$current" != "$want" ]; then
+        sed -i "s/^Gtk\/CursorThemeSize .*/Gtk\/CursorThemeSize $want/" "$xset"
+        changed=1
+    fi
+fi
+
+if [ "$changed" -eq 1 ]; then
+    systemctl --user reload xsettingsd.service >/dev/null 2>&1 || true
+fi

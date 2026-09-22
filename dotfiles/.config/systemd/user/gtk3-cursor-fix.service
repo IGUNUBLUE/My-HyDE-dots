@@ -1,0 +1,6 @@
+[Unit]
+Description=Restore GTK3 cursor size after HyDE theme edits settings.ini
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/gtk3-cursor-fix

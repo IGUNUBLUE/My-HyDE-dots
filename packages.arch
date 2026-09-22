@@ -1,11 +1,12 @@
 # Arch packages needed by this overlay (official repos or configured trusted Arch-compatible repos).
-fluent-icon-theme-git
 brightnessctl
 ddcutil
 gtk-layer-shell
+gum
 imagemagick
 noto-fonts
 python-gobject
-tela-circle-icon-theme-yellow
+tela-circle-icon-theme-blue
+tela-circle-icon-theme-green
 ttf-atkinson-hyperlegible
 waybar

@@ -1,0 +1,10 @@
+[Unit]
+Description=Watch GTK3/XSETTINGS cursor size files for HyDE rewrites
+
+[Path]
+PathModified=%h/.config/gtk-3.0/settings.ini
+PathModified=%h/.config/xsettingsd/xsettingsd.conf
+Unit=gtk3-cursor-fix.service
+
+[Install]
+WantedBy=default.target
