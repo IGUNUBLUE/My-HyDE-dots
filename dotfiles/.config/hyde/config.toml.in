@@ -27,7 +27,7 @@ font_hinting = "slight"
 
 [gtk3]
 font = "Atkinson Hyperlegible Next Medium"
-font_size = 11
+font_size = 10
 
 [qt5]
 font = "Atkinson Hyperlegible Next Medium"

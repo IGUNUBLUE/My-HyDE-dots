@@ -25,10 +25,6 @@ if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
 fi
 
-if [[ "$TERM_PROGRAM" == "kiro" ]] && command -v kiro >/dev/null; then
-    . "$(kiro --locate-shell-integration-path zsh)"
-fi
-
 if [[ ${HYDE_ZSH_NO_PLUGINS} != "1" ]]; then
     #  OMZ Plugins 
     # manually add your oh-my-zsh plugins here

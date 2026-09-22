@@ -2,8 +2,8 @@ $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 # LAGC Calm Dark: warm low-glare theme. Palette: charcoal #2B2522, parchment
 # #E9DFCE, sage #A9C080, amber #D4A55C, terracotta #D67A6E (attention only).
 
-$GTK_THEME=Gruvbox-Retro
-$ICON_THEME=Tela-circle-yellow
+$GTK_THEME=Wallbash-Gtk
+$ICON_THEME=Tela-circle-green
 $CURSOR_THEME=Future-cursors
 $CURSOR_SIZE=46
 $COLOR_SCHEME=prefer-dark
