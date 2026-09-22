@@ -498,9 +498,9 @@ step_apply() {
         systemctl --user start xsettingsd.service 2>/dev/null || true
 
         # config.toml references Atkinson Hyperlegible Next static weights
-        # (Medium UI, SemiBold Waybar). They are not in the official repos, so
-        # install them user-locally; offline failure is non-fatal (fontconfig
-        # falls back to the packaged classic family or the default sans).
+        # (SemiBold for Waybar). They are not in the official repos, so install
+        # them user-locally; offline failure is non-fatal (fontconfig falls
+        # back to the packaged classic family or the default sans).
         local atkinson_dir="$HOME/.local/share/fonts/atkinson" weight
         local atkinson_base="https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/main/fonts/ttf"
         mkdir -p "$atkinson_dir"
@@ -515,6 +515,14 @@ step_apply() {
         systemctl --user restart swaync.service 2>/dev/null || true
         systemctl --user daemon-reload 2>/dev/null || true
         systemctl --user enable --now gtk3-cursor-fix.path 2>/dev/null || true
+
+        # GTK4/libadwaita read the interface font from gsettings (theme.switch
+        # only writes gtk-3.0 settings.ini). Take family/size from config.toml's
+        # [desktop.ui] so a fresh install matches the declared UI font.
+        local ui_font ui_font_size
+        ui_font=$(awk -F'"' '/^\[desktop\.ui\]/{s=1} s && /^font = /{print $2; exit}' "$HOME/.config/hyde/config.toml" 2>/dev/null)
+        ui_font_size=$(awk -F'=[[:space:]]*' '/^\[desktop\.ui\]/{s=1} s && /^font_size = /{print $2; exit}' "$HOME/.config/hyde/config.toml" 2>/dev/null)
+        [[ -n $ui_font ]] && gsettings set org.gnome.desktop.interface font-name "$ui_font ${ui_font_size:-11}"
     fi
 
     if has_module themes; then
