@@ -52,7 +52,7 @@
   background: @sw-noti-bg-hover;
   border: 1px solid @sw-noti-window-br;
   min-height: 34px;
-  padding: 6px 16px;
+  padding: 10px 16px 6px 16px;
 }
 
 .control-center .widget-title > button:hover,
