@@ -47,3 +47,8 @@ Revert by deleting the two theme directories, restoring `config.toml` font keys 
 - gum is bootstrapped via pacman on first interactive run and listed in `packages.arch`. Non-interactive (`--yes`, `--dry-run`, pipe, missing gum/TTY) keeps the old plain output — same behavior, CI-safe (the Omarchy no-TTY bug class is avoided by the `[[ -t 0 ]]` gate).
 - Steps were refactored into `step_{packages,cursor,config,themes,apply}` run through `gum spin -- bash -ec`; functions are `export -f`'d and module membership travels as `MODULES_CSV` (arrays cannot be exported). `--only a,b` selects modules non-interactively.
 - `packages.arch` audit: dropped `fluent-icon-theme-git` (themes no longer reference Fluent) and `tela-circle-icon-theme-yellow`; added `tela-circle-icon-theme-{green,blue}` (the variants themes actually use, official `extra` repo) and `gum`.
+
+## Follow-up: Inter replaces Atkinson for general UI
+
+- After living with Atkinson Hyperlegible Next as the global UI face, its wide metrics and flat-top terminals (the capital "C" reads clipped) bothered the user. `Inter Medium` now backs `[desktop.ui]`, `document_font`, `[gtk3]`, `[qt5]` and `[qt6]` in `config.toml.in`; Atkinson Next SemiBold remains only on `[waybar]`, where the user prefers its look. `CaskaydiaCove Nerd Font Mono` stays monospace. `inter-font` (official repo) is in `packages.arch`; the Atkinson Next vendor download remains for the bar.
+- `install.sh` apply step also sets `org.gnome.desktop.interface font-name` from `config.toml`'s `[desktop.ui]` so GTK4/libadwaita match a fresh install (theme.switch only writes gtk-3.0 `settings.ini`).
