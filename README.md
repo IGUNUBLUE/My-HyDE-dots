@@ -133,7 +133,7 @@ Reference: [HyDE main configuration](https://hydeproject.pages.dev/en/configurin
 
 ## VSCodium themes
 
-The overlay also includes a VS Code-compatible extension containing selectable `LAGC Calm Dark` and `LAGC Calm Light` themes, matching the LAGC Calm desktop family (charcoal-brown base, parchment text, sage accent). It does not copy files into VSCodium's extension directory. Instead, the installer builds a temporary VSIX from `dotfiles/.local/share/vscodium/themes/lagc-calm/` and passes it to VSCodium's supported CLI:
+The overlay also includes a VS Code-compatible extension containing four selectable themes — `LAGC Calm Dark`/`Light` (charcoal-brown, parchment, sage) and `LAGC Tech Dark`/`Light` (deep navy, softened cyan/blue accents with reduced glare). It does not copy files into VSCodium's extension directory. Instead, the installer builds a temporary VSIX from `dotfiles/.local/share/vscodium/themes/lagc-themes/` and passes it to VSCodium's supported CLI:
 
 ```bash
 ./install.sh --vscodium-theme-only

@@ -2,17 +2,17 @@ $HOME/.config/waybar/theme.css|${scrDir}/wbarconfgen.sh
 /* LAGC Tech Dark: documented HyDE Waybar color contract. */
 @define-color bar-bg rgba(6, 27, 43, 1.0);
 
-@define-color main-bg #061B2B;
-@define-color main-fg #EAF7FA;
+@define-color main-bg #0C1C28;
+@define-color main-fg #DDEEF2;
 
-@define-color wb-act-bg #1B5CFF;
-@define-color wb-act-fg #FFFFFF;
+@define-color wb-act-bg #3B6ADF;
+@define-color wb-act-fg #E2E2E2;
 
-@define-color wb-hvr-bg #17D7E8;
-@define-color wb-hvr-fg #061B2B;
+@define-color wb-hvr-bg #34BFCB;
+@define-color wb-hvr-fg #0C1C28;
 
 /* Semantic state colors; every value meets WCAG AA >=4.5:1 on main-bg. */
-@define-color wb-ok-fg #17D7E8;
-@define-color wb-info-fg #6B8CFF;
-@define-color wb-warn-fg #FF7A3D;
-@define-color wb-crit-fg #F97066;
+@define-color wb-ok-fg #34BFCB;
+@define-color wb-info-fg #8097EA;
+@define-color wb-warn-fg #E48458;
+@define-color wb-crit-fg #E4827B;
