@@ -11,7 +11,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 ## Included
 
 - Hyprland monitor layout, Spanish keyboard layouts, and a fully solid visual layer: opaque windows and surfaces, 8 px squircle corners, palette-driven shadows, a looping border gradient, and WCAG AA state colors defined per theme.
-- Readable Atkinson Hyperlegible font settings for GTK, Qt, notifications and Waybar, with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`).
+- Readable Atkinson Hyperlegible Next font settings (Medium for UI/GTK/Qt/documents, SemiBold for Waybar) with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`). The installer fetches the static Next weights from the upstream `googlefonts` repo; the packaged classic `ttf-atkinson-hyperlegible` stays as the offline fallback family.
 - User-owned fontconfig baseline at `~/.config/fontconfig/fonts.conf`, installed and snapshotted by this overlay.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
