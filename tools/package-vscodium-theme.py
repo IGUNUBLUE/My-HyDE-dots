@@ -12,11 +12,13 @@ import zipfile
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-EXTENSION_ROOT = REPOSITORY_ROOT / "dotfiles/.local/share/vscodium/themes/lagc-calm"
-PACKAGE_NAME = "igunublue.lagc-calm-themes-0.1.0.vsix"
+EXTENSION_ROOT = REPOSITORY_ROOT / "dotfiles/.local/share/vscodium/themes/lagc-themes"
+PACKAGE_NAME = "igunublue.lagc-themes-0.1.0.vsix"
 THEMES = {
     "LAGC Calm Dark": ("dark", "themes/lagc-calm-dark-color-theme.json"),
     "LAGC Calm Light": ("light", "themes/lagc-calm-light-color-theme.json"),
+    "LAGC Tech Dark": ("dark", "themes/lagc-tech-dark-color-theme.json"),
+    "LAGC Tech Light": ("light", "themes/lagc-tech-light-color-theme.json"),
 }
 HEX_COLOR = re.compile(r"#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$")
 
@@ -85,8 +87,8 @@ def validate_extension(source: Path) -> tuple[dict, list[Path]]:
     readme_path = source / "README.md"
     package = load_json(package_path)
     expected_package = {
-        "name": "lagc-calm-themes",
-        "displayName": "LAGC Calm Themes",
+        "name": "lagc-themes",
+        "displayName": "LAGC Themes",
         "publisher": "igunublue",
         "version": "0.1.0",
     }
@@ -98,7 +100,7 @@ def validate_extension(source: Path) -> tuple[dict, list[Path]]:
 
     contributed = package.get("contributes", {}).get("themes")
     if not isinstance(contributed, list) or len(contributed) != len(THEMES):
-        raise ValueError("The extension must contribute exactly the two LAGC Calm themes")
+        raise ValueError("The extension must contribute exactly the four LAGC themes")
 
     theme_paths: list[Path] = []
     seen_labels: set[str] = set()

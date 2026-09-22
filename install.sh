@@ -51,13 +51,13 @@ install_vscodium_theme() {
     fi
 
     if $dry_run; then
-        run python "$repo_dir/tools/package-vscodium-theme.py" --output "/tmp/igunublue.lagc-calm-themes-0.1.0.vsix"
-        run codium --install-extension "/tmp/igunublue.lagc-calm-themes-0.1.0.vsix" --force
+        run python "$repo_dir/tools/package-vscodium-theme.py" --output "/tmp/igunublue.lagc-themes-0.1.0.vsix"
+        run codium --install-extension "/tmp/igunublue.lagc-themes-0.1.0.vsix" --force
         return 0
     fi
 
     temporary_dir=$(mktemp -d)
-    package="$temporary_dir/igunublue.lagc-calm-themes-0.1.0.vsix"
+    package="$temporary_dir/igunublue.lagc-themes-0.1.0.vsix"
     if ! python "$repo_dir/tools/package-vscodium-theme.py" --output "$package"; then
         rm -rf -- "$temporary_dir"
         return 1

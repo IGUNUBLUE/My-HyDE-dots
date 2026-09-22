@@ -1,6 +1,6 @@
 $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 # LAGC Tech Dark: native HyDE theme configuration.
-# Palette: midnight #061B2B, cyan #17D7E8, cobalt #1B5CFF, ember #FF7A3D.
+# Palette: midnight #0C1C28, cyan #34BFCB, cobalt #3B6ADF, ember #E48458.
 
 $GTK_THEME=Wallbash-Gtk
 $ICON_THEME=Tela-circle-blue
@@ -12,17 +12,17 @@ general {
     gaps_in = 2
     gaps_out = 4
     border_size = 2
-    col.active_border = rgba(17d7e8ff) rgba(4880ffff) 45deg
-    col.inactive_border = rgba(58718280)
+    col.active_border = rgba(34bfcbff) rgba(628ae5ff) 45deg
+    col.inactive_border = rgba(5E707C80)
     layout = dwindle
     resize_on_border = true
 }
 
 group {
-    col.border_active = rgba(17d7e8ff) rgba(4880ffff) 45deg
-    col.border_inactive = rgba(58718280)
-    col.border_locked_active = rgba(ff7a3dff) rgba(17d7e8ff) 45deg
-    col.border_locked_inactive = rgba(58718280)
+    col.border_active = rgba(34bfcbff) rgba(628ae5ff) 45deg
+    col.border_inactive = rgba(5E707C80)
+    col.border_locked_active = rgba(e48458ff) rgba(34bfcbff) 45deg
+    col.border_locked_inactive = rgba(5E707C80)
 }
 
 decoration {

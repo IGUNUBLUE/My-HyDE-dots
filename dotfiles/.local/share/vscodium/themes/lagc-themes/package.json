@@ -1,6 +1,6 @@
 {
-  "name": "lagc-calm-themes",
-  "displayName": "LAGC Calm Themes",
+  "name": "lagc-themes",
+  "displayName": "LAGC Themes",
   "description": "LAGC Calm Dark and Light color themes for VSCodium. Warm low-glare palette: charcoal-brown base, parchment text, sage accent.",
   "version": "0.1.0",
   "publisher": "igunublue",
@@ -28,6 +28,16 @@
         "label": "LAGC Calm Light",
         "uiTheme": "vs",
         "path": "./themes/lagc-calm-light-color-theme.json"
+      },
+      {
+        "label": "LAGC Tech Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/lagc-tech-dark-color-theme.json"
+      },
+      {
+        "label": "LAGC Tech Light",
+        "uiTheme": "vs",
+        "path": "./themes/lagc-tech-light-color-theme.json"
       }
     ]
   }

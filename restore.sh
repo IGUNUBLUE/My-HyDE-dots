@@ -6,6 +6,7 @@ if [[ ${1:-} == "--vscodium-theme-only" ]]; then
         printf 'VSCodium CLI not found; cannot remove the LAGC Calm VSCodium themes.\n' >&2
         exit 1
     }
+    codium --uninstall-extension igunublue.lagc-themes
     codium --uninstall-extension igunublue.lagc-calm-themes
     printf 'LAGC Calm VSCodium themes removed.\n'
     exit 0
