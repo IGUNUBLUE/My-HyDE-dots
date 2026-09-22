@@ -239,9 +239,20 @@ generate_theme_wallpaper() {
 
 generate_calm_wallpaper() {
     local theme_name=$1 variant=$2
-    local wallpaper_dir target
+    local wallpaper_dir target url
     wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
-    target="$wallpaper_dir/lagc-calm-$variant.png"
+    target="$wallpaper_dir/lagc-calm-$variant.jpg"
+
+    case "$variant" in
+        # Warm low-glare photos matching each palette; fall back to a
+        # deterministic gradient when offline so installs never fail.
+        dark)  url="https://w.wallhaven.cc/full/7j/wallhaven-7jwx8v.jpg" ;;
+        light) url="https://w.wallhaven.cc/full/ly/wallhaven-ly8xwr.jpg" ;;
+        *)
+            printf 'Unknown LAGC Calm wallpaper variant: %s\n' "$variant" >&2
+            return 1
+            ;;
+    esac
 
     if [[ ! -d "$wallpaper_dir" ]]; then
         backup_target "$wallpaper_dir"
@@ -249,24 +260,21 @@ generate_calm_wallpaper() {
     fi
     backup_target "$target"
 
-    case "$variant" in
-        dark)
-            run magick -size 1920x1080 gradient:'#332C26'-'#211D1B' \
-                \( -size 1920x1080 xc:black -fill '#A9C080' \
-                -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.10 \) \
-                -compose screen -composite "$target"
-            ;;
-        light)
-            run magick -size 1920x1080 gradient:'#F4EEE2'-'#E2D7C4' \
-                \( -size 1920x1080 xc:black -fill '#DDE7C8' \
-                -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.45 \) \
-                -compose screen -composite "$target"
-            ;;
-        *)
-            printf 'Unknown LAGC Calm wallpaper variant: %s\n' "$variant" >&2
-            return 1
-            ;;
-    esac
+    if ! $dry_run && curl -fsSL --max-time 30 -o "$target" "$url" && [[ -s "$target" ]]; then
+        run magick "$target" -resize '3840x2160>' -strip -quality 92 "$target"
+    elif [[ "$variant" == dark ]]; then
+        run magick -size 1920x1080 gradient:'#332C26'-'#211D1B' \
+            \( -size 1920x1080 xc:black -fill '#A9C080' \
+            -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.10 \) \
+            -compose screen -composite "${target%.jpg}.png"
+        target="${target%.jpg}.png"
+    else
+        run magick -size 1920x1080 gradient:'#F4EEE2'-'#E2D7C4' \
+            \( -size 1920x1080 xc:black -fill '#DDE7C8' \
+            -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.45 \) \
+            -compose screen -composite "${target%.jpg}.png"
+        target="${target%.jpg}.png"
+    fi
 
     link_theme_wallpaper "$theme_name" "$target"
     run hyde-shell wallpaper --cache wall "$target"
