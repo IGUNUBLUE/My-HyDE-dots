@@ -52,3 +52,7 @@ Revert by deleting the two theme directories, restoring `config.toml` font keys 
 
 - After living with Atkinson Hyperlegible Next as the global UI face, its wide metrics and flat-top terminals (the capital "C" reads clipped) bothered the user. `Inter Medium` now backs `[desktop.ui]`, `document_font`, `[gtk3]`, `[qt5]` and `[qt6]` in `config.toml.in`; Atkinson Next SemiBold remains only on `[waybar]`, where the user prefers its look. `CaskaydiaCove Nerd Font Mono` stays monospace. `inter-font` (official repo) is in `packages.arch`; the Atkinson Next vendor download remains for the bar.
 - `install.sh` apply step also sets `org.gnome.desktop.interface font-name` from `config.toml`'s `[desktop.ui]` so GTK4/libadwaita match a fresh install (theme.switch only writes gtk-3.0 `settings.ini`).
+
+## Follow-up: dunst wallbash template shadowed
+
+- HyDE's stock `~/.local/share/wallbash/always/dunst.dcol` runs `scripts/dunst.sh`, which unconditionally ends with `killall dunst; dunst &`. With dunst uninstalled (swaync is the daemon), every login theme apply spawned a GLib "Executable not found: 'dunst'" notification. Wallbash dedupes same-named templates with `~/.config/hyde/wallbash` ahead of `~/.local/share/wallbash` in `WALLBASH_DIRS`, so the overlay shadows both: `always/dunst.dcol` (same template, resolves `WALLBASH_SCRIPTS` to the user dir) and `scripts/dunst.sh` (upstream minus the launch; dunstrc still regenerates, dunst only starts if installed AND swaync absent). Verified: `theme.switch` runs clean, no spawn.

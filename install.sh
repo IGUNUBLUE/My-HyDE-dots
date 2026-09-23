@@ -442,7 +442,9 @@ step_config() {
     install_dot "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel" "$HOME/.local/bin/hyde-brightness-panel" 0755
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-frosted.dcol" "$HOME/.config/hyde/wallbash/always/rofi-frosted.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/btop.dcol" "$HOME/.config/hyde/wallbash/always/btop.dcol"
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/dunst.dcol" "$HOME/.config/hyde/wallbash/always/dunst.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-btop.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-btop.sh" 0755
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/dunst.sh" "$HOME/.config/hyde/wallbash/scripts/dunst.sh" 0755
     install_dot "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection" "$HOME/.local/bin/my-hyde-rofi-selection" 0755
     install_dot "$repo_dir/dotfiles/.local/bin/gtk3-cursor-fix" "$HOME/.local/bin/gtk3-cursor-fix" 0755
     install_dot "$repo_dir/dotfiles/.config/systemd/user/gtk3-cursor-fix.path" "$HOME/.config/systemd/user/gtk3-cursor-fix.path"
