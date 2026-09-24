@@ -512,6 +512,10 @@ step_apply() {
                 || printf 'Atkinson Next %s download failed; fontconfig will fall back.\n' "$weight" >&2
         done
         fc-cache -f "$atkinson_dir" >/dev/null 2>&1 || true
+        # swaync.service is the notification daemon; hyprland.lua blanks
+        # hyde.config.start.notifications, so guarantee the wants link keeps a
+        # daemon in the session on fresh installs.
+        systemctl --user add-wants graphical-session.target swaync.service
         # Processes keep a stale fontconfig map until restarted; without this a
         # running swaync renders notification text as tofu after font install.
         systemctl --user restart swaync.service 2>/dev/null || true

@@ -58,6 +58,10 @@ hl.monitor({
 	scale = 1,
 })
 
+-- HyDE's default notification launcher targets dunst, which is not installed;
+-- swaync.service owns the daemon. Blank it so start_up.lua skips the spawn.
+hyde.config.start.notifications = ""
+
 -- Solid-first spacing and depth: keep windows opaque and every user-owned
 -- surface fully solid; only Kitty retains a small transparency. Blur is
 -- intentionally disabled because the diffuse backdrop is uncomfortable to use.
