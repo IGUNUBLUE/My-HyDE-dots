@@ -247,6 +247,105 @@ grep -Fqx '$HOME/.config/btop/themes/hyde-wallbash.theme|"$WALLBASH_SCRIPTS/my-h
 grep -Fqx 'theme[title]="#<wallbash_4xa8>"' "$btop_template"
 bash -n "$btop_script"
 
+# Agent CLI themes: the .dcol payloads are only valid JSON/XML once wallbash
+# and the selector scripts replace every placeholder. Simulate that render
+# (wallbash palette + kitty ANSI + blends) and parse the results for real.
+python - "$repo_dir/dotfiles/.config/hyde/wallbash/always/opencode.dcol" \
+         "$repo_dir/dotfiles/.config/hyde/wallbash/always/codex.dcol" <<'PY'
+import json
+import pathlib
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+opencode_template = pathlib.Path(sys.argv[1])
+codex_template = pathlib.Path(sys.argv[2])
+PLACEHOLDER = re.compile(r"<wallbash_[0-9A-Za-z_]+>|@ANSI[0-9]+@|@MIX_[0-9]+@")
+
+
+def render(path):
+    lines = path.read_text().splitlines()
+    return PLACEHOLDER.sub("A9C080", "\n".join(lines[1:])).replace("\\$", "$")
+
+
+def fail(message):
+    print(f"Wallbash agent template invalid: {message}", file=sys.stderr)
+    sys.exit(1)
+
+
+expected_headers = {
+    opencode_template: '${XDG_CONFIG_HOME:-$HOME/.config}/opencode/themes/hyde-wallbash.json|"$WALLBASH_SCRIPTS/my-hyde-opencode-theme.sh"',
+    codex_template: '${CODEX_HOME:-$HOME/.codex}/themes/hyde-wallbash.tmTheme|"$WALLBASH_SCRIPTS/my-hyde-codex-theme.sh"',
+}
+for path, header in expected_headers.items():
+    first = path.read_text().splitlines()[0]
+    if first != header:
+        fail(f"unexpected .dcol header in {path.name}: {first}")
+
+try:
+    theme = json.loads(render(opencode_template))["theme"]
+except Exception as exc:
+    fail(f"opencode theme JSON does not parse after render: {exc}")
+
+required = {
+    "primary", "secondary", "accent", "error", "warning", "success", "info",
+    "text", "textMuted", "background", "backgroundPanel", "backgroundElement",
+    "border", "borderActive", "borderSubtle", "diffAdded", "diffRemoved",
+    "diffContext", "diffHunkHeader", "diffHighlightAdded", "diffHighlightRemoved",
+    "diffAddedBg", "diffRemovedBg", "diffContextBg", "diffLineNumber",
+    "diffAddedLineNumberBg", "diffRemovedLineNumberBg", "markdownText",
+    "markdownHeading", "markdownLink", "markdownLinkText", "markdownCode",
+    "markdownBlockQuote", "markdownEmph", "markdownStrong",
+    "markdownHorizontalRule", "markdownListItem", "markdownListEnumeration",
+    "markdownImage", "markdownImageText", "markdownCodeBlock", "syntaxComment",
+    "syntaxKeyword", "syntaxFunction", "syntaxVariable", "syntaxString",
+    "syntaxNumber", "syntaxType", "syntaxOperator", "syntaxPunctuation",
+}
+missing = sorted(required - set(theme))
+if missing:
+    fail(f"opencode theme is missing semantic keys: {missing}")
+
+try:
+    ET.fromstring(render(codex_template))
+except Exception as exc:
+    fail(f"codex tmTheme XML does not parse after render: {exc}")
+
+codex_body = codex_template.read_text()
+for scope in ("markup.inserted", "markup.deleted", "comment", "keyword",
+              "string", "entity.name.function", "variable", "markup.heading",
+              "invalid"):
+    if scope not in codex_body:
+        fail(f"codex tmTheme is missing scope coverage: {scope}")
+for marker in ("@MIX_1@", "@MIX_2@"):
+    if marker not in codex_body:
+        fail(f"codex tmTheme is missing diff background marker: {marker}")
+PY
+
+opencode_selector="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-opencode-theme.sh"
+codex_selector="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-codex-theme.sh"
+for selector in "$opencode_selector" "$codex_selector"; do
+    [[ -x $selector ]] || {
+        printf 'Agent theme selector is missing or not executable: %s\n' "$selector" >&2
+        exit 1
+    }
+    bash -n "$selector"
+done
+grep -Fq 'section["name"] = theme' "$opencode_selector"
+grep -Fq 'kill -USR2' "$opencode_selector"
+grep -Fq 'SigCgt' "$opencode_selector"
+grep -Fq 'theme = "' "$codex_selector"
+grep -Fq 'ansi_color' "$codex_selector"
+
+gtk_mode_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/gtk-dark-mode.dcol"
+gtk_mode_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-gtk-dark-mode.sh"
+[[ -s "$gtk_mode_template" && -x "$gtk_mode_script" ]] || {
+    printf 'GTK dark-mode hook is missing or not executable.\n' >&2
+    exit 1
+}
+grep -Fqx '$HOME/.config/gtk-3.0/.wallbash-dark-mode|"$WALLBASH_SCRIPTS/my-hyde-gtk-dark-mode.sh"' "$gtk_mode_template"
+bash -n "$gtk_mode_script"
+grep -Fq 'gtk-application-prefer-dark-theme' "$gtk_mode_script"
+
 python "$repo_dir/tests/qt-menu.py"
 
 while IFS= read -r memory_link; do
