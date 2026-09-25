@@ -3,20 +3,27 @@
 /* HyDE's generated theme.css and swaync's stock stylesheet both assume dark
  * surfaces: text-color is hardcoded #FFFFFF and --text-color is white.
  * Re-map them onto the active theme's own notification text color so light
- * themes keep readable notification popups and control-center text. */
+ * themes keep readable notification popups and control-center text.
+ *
+ * Only sw-* named colors from theme.css are referenced below — never the
+ * wallbash_* tokens imported from ~/.cache/hyde/wallbash/gtk.css. That file is
+ * regenerated in wallbash's always/ phase, which runs AFTER theme/swaync.dcol
+ * reloads swaync, so the daemon would resolve wallbash_* names against the
+ * previous palette for one full switch (cream cards + invisible text on
+ * Calm mode flips). sw-* values are baked into theme.css on every render. */
 @define-color text-color @sw-noti-window-txt;
-@define-color text-color-disabled @wallbash_1xa4;
-@define-color noti-bg-opaque @wallbash_1xa1;
-@define-color noti-bg-hover-opaque @wallbash_1xa2;
+@define-color text-color-disabled @sw-msg-sum-fg;
+@define-color noti-bg-opaque @sw-noti-bg-hover;
+@define-color noti-bg-hover-opaque @sw-msg-sum-fg;
 
 :root {
   --text-color: @sw-noti-window-txt;
-  --text-color-disabled: @wallbash_1xa4;
+  --text-color-disabled: @sw-msg-sum-fg;
   --noti-close-bg: @sw-noti-bg-hover;
-  --noti-close-bg-hover: @wallbash_1xa2;
+  --noti-close-bg-hover: @sw-msg-sum-fg;
   --noti-bg-focus: @sw-noti-bg-hover;
   --noti-bg-hover: @sw-noti-bg-hover;
-  --noti-bg-darker: @wallbash_1xa2;
+  --noti-bg-darker: @sw-noti-bg-hover;
 }
 
 /* --noti-bg stays the stock dark gray (48,48,48) and cannot take a theme
@@ -34,7 +41,7 @@
  * text unreadable on the light theme. Use the same subtle surface tint as the
  * other hover states instead. */
 .notification-group.collapsed:hover .notification-row:not(:only-child) .notification {
-  background-color: @wallbash_1xa2;
+  background-color: @sw-msg-sum-fg;
 }
 
 /* Solid-first profile: the generated theme.css sets opacity 0.9 on the
@@ -55,15 +62,16 @@
 
 .control-center .widget-title > button:hover,
 .control-center .widget-buttons-grid flowboxchild > button:hover {
-  background: @wallbash_1xa2;
+  background: @sw-msg-sum-fg;
 }
 
 /* Match the wlogout outline: upstream borders notification cards and the
  * control center in the cobalt accent; use the palette's divider tone
- * (Ice line) at the same 2px weight for a quieter, consistent edge. */
+ * (primary color 3, the same value the old wallbash_1xa3 held) at the same
+ * 2px weight for a quieter, consistent edge. */
 .control-center,
 .notification-row .notification-background .notification {
-  border: 2px solid @wallbash_1xa3;
+  border: 2px solid @sw-msg-sum-fg;
 }
 
 /* Media player cards keep a dark album-art overlay; keep their text light. */

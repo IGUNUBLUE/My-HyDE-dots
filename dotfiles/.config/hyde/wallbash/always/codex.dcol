@@ -1,0 +1,364 @@
+${CODEX_HOME:-$HOME/.codex}/themes/hyde-wallbash.tmTheme|"$WALLBASH_SCRIPTS/my-hyde-codex-theme.sh"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>HyDE Wallbash</string>
+	<key>settings</key>
+	<array>
+		<dict>
+			<key>settings</key>
+			<dict>
+				<key>background</key>
+				<string>#<wallbash_pry1></string>
+				<key>foreground</key>
+				<string>#<wallbash_txt1></string>
+				<key>caret</key>
+				<string>#<wallbash_pry4></string>
+				<key>lineHighlight</key>
+				<string>#<wallbash_pry2></string>
+				<key>selection</key>
+				<string>#<wallbash_1xa3></string>
+				<key>selectionForeground</key>
+				<string>#<wallbash_txt1></string>
+				<key>invisibles</key>
+				<string>#<wallbash_1xa4></string>
+				<key>guide</key>
+				<string>#<wallbash_1xa3></string>
+				<key>activeGuide</key>
+				<string>#<wallbash_1xa5></string>
+				<key>stackGuide</key>
+				<string>#<wallbash_1xa3></string>
+				<key>gutter</key>
+				<string>#<wallbash_pry1></string>
+				<key>gutterForeground</key>
+				<string>#<wallbash_1xa5></string>
+				<key>findHighlight</key>
+				<string>#<wallbash_2xa5></string>
+				<key>findHighlightForeground</key>
+				<string>#<wallbash_txt4></string>
+				<key>highlight</key>
+				<string>#<wallbash_pry2></string>
+				<key>bracketsForeground</key>
+				<string>#<wallbash_1xa6></string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Comment</string>
+			<key>scope</key>
+			<string>comment</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#08000000</string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Documentation comment</string>
+			<key>scope</key>
+			<string>comment.documentation, comment.block.documentation</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#<wallbash_1xa6></string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>String</string>
+			<key>scope</key>
+			<string>string</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#02000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>String escape and regex</string>
+			<key>scope</key>
+			<string>constant.character.escape, string.regexp, string punctuation.definition.string</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0A000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Number and constant</string>
+			<key>scope</key>
+			<string>constant.numeric, constant.language, constant.character, constant.other, support.constant</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#03000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Keyword</string>
+			<key>scope</key>
+			<string>keyword, storage, storage.type, storage.modifier</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0C000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Operator</string>
+			<key>scope</key>
+			<string>keyword.operator</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0D000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Function</string>
+			<key>scope</key>
+			<string>entity.name.function, support.function, meta.function-call, variable.function</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0A000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Type</string>
+			<key>scope</key>
+			<string>entity.name.type, entity.name.class, entity.name.struct, entity.name.enum, support.type, entity.name.namespace, entity.name.module</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#04000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Tag</string>
+			<key>scope</key>
+			<string>entity.name.tag</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0C000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Attribute</string>
+			<key>scope</key>
+			<string>entity.other.attribute-name, variable.annotation, meta.annotation</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#05000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Variable</string>
+			<key>scope</key>
+			<string>variable</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#<wallbash_txt1></string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Language variable</string>
+			<key>scope</key>
+			<string>variable.language, variable.parameter</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0D000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Punctuation</string>
+			<key>scope</key>
+			<string>punctuation, meta.brace</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#<wallbash_1xa7></string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Invalid</string>
+			<key>scope</key>
+			<string>invalid, invalid.illegal</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#09000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Deprecated</string>
+			<key>scope</key>
+			<string>invalid.deprecated</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#09000000</string>
+				<key>fontStyle</key>
+				<string>strikethrough</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Diff inserted</string>
+			<key>scope</key>
+			<string>markup.inserted, diff.inserted</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0A000000</string>
+				<key>background</key>
+				<string>#@MIX_2@</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Diff deleted</string>
+			<key>scope</key>
+			<string>markup.deleted, diff.deleted</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#09000000</string>
+				<key>background</key>
+				<string>#@MIX_1@</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Diff changed and header</string>
+			<key>scope</key>
+			<string>markup.changed, meta.diff.header, meta.diff.range, meta.diff.index</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0B000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup heading</string>
+			<key>scope</key>
+			<string>markup.heading, entity.name.section</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0C000000</string>
+				<key>fontStyle</key>
+				<string>bold</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup bold</string>
+			<key>scope</key>
+			<string>markup.bold</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string>bold</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup italic</string>
+			<key>scope</key>
+			<string>markup.italic</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup link and underline</string>
+			<key>scope</key>
+			<string>markup.underline, markup.underline.link, string.other.link</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0C000000</string>
+				<key>fontStyle</key>
+				<string>underline</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup quote</string>
+			<key>scope</key>
+			<string>markup.quote</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#<wallbash_1xa6></string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup raw</string>
+			<key>scope</key>
+			<string>markup.raw, markup.raw.block, markup.raw.inline</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0E000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup list</string>
+			<key>scope</key>
+			<string>markup.list, markup.list.numbered, markup.list.unnumbered</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#0B000000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Separator</string>
+			<key>scope</key>
+			<string>meta.separator</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#<wallbash_1xa4></string>
+			</dict>
+		</dict>
+	</array>
+	<key>uuid</key>
+	<string>5A73E3E2-6B1F-4C8A-9D3E-7C2F1A0B4E59</string>
+</dict>
+</plist>

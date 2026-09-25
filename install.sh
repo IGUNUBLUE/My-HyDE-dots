@@ -443,8 +443,17 @@ step_config() {
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/rofi-frosted.dcol" "$HOME/.config/hyde/wallbash/always/rofi-frosted.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/btop.dcol" "$HOME/.config/hyde/wallbash/always/btop.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/dunst.dcol" "$HOME/.config/hyde/wallbash/always/dunst.dcol"
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/opencode.dcol" "$HOME/.config/hyde/wallbash/always/opencode.dcol"
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/codex.dcol" "$HOME/.config/hyde/wallbash/always/codex.dcol"
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/gtk-dark-mode.dcol" "$HOME/.config/hyde/wallbash/always/gtk-dark-mode.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-btop.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-btop.sh" 0755
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/dunst.sh" "$HOME/.config/hyde/wallbash/scripts/dunst.sh" 0755
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-opencode-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-opencode-theme.sh" 0755
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-codex-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-codex-theme.sh" 0755
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-gtk-dark-mode.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-gtk-dark-mode.sh" 0755
+    # Wallbash skips a template whose target directory does not exist; creating
+    # these is a no-op when the agent CLI is not installed.
+    run mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/opencode/themes" "${CODEX_HOME:-$HOME/.codex}/themes" "${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0"
     install_dot "$repo_dir/dotfiles/.local/bin/my-hyde-rofi-selection" "$HOME/.local/bin/my-hyde-rofi-selection" 0755
     install_dot "$repo_dir/dotfiles/.local/bin/gtk3-cursor-fix" "$HOME/.local/bin/gtk3-cursor-fix" 0755
     install_dot "$repo_dir/dotfiles/.config/systemd/user/gtk3-cursor-fix.path" "$HOME/.config/systemd/user/gtk3-cursor-fix.path"
@@ -529,6 +538,15 @@ step_apply() {
         ui_font=$(awk -F'"' '/^\[desktop\.ui\]/{s=1} s && /^font = /{print $2; exit}' "$HOME/.config/hyde/config.toml" 2>/dev/null)
         ui_font_size=$(awk -F'=[[:space:]]*' '/^\[desktop\.ui\]/{s=1} s && /^font_size = /{print $2; exit}' "$HOME/.config/hyde/config.toml" 2>/dev/null)
         [[ -n $ui_font ]] && gsettings set org.gnome.desktop.interface font-name "$ui_font ${ui_font_size:-11}"
+
+        # Render the agent CLI themes once on install so the generated files
+        # exist before the first manual theme switch; every later switch
+        # regenerates them through the wallbash always/ pipeline.
+        local wallbash_apply="$HOME/.local/lib/hyde/color.set.sh"
+        if [[ -x $wallbash_apply && -f ${XDG_CACHE_HOME:-$HOME/.cache}/hyde/wall.set ]]; then
+            "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/opencode.dcol" >/dev/null 2>&1 || true
+            "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/codex.dcol" >/dev/null 2>&1 || true
+        fi
     fi
 
     if has_module themes; then
