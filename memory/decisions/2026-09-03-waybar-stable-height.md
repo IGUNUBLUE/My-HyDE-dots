@@ -19,13 +19,13 @@ The historical custom layout requested 22 pixels, but GTK widget minimums could 
 
 ## Decision
 
-Use `height: 22` in `dotfiles/.config/waybar/layouts/my-hyde.jsonc` together with the scoped `#pill` `min-height: 0` rule in `user-style.css`. Keep vertical margins symmetric and do not use negative margins or content offsets. Manual pointer crossing on every active mixed-scale output is mandatory; restore 26 pixels if any geometry jump, clipping or unusable click target appears.
+Use `height: 24` in `dotfiles/.config/waybar/layouts/my-hyde.jsonc` together with the scoped `#pill` `min-height: 0` rule in `user-style.css` (raised from the historical 22 on 2026-09-25 for a slightly taller bar with a larger font). Waybar `scale`/`icon_size` live in `[waybar]` of `~/.config/hyde/config.toml` (tracked `config.toml.in`) and are now 13 px / 9 px: at 14 px font the modules require a 26-px minimum, so 13 px is the largest that still fits 24. Keep vertical margins symmetric and do not use negative margins or content offsets. Manual pointer crossing on every active mixed-scale output is mandatory; restore 26 pixels if any geometry jump, clipping or unusable click target appears.
 
 ## Validation
 
 - Install through `./install.sh --skip-packages` so the live files are backed up.
 - Reload Waybar through `hyde-shell waybar --set` using the `my-hyde` layout.
-- Confirm Hyprland reports a 22-pixel Waybar layer on every active output and the journal has no minimum-height warning.
+- Confirm Hyprland reports a 24-pixel Waybar layer on every active output and the journal has no minimum-height warning.
 - Cycle Material Sakura and LAGC Tech Light, then repeatedly cross the pointer between outputs while watching the bar and tiled-window edge.
 - Inspect workspace badges, icons, text and click targets for clipping before accepting the change.
 

@@ -9,7 +9,7 @@ custom_paths = [
 ]
 
 [waybar]
-scale = 12
+scale = 13
 icon_size = 9
 font = "Atkinson Hyperlegible Next SemiBold"
 
