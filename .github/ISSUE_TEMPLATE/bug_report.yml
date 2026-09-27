@@ -75,10 +75,10 @@ body:
     attributes:
       label: Displays and scale factors
       description: >
-        Monitor identifiers, scale factors and position, plus the DDC/CI model name if the
-        brightness popup is involved. Most display bugs here are mixed-scale interactions that
-        only reproduce on a specific pair of outputs.
-      placeholder: "eDP-1 scale 1.25; external display scale 1 at auto-right; DDC/CI: external display"
+        Connector names, scale factors and `ddcutil detect` output if the
+        brightness popup is involved. Most display bugs here are mixed-scale
+        interactions that only reproduce on a specific pair of outputs.
+      placeholder: "internal eDP-1 scale 1.25; external scale 1 auto-right; ddcutil detect: 1 non-eDP display"
     validations:
       required: true
 

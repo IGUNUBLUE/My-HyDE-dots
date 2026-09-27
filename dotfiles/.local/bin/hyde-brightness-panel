@@ -18,7 +18,6 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GtkLayerShell", "0.1")
 from gi.repository import Gdk, GLib, Gtk, GtkLayerShell
 
-EXTERNAL_MODEL = "external display"
 THEME_CSS = os.path.join(
     os.environ.get("XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config")),
     "waybar",
@@ -48,8 +47,32 @@ def internal_brightness() -> int:
     return int(match.group(1)) if match else 50
 
 
+def external_display() -> int | None:
+    """First DDC/CI display that is not an internal eDP panel.
+
+    `ddcutil detect` numbers valid displays and lists their DRM connector;
+    internal laptop panels appear as eDP-*, so the first non-eDP connector is
+    the external monitor. No model name or serial is required.
+    """
+    current = None
+    for line in run(*ddc_command("detect", "--brief")).splitlines():
+        if match := re.match(r"Display\s+(\d+)", line):
+            current = int(match.group(1))
+        elif re.match(r"Invalid display", line):
+            current = None
+        elif current is not None and "DRM connector" in line:
+            if "eDP" in line.rsplit(":", 1)[-1]:
+                current = None
+            else:
+                return current
+    return None
+
+
 def external_brightness() -> int | None:
-    output = run(*ddc_command("getvcp", "10", "--model", EXTERNAL_MODEL, "--brief"))
+    display = external_display()
+    if display is None:
+        return None
+    output = run(*ddc_command("getvcp", "10", "--display", str(display), "--brief"))
     match = re.search(r"VCP 10 C (\d+) (\d+)", output)
     if not match:
         return None
@@ -161,7 +184,7 @@ def status() -> None:
         json.dumps(
             {
                 "text": "󰃠",
-                "tooltip": f"Internal: {internal}%\nexternal display: {external_text}\n\nRight-click to adjust both",
+                "tooltip": f"Internal: {internal}%\nExternal: {external_text}\n\nRight-click to adjust both",
                 "class": "dual-brightness",
             }
         )
@@ -219,7 +242,7 @@ class BrightnessPopup(Gtk.Window):
         box.pack_start(title, False, False, 0)
 
         self.internal_scale, self.internal_label = self.add_control(
-            box, "Internal display (eDP-1)", internal_brightness()
+            box, "Internal display", internal_brightness()
         )
         self.internal_timeout: int | None = None
         self.internal_scale.connect("enter-notify-event", self.slider_entered)
@@ -228,7 +251,7 @@ class BrightnessPopup(Gtk.Window):
 
         external = cached_external_brightness()
         self.external_scale, self.external_label = self.add_control(
-            box, "external display", external if external is not None else 0
+            box, "External display", external if external is not None else 0
         )
         if external is None:
             self.external_scale.set_sensitive(False)
@@ -309,14 +332,17 @@ class BrightnessPopup(Gtk.Window):
 
     def apply_external(self, *_args: object) -> bool:
         value = round(self.external_scale.get_value())
+        display = external_display()
+        if display is None:
+            return False
         write_status_cache(internal_brightness(), value)
         subprocess.Popen(
             ddc_command(
                 "setvcp",
                 "10",
                 str(value),
-                "--model",
-                EXTERNAL_MODEL,
+                "--display",
+                str(display),
             ),
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,

@@ -27,7 +27,7 @@ This repository is the installable, update-safe source of truth for the owner's 
 - Preserve documents, media, Nextcloud content, browser profiles, credentials, keyrings, shell history, caches, and unrelated dotfiles.
 - Never commit tokens, passwords, private keys, machine identifiers that are not required, generated caches, or HyDE runtime state.
 - Parameterize home paths with `@HOME@` in tracked templates. Do not commit `/home/user` when the value should be portable.
-- Hardware-specific monitor names and DDC/CI identifiers are allowed only where required and must be documented in `README.md`.
+- Never commit hardware identifiers (monitor descriptions, serial numbers, DDC/CI model names, fixed output positions). Target internal panels by the generic `eDP-*` kernel connector names and detect external DDC/CI displays at runtime instead.
 - Before package removal or a destructive cleanup, inspect HyDE's current core package list and simulate the package transaction. Do not remove a dependency merely because it originated with KDE.
 - Existing target files must be backed up before installation. A restore operation must affect only paths recorded by this overlay.
 
@@ -62,7 +62,7 @@ This repository is the installable, update-safe source of truth for the owner's 
 
 ### Brightness popup
 
-- Preserve independent support for the internal panel through `brightnessctl` and the external external monitor through `ddcutil`.
+- Preserve independent support for the internal panel through `brightnessctl` and the external monitor through `ddcutil` runtime detection.
 - A missing external DDC display must degrade gracefully rather than preventing Waybar from starting.
 - Validate the Python script, its JSON status output, executable mode, and right-click popup behavior after changes.
 

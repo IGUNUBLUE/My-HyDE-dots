@@ -3,11 +3,11 @@
 - Status: active
 - Date: 2026-09-15
 - Scope: fontconfig, HyDE fonts, displays
-- Sources: `fc-match -v "Noto Sans"` before/after on live system; ArchWiki Font configuration (hintstyle default hintslight, rgba rgb, lcdfilter lcddefault, Chromium stem-darkening note); Hyprland XWayland docs (force_zero_scaling); `hyprctl monitors all` (eDP-1 ~143 DPI at 1.25, external 1080p ~81 DPI at 1.0)
+- Sources: `fc-match -v "Noto Sans"` before/after on live system; ArchWiki Font configuration (hintstyle default hintslight, rgba rgb, lcdfilter lcddefault, Chromium stem-darkening note); Hyprland XWayland docs (force_zero_scaling); `hyprctl monitors all` (internal ~143 DPI panel at 1.25, external 1080p ~81 DPI at 1.0)
 
 ## Context
 
-Text on the external external 1080p monitor looked blurry. The system had no `10-sub-pixel-rgb.conf` preset enabled and the user `fonts.conf` set only antialias/hinting/hintstyle, so `fc-match` showed no `rgba` value. HyDE requested `font_hinting="full"` while fontconfig used `hintslight`.
+Text on the external 1080p monitor looked blurry. The system had no `10-sub-pixel-rgb.conf` preset enabled and the user `fonts.conf` set only antialias/hinting/hintstyle, so `fc-match` showed no `rgba` value. HyDE requested `font_hinting="full"` while fontconfig used `hintslight`.
 
 ## Evidence
 

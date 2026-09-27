@@ -43,16 +43,21 @@ end
 --
 -- Other Lua files next to this one can be pulled in with require("name").
 
--- Per-monitor scaling: keep the laptop readable without the aggressive auto 1.5 scale.
-hl.monitor({
-	output = "eDP-1",
-	mode = "preferred",
-	position = "0x0",
-	scale = 1.25,
-})
+-- Per-monitor scaling: internal laptop panels (generic eDP-* connectors)
+-- keep a readable fixed scale instead of the aggressive auto value, and any
+-- other output lands to the right at native scale. No machine-specific
+-- names, positions or descriptions are tracked.
+for _, output in ipairs({ "eDP-1", "eDP-2" }) do
+	hl.monitor({
+		output = output,
+		mode = "preferred",
+		position = "0x0",
+		scale = 1.25,
+	})
+end
 
 hl.monitor({
-	output = "desc:external display ***REMOVED***",
+	output = "",
 	mode = "preferred",
 	position = "auto-right",
 	scale = 1,
