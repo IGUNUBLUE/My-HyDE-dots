@@ -251,7 +251,8 @@ bash -n "$btop_script"
 # and the selector scripts replace every placeholder. Simulate that render
 # (wallbash palette + kitty ANSI + blends) and parse the results for real.
 python - "$repo_dir/dotfiles/.config/hyde/wallbash/always/opencode.dcol" \
-         "$repo_dir/dotfiles/.config/hyde/wallbash/always/codex.dcol" <<'PY'
+         "$repo_dir/dotfiles/.config/hyde/wallbash/always/codex.dcol" \
+         "$repo_dir/dotfiles/.config/hyde/wallbash/always/omp.dcol" <<'PY'
 import json
 import pathlib
 import re
@@ -260,6 +261,7 @@ import xml.etree.ElementTree as ET
 
 opencode_template = pathlib.Path(sys.argv[1])
 codex_template = pathlib.Path(sys.argv[2])
+omp_template = pathlib.Path(sys.argv[3])
 PLACEHOLDER = re.compile(r"<wallbash_[0-9A-Za-z_]+>|@ANSI[0-9]+@|@MIX_[0-9]+@")
 
 
@@ -276,6 +278,7 @@ def fail(message):
 expected_headers = {
     opencode_template: '${XDG_CONFIG_HOME:-$HOME/.config}/opencode/themes/hyde-wallbash.json|"$WALLBASH_SCRIPTS/my-hyde-opencode-theme.sh"',
     codex_template: '${CODEX_HOME:-$HOME/.codex}/themes/hyde-wallbash.tmTheme|"$WALLBASH_SCRIPTS/my-hyde-codex-theme.sh"',
+    omp_template: '${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}/themes/hyde-wallbash.json|"$WALLBASH_SCRIPTS/my-hyde-omp-theme.sh"',
 }
 for path, header in expected_headers.items():
     first = path.read_text().splitlines()[0]
@@ -319,11 +322,67 @@ for scope in ("markup.inserted", "markup.deleted", "comment", "keyword",
 for marker in ("@MIX_1@", "@MIX_2@"):
     if marker not in codex_body:
         fail(f"codex tmTheme is missing diff background marker: {marker}")
+
+# Oh My Pi: every required token from docs/theme.md must resolve through vars
+# to a literal color (the simulated render turns each placeholder into A9C080).
+try:
+    omp_theme = json.loads(render(omp_template))
+except Exception as exc:
+    fail(f"omp theme JSON does not parse after render: {exc}")
+
+if omp_theme.get("name") != "hyde-wallbash":
+    fail("omp theme name is not hyde-wallbash")
+
+omp_required = {
+    "accent", "border", "borderAccent", "borderMuted", "success", "error",
+    "warning", "muted", "dim", "text", "thinkingText",
+    "selectedBg", "userMessageBg", "customMessageBg", "toolPendingBg",
+    "toolSuccessBg", "toolErrorBg", "statusLineBg",
+    "userMessageText", "customMessageText", "customMessageLabel",
+    "toolTitle", "toolOutput",
+    "mdHeading", "mdLink", "mdLinkUrl", "mdCode", "mdCodeBlock",
+    "mdCodeBlockBorder", "mdQuote", "mdQuoteBorder", "mdHr", "mdListBullet",
+    "toolDiffAdded", "toolDiffRemoved", "toolDiffContext",
+    "syntaxComment", "syntaxKeyword", "syntaxFunction", "syntaxVariable",
+    "syntaxString", "syntaxNumber", "syntaxType", "syntaxOperator",
+    "syntaxPunctuation",
+    "thinkingOff", "thinkingMinimal", "thinkingLow", "thinkingMedium",
+    "thinkingHigh", "thinkingXhigh", "bashMode", "pythonMode",
+    "statusLineSep", "statusLineModel", "statusLinePath",
+    "statusLineGitClean", "statusLineGitDirty", "statusLineContext",
+    "statusLineSpend", "statusLineStaged", "statusLineDirty",
+    "statusLineUntracked", "statusLineOutput", "statusLineCost",
+    "statusLineSubagents",
+}
+colors = omp_theme.get("colors")
+if not isinstance(colors, dict):
+    fail("omp theme has no colors object")
+missing = sorted(omp_required - set(colors))
+if missing:
+    fail(f"omp theme is missing required tokens: {missing}")
+
+vars_map = omp_theme.get("vars", {})
+COLOR_VALUE = re.compile(r"^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{8}|[0-9]{1,3}|)$")
+unresolved = []
+for key, value in colors.items():
+    if isinstance(value, int):
+        continue
+    seen = set()
+    while isinstance(value, str) and value in vars_map and value not in seen:
+        seen.add(value)
+        value = vars_map[value]
+    if isinstance(value, str) and value in vars_map:
+        fail(f"omp theme token has a circular var reference: {key}")
+    if not (isinstance(value, int) or (isinstance(value, str) and COLOR_VALUE.match(value))):
+        unresolved.append(f"{key}={value!r}")
+if unresolved:
+    fail(f"omp theme tokens do not resolve to colors: {unresolved}")
 PY
 
 opencode_selector="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-opencode-theme.sh"
 codex_selector="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-codex-theme.sh"
-for selector in "$opencode_selector" "$codex_selector"; do
+omp_selector="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-omp-theme.sh"
+for selector in "$opencode_selector" "$codex_selector" "$omp_selector"; do
     [[ -x $selector ]] || {
         printf 'Agent theme selector is missing or not executable: %s\n' "$selector" >&2
         exit 1
@@ -335,6 +394,9 @@ grep -Fq 'kill -USR2' "$opencode_selector"
 grep -Fq 'SigCgt' "$opencode_selector"
 grep -Fq 'theme = "' "$codex_selector"
 grep -Fq 'ansi_color' "$codex_selector"
+grep -Fq 'dark: ' "$omp_selector"
+grep -Fq 'light: ' "$omp_selector"
+grep -Fq 'config.yml' "$omp_selector"
 
 gtk_mode_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/gtk-dark-mode.dcol"
 gtk_mode_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-gtk-dark-mode.sh"
