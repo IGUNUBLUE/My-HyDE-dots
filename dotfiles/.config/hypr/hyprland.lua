@@ -113,6 +113,11 @@ hl.config({
 	},
 })
 
+-- Free ALT+P for omp/pi's model picker (app.model.selectTemporary); it would
+-- otherwise always fire HyDE's pseudotile dispatcher before reaching the
+-- terminal. Pseudotiling remains reachable from the SUPER+/ keybind sheet.
+hl.unbind("ALT + P")
+
 -- HyDE enables blur on these layer surfaces by default. Disable the diffuse
 -- backdrop entirely; the surfaces themselves stay fully opaque.
 hl.layer_rule({

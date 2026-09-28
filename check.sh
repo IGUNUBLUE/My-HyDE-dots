@@ -435,4 +435,14 @@ if rg -n -i '(BEGIN [A-Z ]*PRIVATE KEY|github_pat_|ghp_|api[_-]?key[[:space:]]*=
     exit 1
 fi
 
+if rg -n '/home/[A-Za-z0-9._-]+' "$repo_dir" --glob '!check.sh' | rg -v linuxbrew; then
+    printf 'Literal home path found; use @HOME@ or $HOME instead. Refusing validation.\n' >&2
+    exit 1
+fi
+
+if rg -n 'desc\s*[:=]' "$repo_dir/dotfiles/.config/hypr/" || rg -n -- '--model' "$repo_dir/dotfiles/"; then
+    printf 'Hardware identifier found (monitor desc/DDC model); use generic detection. Refusing validation.\n' >&2
+    exit 1
+fi
+
 printf 'All checks passed.\n'
