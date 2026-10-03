@@ -129,6 +129,28 @@ hydectl theme set "LAGC Calm Dark"
 hydectl theme set "LAGC Calm Light"
 ```
 
+## Browsers and GTK apps
+
+Every switch reaches browsers through two channels. Web pages follow `prefers-color-scheme`, which HyDE publishes as `color-scheme` in gsettings and the xdg-desktop-portal. Browser chrome follows the GTK theme only in Chrome/Brave profiles set to **Appearance → Use GTK** and in Firefox's default theme; a Chrome profile with a custom colour or "Classic" theme keeps its own colours by design.
+
+Wallbash rewrites `Wallbash-Gtk`'s css in place, so the theme name never changes and running GTK clients — GTK-mode browsers included — kept the previous palette on a dark→dark or light→light switch (Firefox could lag one switch behind). The `always/gtk-dark-mode.dcol` hook therefore pins `gtk-application-prefer-dark-theme`, waits until the background `gtk-dark.css` copies match `gtk.css`, and re-emits `gtk-theme` on every switch so every GTK client reloads the finished theme. The re-emit goes through `Wallbash-Gtk-reload`, a symlink alias the hook keeps in `~/.local/share/themes`, because Firefox sometimes stops at the first of two quick theme-name changes; stopping on the alias still shows the right palette.
+
+HyDE reloads Waybar with `SIGUSR2` on every switch, and Waybar 0.15 can hang when two reloads overlap: the process stays alive but the bar disappears from every monitor. The `always/waybar-guard.dcol` hook watches the bars for 15 s after each switch and restarts `hyde-Hyprland-bar.service` once if a monitor has been without a bar for 4 s. Rapid switches share one guard, and a Waybar you stopped yourself is left alone.
+
+## Tests
+
+`./check.sh` runs the static and sandboxed suites:
+
+- `tests/theme-contract.py` — every LAGC theme agrees across `hypr.theme` (`$COLOR_SCHEME` vs `dcol_mode`, `$GTK_THEME`, cursor, icons), `theme.dcol`, Kitty, Waybar, Rofi and its rhun theme.
+- `tests/hooks.py` — runs the Wallbash hook scripts in a throwaway XDG tree with fake `gsettings`/`fc-match`/`hyprctl`/`systemctl`: GTK refresh on same-mode and mode-flip switches, waiting for `gtk-dark.css`, rhun theme/font following, the Waybar guard (restart after lost bars, tolerance of normal reload gaps, one restart at most, no action on a stopped Waybar), idempotence and preservation of foreign config keys.
+
+`tests/live-theme.sh` is the end-to-end check for a running session. It cycles the LAGC themes with `hydectl theme set` and asserts gsettings, the portal, GTK3/libadwaita client state, `settings.ini`, xsettingsd, `Wallbash-Gtk`, Kitty, Waybar (colours and a bar on every monitor), Rofi, Qt and rhun, and it keeps Chrome, Brave (GTK mode) and Firefox open with throwaway profiles to verify both page colour scheme and toolbar palette after every switch. It restores the theme that was active before the run. Run it after any change to themes, hooks or the HyDE version:
+
+```bash
+tests/live-theme.sh
+SEQ="LAGC Calm Dark|LAGC Tech Dark" BROWSERS="firefox" tests/live-theme.sh
+```
+
 ## Future-cyan cursor
 
 The default cursor is the GPLv3 [Future-cyan](https://www.gnome-look.org/p/1465392) theme from [Future-cursors](https://github.com/yeyushengfan258/Future-cursors), pinned to commit `587c14d2f5bd2dc34095a4efbb1a729eb72a1d36`. That upstream revision explicitly improves hotspot consistency. The reviewed compiled XCursor payload, license and provenance are tracked under `dotfiles/.local/share/icons/Future-cursors/`; installation does not download or execute third-party code.

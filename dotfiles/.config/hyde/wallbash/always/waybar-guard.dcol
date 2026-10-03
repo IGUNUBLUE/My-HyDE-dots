@@ -1,0 +1,2 @@
+${XDG_RUNTIME_DIR:-/tmp}/hyde/.waybar-guard|"$WALLBASH_SCRIPTS/my-hyde-waybar-guard.sh"
+<wallbash_mode>

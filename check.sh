@@ -446,7 +446,20 @@ grep -Fqx '$HOME/.config/gtk-3.0/.wallbash-dark-mode|"$WALLBASH_SCRIPTS/my-hyde-
 bash -n "$gtk_mode_script"
 grep -Fq 'gtk-application-prefer-dark-theme' "$gtk_mode_script"
 
+waybar_guard_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/waybar-guard.dcol"
+waybar_guard_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-waybar-guard.sh"
+[[ -s "$waybar_guard_template" && -x "$waybar_guard_script" ]] || {
+    printf 'Waybar guard hook is missing or not executable.\n' >&2
+    exit 1
+}
+grep -Fqx '${XDG_RUNTIME_DIR:-/tmp}/hyde/.waybar-guard|"$WALLBASH_SCRIPTS/my-hyde-waybar-guard.sh"' "$waybar_guard_template"
+bash -n "$waybar_guard_script"
+grep -Fq 'install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-waybar-guard.sh"' "$repo_dir/install.sh"
+
 python "$repo_dir/tests/qt-menu.py"
+python "$repo_dir/tests/theme-contract.py"
+python "$repo_dir/tests/hooks.py"
+bash -n "$repo_dir/tests/live-theme.sh"
 
 while IFS= read -r memory_link; do
     [[ -f "$repo_dir/memory/$memory_link" ]] || {

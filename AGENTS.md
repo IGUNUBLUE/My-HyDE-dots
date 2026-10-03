@@ -112,6 +112,7 @@ hyprctl configerrors
 pgrep -x waybar
 ~/.local/bin/hyde-brightness-panel --status | python -m json.tool
 zsh -lic 'command -v omp; print -r -- "ZDOTDIR=${ZDOTDIR:-unset}"'
+tests/live-theme.sh   # after theme, Wallbash hook or HyDE updates
 ```
 
 Do not describe a change as verified when only static validation ran. Report separately whether it was reviewed, installed, reloaded, and observed live.
