@@ -1,0 +1,2 @@
+${XDG_CONFIG_HOME:-$HOME/.config}/rhun/.wallbash-mode|"$WALLBASH_SCRIPTS/my-hyde-rhun-theme.sh"
+<wallbash_mode>

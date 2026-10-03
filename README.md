@@ -17,6 +17,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Native `LAGC Tech Dark` and `LAGC Tech Light` themes derived from the lagc-tech midnight/frost/cobalt/cyan/ember palette. They use HyDE's supported theme-switch, Wallbash, Waybar, Kitty and Rofi contracts, and drive Dunst plus Kvantum through the standard Wallbash templates.
 - Native `LAGC Calm Dark` and `LAGC Calm Light` warm low-glare themes with static `theme.dcol` palettes (sage/olive accents, WCAG AA state colors) and installer-generated gradient wallpapers.
 - A portable VSCodium extension (`igunublue.lagc-themes`) with all four `LAGC` color themes — Calm and Tech, dark and light — installed only through VSCodium's own VSIX CLI.
+- Portable `LAGC` themes for the [rhun](https://github.com/vshvedov/rhun) editor — all four Calm/Tech dark/light `.theme` files under `~/.config/rhun/themes/`, palette reused 1:1 from the VSCodium themes and validated before install. A Wallbash `always/` hook makes rhun follow the active HyDE theme live (exact LAGC match, Calm light/dark fallback otherwise) by rewriting the `[ui] theme` key, which rhun hot-reloads.
 - Compact solid Waybar layout at 24 pixels with Atkinson Hyperlegible Next at 13 px (13 px font + 9 px icons is the largest combination that still fits under the modules' 26 px minimum at font 14), scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
 - Pinned GPLv3 `Future-cyan` cursor theme at visually accepted logical size 46, with native Hyprcursor plus XCursor fallback, reviewed hotspot corrections, and consistent HyDE/session/GTK defaults. Because Hyprcursor and XCursor sizes do not translate 1:1, GTK/Qt/XWayland clients use `XCURSOR_SIZE=32` (via `environment.d`) while the compositor keeps `HYPRCURSOR_SIZE=46`; a `gtk3-cursor-fix` systemd path unit restores the GTK3 value after each HyDE theme switch, which rewrites `settings.ini` with the compositor size.
 - Kitty user configuration with an 11 pt default font and 0.97 background opacity: the only remaining transparency in the profile.
@@ -150,6 +151,26 @@ The normal `./install.sh` flow installs or updates the same extension whenever t
 
 ```bash
 ./restore.sh --vscodium-theme-only
+```
+
+## rhun editor themes
+
+[rhun](https://github.com/vshvedov/rhun) is a small, fast code editor that loads user themes from `~/.config/rhun/themes/*.theme`. The overlay ships the same four LAGC themes for it — `LAGC Calm Dark`/`Light` and `LAGC Tech Dark`/`Light` — as plain `.theme` files tracked under `dotfiles/.config/rhun/themes/`, with the palette reused verbatim from the VSCodium themes so rhun matches the rest of the family. Each file defines rhun's full set of UI slots, syntax classes, the 16 `[terminal]` ANSI colors and the `git_*` gutter colors, so nothing is left to rhun's `bg`/`fg`/`accent` fallback.
+
+rhun **follows the active HyDE theme**: switching themes (`Super+Shift+T`) runs a Wallbash `always/` hook (`rhun-theme.dcol` + `my-hyde-rhun-theme.sh`) that rewrites only the `theme` key under `[ui]` in `~/.config/rhun/config`. rhun watches that file and hot-reloads the theme live, no restart needed. The four LAGC themes map 1:1 to their rhun slugs; any other HyDE theme falls back to the LAGC Calm pair by light/dark mode, so rhun never lands on the wrong side of light/dark. The hook preserves every other key in rhun's config and is a no-op when nothing changed.
+
+The same hook replaces rhun's narrow built-in Iosevka with the HyDE fonts: `[ui] font` gets the HyDE UI font (`Inter Medium`) and `[editor] font` the monospace font (`CaskaydiaCove Nerd Font Mono`). It reads a theme's own `$FONT`/`$MONOSPACE_FONT` from `hypr.theme` first and falls back to `[desktop.ui] font`/`monospace_font` in `config.toml`, so changing the HyDE font also changes rhun. rhun takes a path to a TrueType file and reads only the first face of a `.ttc`, so the hook resolves each family with fontconfig, accepts only glyf (TrueType) faces, and copies a face that is not first in its collection (Inter Medium is face 10 of `Inter.ttc`) to `~/.config/rhun/fonts/`. rhun loads fonts only at startup or from its Settings page, so a font change appears the next time rhun starts; colors change immediately. Font sizes stay rhun's own.
+
+The normal `./install.sh` flow validates and copies these themes, installs the follow hook and renders it once so rhun matches the current theme immediately. To install or refresh only the rhun integration (themes plus hook):
+
+```bash
+./install.sh --rhun-theme-only
+```
+
+Afterwards just switch HyDE themes and rhun follows; a theme picked by hand in rhun (`Ctrl+K`) lasts until the next HyDE theme switch. Key names come from rhun's own slot table, and `tools/validate-rhun-themes.py` rejects any key rhun would silently ignore. rhun itself is not an Arch package, so the overlay installs only the themes and hook, not the editor. To remove the overlay-owned themes, extracted fonts, hook and marker (rhun's own `config` stays; rhun falls back to its default theme and built-in font if they are gone):
+
+```bash
+./restore.sh --rhun-theme-only
 ```
 
 ## Restore the previous configuration

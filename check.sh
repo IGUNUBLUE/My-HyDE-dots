@@ -81,6 +81,44 @@ if find "$repo_dir/dotfiles/.local/share/vscodium/themes" -type f -name '*.vsix'
     exit 1
 fi
 
+python "$repo_dir/tools/validate-rhun-themes.py" --check
+grep -Fq 'install_rhun_theme()' "$repo_dir/install.sh" || {
+    printf 'install.sh must define install_rhun_theme.\n' >&2
+    exit 1
+}
+awk '/^step_themes\(\) \{/{s=1} s && /^\}/{exit} s' "$repo_dir/install.sh" | grep -Eq '^[[:space:]]+install_rhun_theme$' || {
+    printf 'step_themes must call install_rhun_theme.\n' >&2
+    exit 1
+}
+rhun_theme_dir="$repo_dir/dotfiles/.config/rhun/themes"
+for rhun_theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
+    [[ -s "$rhun_theme_dir/$rhun_theme.theme" ]] || {
+        printf 'rhun LAGC theme is missing: %s\n' "$rhun_theme" >&2
+        exit 1
+    }
+done
+
+rhun_follow_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/rhun-theme.dcol"
+rhun_follow_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-rhun-theme.sh"
+[[ -s "$rhun_follow_template" && -x "$rhun_follow_script" ]] || {
+    printf 'rhun theme-follow hook is missing or not executable.\n' >&2
+    exit 1
+}
+grep -Fqx '${XDG_CONFIG_HOME:-$HOME/.config}/rhun/.wallbash-mode|"$WALLBASH_SCRIPTS/my-hyde-rhun-theme.sh"' "$rhun_follow_template"
+grep -Fqx '<wallbash_mode>' "$rhun_follow_template"
+bash -n "$rhun_follow_script"
+# The follower selects by the active HyDE theme name; keep the LAGC map and the
+# Calm light/dark fallback in sync with the installed theme slugs.
+grep -Fq '"LAGC Calm Dark")  want="lagc-calm-dark"' "$rhun_follow_script"
+grep -Fq '"LAGC Tech Light") want="lagc-tech-light"' "$rhun_follow_script"
+grep -Fq 'want="lagc-calm-$mode"' "$rhun_follow_script"
+# Fonts follow HyDE: theme hypr.theme first, then [desktop.ui] in config.toml,
+# resolved by fontconfig and restricted to TrueType glyf faces rhun can draw.
+grep -Fq 'hypr_var MONOSPACE_FONT' "$rhun_follow_script"
+grep -Fq 'toml_ui monospace_font' "$rhun_follow_script"
+grep -Fq 'set_key "$work" editor font' "$rhun_follow_script"
+grep -Fq '{b"glyf", b"loca", b"cmap"}' "$rhun_follow_script"
+
 cursor_dir="$repo_dir/dotfiles/.local/share/icons/Future-cursors"
 cursor_config="$repo_dir/dotfiles/.config/hyde/config.toml.in"
 cursor_env="$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf"

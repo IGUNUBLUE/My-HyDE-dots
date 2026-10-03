@@ -11,11 +11,12 @@ skip_packages=false
 assume_yes=false
 qt_menu_only=false
 vscodium_theme_only=false
+rhun_theme_only=false
 only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -26,6 +27,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --only a,b           run only these modules: packages,cursor,config,themes,apply
   --qt-menu-only       refresh the Qt menu template and exit
   --vscodium-theme-only  reinstall the VSCodium LAGC themes and exit
+  --rhun-theme-only    reinstall the rhun LAGC editor themes and exit
 EOF
 }
 
@@ -34,6 +36,7 @@ while (($#)); do
         --dry-run) dry_run=true ;;
         --qt-menu-only) qt_menu_only=true; skip_packages=true ;;
         --vscodium-theme-only) vscodium_theme_only=true; skip_packages=true ;;
+        --rhun-theme-only) rhun_theme_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         --yes|--non-interactive) assume_yes=true ;;
         --only) shift; only_modules=${1:-} ;;
@@ -74,7 +77,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only; then
     interactive=true
 fi
 
@@ -197,6 +200,37 @@ install_vscodium_theme() {
         return 1
     fi
     rm -rf -- "$temporary_dir"
+}
+
+install_rhun_theme() {
+    # rhun loads user themes from ~/.config/rhun/themes/*.theme and its active
+    # theme from [ui] theme in ~/.config/rhun/config. The .theme files are plain
+    # data with no dependency on the rhun binary; the Wallbash always/ hook keeps
+    # [ui] theme in step with the active HyDE theme on every theme switch.
+    local source_dir="$repo_dir/dotfiles/.config/rhun/themes"
+    local wallbash_dir="$repo_dir/dotfiles/.config/hyde/wallbash"
+    local source relative wallbash_apply
+
+    if ! python "$repo_dir/tools/validate-rhun-themes.py" --check; then
+        return 1
+    fi
+    while IFS= read -r -d '' source; do
+        relative=${source#"$source_dir"/}
+        install_dot "$source" "$HOME/.config/rhun/themes/$relative"
+    done < <(find "$source_dir" -type f -name '*.theme' -print0)
+    install_dot "$wallbash_dir/always/rhun-theme.dcol" "$HOME/.config/hyde/wallbash/always/rhun-theme.dcol"
+    install_dot "$wallbash_dir/scripts/my-hyde-rhun-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-rhun-theme.sh" 0755
+
+    # Render the hook once so rhun follows the current theme before the next
+    # switch; later switches run it through the always/ pipeline.
+    wallbash_apply="$HOME/.local/lib/hyde/color.set.sh"
+    if [[ -x $wallbash_apply && -f ${XDG_CACHE_HOME:-$HOME/.cache}/hyde/wall.set ]]; then
+        if $dry_run; then
+            run "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/rhun-theme.dcol"
+        else
+            "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/rhun-theme.dcol" >/dev/null 2>&1 || true
+        fi
+    fi
 }
 
 backup_target() {
@@ -470,6 +504,7 @@ step_themes() {
     install_theme_files "LAGC Calm Dark"
     install_theme_files "LAGC Calm Light"
     install_vscodium_theme
+    install_rhun_theme
     remove_target "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
     remove_target "$HOME/.config/hyde/wallbash/theme/lagc-tech-dark-kitty.dcol"
     remove_target "$HOME/.config/hyde/wallbash/always/lagc-tech-dark-waybar.dcol"
@@ -585,14 +620,21 @@ step_apply() {
 only_install_count=0
 $qt_menu_only && ((only_install_count += 1))
 $vscodium_theme_only && ((only_install_count += 1))
+$rhun_theme_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
-    printf 'Use only one of --qt-menu-only or --vscodium-theme-only.\n' >&2
+    printf 'Use only one of --qt-menu-only, --vscodium-theme-only or --rhun-theme-only.\n' >&2
     exit 2
 fi
 
 if $vscodium_theme_only; then
     install_vscodium_theme true
     printf 'LAGC VSCodium themes installed. Select one with Preferences: Color Theme.\n'
+    exit 0
+fi
+
+if $rhun_theme_only; then
+    install_rhun_theme
+    printf 'LAGC rhun themes and theme-follow hook installed; rhun now follows the active HyDE theme.\n'
     exit 0
 fi
 
@@ -633,7 +675,7 @@ if $interactive; then
                 'Paquetes (pacman)' \
                 'Cursor Future (hyprcursor)' \
                 'Configs base (waybar, kitty, hooks)' \
-                'Temas LAGC + wallpapers + VSCodium' \
+                'Temas LAGC + wallpapers + VSCodium + rhun' \
                 'Aplicar en vivo (reload, fuentes, envs)') || { ui_bar; exit 0; }
             modules=()
             for p in "${picked[@]}"; do
@@ -685,7 +727,7 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module step_packages step_cursor \
-    step_config step_themes step_apply
+    step_config step_themes step_apply install_rhun_theme
 export repo_dir backup_dir work_dir dry_run MODULES_CSV
 
 $interactive && mkdir -p "$state_dir" && : > "$install_log"

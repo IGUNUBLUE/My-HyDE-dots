@@ -12,6 +12,22 @@ if [[ ${1:-} == "--vscodium-theme-only" ]]; then
     exit 0
 fi
 
+if [[ ${1:-} == "--rhun-theme-only" ]]; then
+    # Removes only overlay-owned files. ~/.config/rhun/config is rhun's own file
+    # and stays; a [ui] theme naming a removed LAGC theme falls back to rhun's
+    # default theme, and a font path that no longer exists to the built-in font.
+    rhun_dir="${XDG_CONFIG_HOME:-$HOME/.config}/rhun"
+    for rhun_theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
+        rm -f -- "$HOME/.config/rhun/themes/$rhun_theme.theme"
+    done
+    rm -f -- "$HOME/.config/hyde/wallbash/always/rhun-theme.dcol" \
+        "$HOME/.config/hyde/wallbash/scripts/my-hyde-rhun-theme.sh" \
+        "$rhun_dir/.wallbash-mode" "$rhun_dir/fonts/ui.ttf" "$rhun_dir/fonts/editor.ttf"
+    rmdir -- "$rhun_dir/fonts" 2>/dev/null || true
+    printf 'LAGC rhun themes, extracted fonts and the theme-follow hook removed.\n'
+    exit 0
+fi
+
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/my-hyde-dots/backups"
 backup=${1:-}
 
