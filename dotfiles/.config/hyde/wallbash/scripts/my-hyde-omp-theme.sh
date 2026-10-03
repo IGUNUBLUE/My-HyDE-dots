@@ -5,14 +5,23 @@
 # 18% over the theme background for tool result panels. The same theme file is
 # pinned to both config.yml slots (theme.dark/theme.light): wallbash only knows
 # the active palette, and OMP picks a slot from terminal luminance on its own.
+# Profiles launched with OMP_PROFILE=<name> live in ~/.omp/profiles/<name>/agent
+# with their own config.yml and theme dir, so each one gets the same file+pin.
 # OMP watches the active custom theme file and hot-reloads it, so running TUIs
 # pick up regenerated colors without a signal or restart.
 set -Eeuo pipefail
 
 omp_dir="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
 theme_file="$omp_dir/themes/hyde-wallbash.json"
-config="$omp_dir/config.yml"
 theme="hyde-wallbash"
+# OMP resolves profiles as homedir()+"/.omp/profiles/<name>/agent" — the root
+# ignores PI_CODING_AGENT_DIR (verified against omp 18.4.10), so only profile
+# names are discovered here, via glob; the root is OMP's own fixed layout.
+agent_dirs=("$omp_dir")
+for profile_agent in "$HOME"/.omp/profiles/*/agent; do
+    [[ -d $profile_agent && $profile_agent != "$omp_dir" ]] || continue
+    agent_dirs+=("$profile_agent")
+done
 
 [[ -f $theme_file ]] || exit 0
 
@@ -63,11 +72,12 @@ if cp "$theme_file" "$tmp"; then
     fi
     mv -f "$tmp" "$theme_file"
 fi
-
-# Select the theme in both auto slots. config.yml is OMP-owned YAML; only the
-# scalar values inside the top-level "theme:" map are rewritten, every other
-# key and section is preserved byte-for-byte.
-if [[ -d $omp_dir ]]; then
+# Propagate the fully-spliced theme into each profile's theme dir, then select
+# it in both auto slots of every config.yml. config.yml is OMP-owned YAML; only
+# the scalar values inside the top-level "theme:" map are rewritten, every
+# other key and section is preserved byte-for-byte.
+pin_theme() {
+    local config="$1/config.yml" patched
     if [[ -f $config ]]; then
         if patched=$(awk -v theme="$theme" '
             /^theme[[:space:]]*:/ && !in_theme {
@@ -108,6 +118,15 @@ if [[ -d $omp_dir ]]; then
     else
         printf 'theme:\n  dark: %s\n  light: %s\n' "$theme" "$theme" > "$config" || true
     fi
-fi
+}
+
+for dir in "${agent_dirs[@]}"; do
+    [[ -d $dir ]] || continue
+    if [[ $dir != "$omp_dir" ]]; then
+        mkdir -p "$dir/themes" || continue
+        cp -f "$theme_file" "$dir/themes/hyde-wallbash.json" || continue
+    fi
+    pin_theme "$dir"
+done
 
 exit 0
