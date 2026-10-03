@@ -406,6 +406,70 @@ def test_guard_restarts_at_most_once() -> None:
         box.close()
 
 
+def test_rhun_fonts_use_a_heavier_face() -> None:
+    # rhun rasterizes without hinting, so 1 px stems of Regular/Medium faces
+    # smear over two grey pixels. The hook asks fontconfig for the SemiBold
+    # face of the HyDE families, stripping a weight suffix such as "Medium".
+    box = rhun_sandbox("dark")
+    try:
+        import struct
+        def ttf(path: Path) -> Path:
+            tables = [b"cmap", b"glyf", b"loca"]
+            data = struct.pack(">IHHHH", 0x00010000, len(tables), 0, 0, 0)
+            for tag in tables:
+                data += struct.pack(">4sIII", tag, 0, 12 + 16 * len(tables), 0)
+            path.write_bytes(data)
+            return path
+        regular = ttf(box.root / "Good-Mono-Regular.ttf")
+        semibold = ttf(box.root / "Good-Mono-SemiBold.ttf")
+        ui_semibold = ttf(box.root / "Good-Sans-SemiBold.ttf")
+        (box.config / "hyde").mkdir()
+        (box.config / "hyde/config.toml").write_text(
+            '[desktop.ui]\nfont = "Good Sans Medium"\nmonospace_font = "Good Mono"\n')
+        box.fake("fc-match", f"""#!/usr/bin/env bash
+echo "fc-match ${{@: -1}}" >> "{box.log}"
+case "${{@: -1}}" in
+  "Good Mono:style=SemiBold") printf 'Good Mono\\t{semibold}\\t0\\tTrueType\\tSemiBold\\n' ;;
+  "Good Mono") printf 'Good Mono\\t{regular}\\t0\\tTrueType\\tRegular\\n' ;;
+  "Good Sans:style=SemiBold") printf 'Good Sans\\t{ui_semibold}\\t0\\tTrueType\\tSemiBold\\n' ;;
+  *) printf 'DejaVu Sans\\t/usr/share/fonts/DejaVuSans.ttf\\t0\\tTrueType\\tBook\\n' ;;
+esac
+""")
+        box.run("my-hyde-rhun-theme.sh", HYDE_THEME="LAGC Calm Dark")
+        check(rhun_value(box, "editor", "font") == str(semibold),
+              f"editor font must be the SemiBold face, got {rhun_value(box, 'editor', 'font')}")
+        check(rhun_value(box, "ui", "font") == str(ui_semibold),
+              f"UI font must be the SemiBold face of 'Good Sans Medium', got {rhun_value(box, 'ui', 'font')}")
+    finally:
+        box.close()
+
+
+def test_rhun_fonts_fall_back_to_the_named_face_without_semibold() -> None:
+    box = rhun_sandbox("dark")
+    try:
+        import struct
+        font = box.root / "Only-Regular.ttf"
+        tables = [b"cmap", b"glyf", b"loca"]
+        data = struct.pack(">IHHHH", 0x00010000, len(tables), 0, 0, 0)
+        for tag in tables:
+            data += struct.pack(">4sIII", tag, 0, 12 + 16 * len(tables), 0)
+        font.write_bytes(data)
+        (box.config / "hyde").mkdir()
+        (box.config / "hyde/config.toml").write_text('[desktop.ui]\nmonospace_font = "Only Mono"\n')
+        # fontconfig answers the SemiBold request with the Regular face.
+        box.fake("fc-match", f"""#!/usr/bin/env bash
+case "${{@: -1}}" in
+  "Only Mono"*) printf 'Only Mono\\t{font}\\t0\\tTrueType\\tRegular\\n' ;;
+  *) printf 'DejaVu Sans\\t/usr/share/fonts/DejaVuSans.ttf\\t0\\tTrueType\\tBook\\n' ;;
+esac
+""")
+        box.run("my-hyde-rhun-theme.sh", HYDE_THEME="LAGC Calm Dark")
+        check(rhun_value(box, "editor", "font") == str(font),
+              "without a SemiBold face the editor must keep the family's own face")
+    finally:
+        box.close()
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

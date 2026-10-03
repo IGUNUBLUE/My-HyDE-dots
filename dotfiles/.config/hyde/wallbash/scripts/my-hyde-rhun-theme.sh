@@ -81,20 +81,43 @@ toml_ui() {
 }
 
 # font_path FAMILY SLUG: print a rhun-loadable .ttf path for FAMILY, or nothing.
+# rhun rasterizes without hinting, so the 1 px stems of Regular/Medium faces
+# smear across two grey pixels. Prefer the family's heavier face
+# (MY_HYDE_RHUN_FONT_WEIGHT, default SemiBold) and fall back to the named face.
 font_path() {
-    local family=$1 slug=$2 matched file index format
+    local family=$1 slug=$2 weight=${MY_HYDE_RHUN_FONT_WEIGHT:-SemiBold} base query file index
     [[ -n $family ]] && command -v fc-match >/dev/null || return 0
-    IFS=$'\t' read -r matched file index format < <(
-        fc-match -f '%{family}\t%{file}\t%{index}\t%{fontformat}\n' "$family" 2>/dev/null) || return 0
-    [[ $format == TrueType && -f $file ]] || return 0
-    # fontconfig always answers; reject a fallback to an unrelated family.
-    local requested=${family,,} name ok=false
+    base=$(sed -E 's/[[:space:]]+(Thin|Hairline|ExtraLight|UltraLight|Light|SemiLight|Regular|Book|Normal|Medium|SemiBold|DemiBold|Bold|ExtraBold|UltraBold|Black|Heavy)$//I' <<< "$family")
+    [[ -n $base ]] || base=$family
+    for query in "$base:style=$weight" "$family"; do
+        IFS=$'\t' read -r file index < <(font_match "$query" "${query%%:*}" "$([[ $query == *:style=* ]] && echo "$weight")") || continue
+        [[ -n $file ]] || continue
+        font_copy "$file" "$index" "$slug" && return 0
+    done
+    return 0
+}
+
+# font_match QUERY FAMILY [STYLE]: "file<TAB>index" when fontconfig answers QUERY
+# with FAMILY (not a fallback family), in TrueType, and in STYLE if given.
+font_match() {
+    local matched file index format style
+    IFS=$'\t' read -r matched file index format style < <(
+        fc-match -f '%{family}\t%{file}\t%{index}\t%{fontformat}\t%{style[0]}\n' "$1" 2>/dev/null) || return 1
+    [[ $format == TrueType && -f $file ]] || return 1
+    [[ -z $3 || ${style,,} == "${3,,}" ]] || return 1
+    local requested=${2,,} name ok=false
     IFS=',' read -ra names <<< "${matched,,}"
     for name in "${names[@]}"; do
         [[ $requested == "$name" || $requested == "$name "* ]] && ok=true
     done
-    $ok || return 0
-    python3 - "$file" "${index:-0}" "$fonts_dir/$slug.ttf" <<'PY' || return 0
+    $ok || return 1
+    printf '%s\t%s\n' "$file" "${index:-0}"
+}
+
+# font_copy FILE INDEX SLUG: print FILE, or a standalone copy of a later
+# collection face, when it is a TrueType glyf face rhun can draw.
+font_copy() {
+    python3 - "$1" "${2:-0}" "$fonts_dir/$3.ttf" <<'PY'
 import os
 import struct
 import sys

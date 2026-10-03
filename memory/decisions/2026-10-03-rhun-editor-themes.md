@@ -30,6 +30,12 @@ The user wanted the four LAGC themes (Calm/Tech, Dark/Light) in the rhun editor 
 - Headless comparison (`rhun --headless --script` with `shot`) showed CaskaydiaCove clearly wider and more legible than Iosevka in the editor, and Inter Medium matching the GTK/Qt UI. A `--control` session proved that editing the font keys in the config does not reload fonts in a running rhun (`app_reload_config` → `app_apply_settings` never calls `app_load_fonts`; only the Settings page does), while the theme key does. Fonts therefore apply on rhun's next start; colors remain live.
 - Font sizes stay rhun's own (`[ui] font_size`, `[editor] font_size`); HyDE's point sizes are not mapped because rhun's are pixel-scaled.
 
+## Follow-up: SemiBold faces for rhun
+
+- The user found the CaskaydiaCove Regular / Inter Medium text blurry in rhun. rhun's rasterizer (`src/gfx/raster.s`) applies coverage antialiasing with a gamma curve but no hinting, so 1 px stems straddle two pixels. Headless comparisons of the user's file showed CaskaydiaCove SemiBold 14 + Inter SemiBold clearly crisper at the same size; the user chose that option (B) over JetBrains Mono Medium and SemiBold 15.
+- The hook now strips a trailing weight word from the HyDE family (`Inter Medium` → `Inter`), asks fontconfig for `Family:style=SemiBold`, accepts it only when the answer is that family, TrueType and that style, and otherwise falls back to the named face. `MY_HYDE_RHUN_FONT_WEIGHT` overrides the weight. Only rhun changes; GTK, Qt and Kitty keep their hinted Regular/Medium faces.
+- Verified with the real fontconfig (`ui.ttf` → Inter SemiBold extracted from `Inter.ttc` face 12, editor → `CaskaydiaCoveNerdFontMono-SemiBold.ttf`), two new `tests/hooks.py` cases (red first), and a headless render of the user's live config.
+
 ## Validation
 
 - `tools/validate-rhun-themes.py --check`, `./check.sh`, `./install.sh --dry-run --skip-packages`, `./install.sh --rhun-theme-only --dry-run`, `bash -n` on the lifecycle scripts and `git diff --check` pass.

@@ -47,4 +47,15 @@ copy_dot "$HOME/.config/fontconfig/fonts.conf" "$repo_dir/dotfiles/.config/fontc
 copy_dot "$HOME/.local/bin/my-hyde-qt-menu" "$repo_dir/dotfiles/.local/bin/my-hyde-qt-menu"
 chmod 0755 "$repo_dir/dotfiles/.local/bin/my-hyde-qt-menu"
 
+# Wallbash theme-switch hooks (GTK refresh, Waybar guard, rhun follow) and the
+# rhun themes they select.
+for hook in gtk-dark-mode:my-hyde-gtk-dark-mode waybar-guard:my-hyde-waybar-guard rhun-theme:my-hyde-rhun-theme; do
+    copy_dot "$HOME/.config/hyde/wallbash/always/${hook%%:*}.dcol" "$repo_dir/dotfiles/.config/hyde/wallbash/always/${hook%%:*}.dcol"
+    copy_dot "$HOME/.config/hyde/wallbash/scripts/${hook#*:}.sh" "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/${hook#*:}.sh"
+    chmod 0755 "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/${hook#*:}.sh"
+done
+for theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
+    copy_dot "$HOME/.config/rhun/themes/$theme.theme" "$repo_dir/dotfiles/.config/rhun/themes/$theme.theme"
+done
+
 printf 'Snapshot updated. Review with: git diff\n'
