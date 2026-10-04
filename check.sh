@@ -275,6 +275,44 @@ for opacity_key in active_opacity inactive_opacity; do
     }
 done
 
+# Lid: close locks + blanks eDP-* panels, the machine keeps running. Both the
+# Hyprland switch binds and the logind drop-in are required; either alone
+# either suspends the laptop or leaves the panel lit.
+for lid_trigger in 'switch:on:Lid Switch' 'switch:off:Lid Switch'; do
+    grep -Fq "hl.bind(\"$lid_trigger\"" "$hyprland_config" || {
+        printf 'Hyprland lid bind missing: %s\n' "$lid_trigger" >&2
+        exit 1
+    }
+done
+[[ $(grep -Ec '^[[:space:]]*locked = true,$' "$hyprland_config") -ge 2 ]] || {
+    printf 'Lid binds must stay locked (bindl) so they fire on a locked session.\n' >&2
+    exit 1
+}
+grep -Fq 'hyde.sh.session.lock()' "$hyprland_config" || {
+    printf 'Lid close must lock through the same path as SUPER + L.\n' >&2
+    exit 1
+}
+logind_dropin="$repo_dir/system/etc/systemd/logind.conf.d/10-my-hyde-lid.conf"
+[[ -s "$logind_dropin" ]] || { printf 'logind lid drop-in is missing.\n' >&2; exit 1; }
+grep -Fqx '[Login]' "$logind_dropin" || { printf 'logind drop-in needs a [Login] section.\n' >&2; exit 1; }
+for lid_key in HandleLidSwitch HandleLidSwitchExternalPower HandleLidSwitchDocked; do
+    grep -Fqx "$lid_key=ignore" "$logind_dropin" || {
+        printf 'logind drop-in must set %s=ignore.\n' "$lid_key" >&2
+        exit 1
+    }
+done
+# Every tracked system file must be in both lifecycle allowlists, or install
+# would skip it / restore would refuse it.
+while IFS= read -r -d '' system_file; do
+    system_relative=${system_file#"$repo_dir/system/"}
+    for lifecycle in install.sh restore.sh update-snapshot.sh; do
+        grep -Fq "$system_relative" "$repo_dir/$lifecycle" || {
+            printf '%s is not handled by %s.\n' "$system_relative" "$lifecycle" >&2
+            exit 1
+        }
+    done
+done < <(find "$repo_dir/system" -type f -print0)
+
 btop_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/btop.dcol"
 btop_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-btop.sh"
 [[ -s "$btop_template" && -x "$btop_script" ]] || {

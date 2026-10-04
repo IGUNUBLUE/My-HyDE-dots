@@ -58,4 +58,13 @@ for theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
     copy_dot "$HOME/.config/rhun/themes/$theme.theme" "$repo_dir/dotfiles/.config/rhun/themes/$theme.theme"
 done
 
+# System files installed by the `system` module (world-readable, no sudo).
+for relative in etc/systemd/logind.conf.d/10-my-hyde-lid.conf; do
+    if [[ -f "/$relative" ]]; then
+        copy_dot "/$relative" "$repo_dir/system/$relative"
+    else
+        printf 'Not installed, kept tracked copy: /%s\n' "$relative" >&2
+    fi
+done
+
 printf 'Snapshot updated. Review with: git diff\n'

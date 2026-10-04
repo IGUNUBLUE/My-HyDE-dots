@@ -24,7 +24,8 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --dry-run            print actions without applying them
   --skip-packages      do not install packages.arch entries
   --yes                non-interactive: accept defaults, no prompts
-  --only a,b           run only these modules: packages,cursor,config,themes,apply
+  --only a,b           run only these modules: packages,cursor,config,themes,system,apply
+                       (system needs sudo: installs the logind lid drop-in)
   --qt-menu-only       refresh the Qt menu template and exit
   --vscodium-theme-only  reinstall the VSCodium LAGC themes and exit
   --rhun-theme-only    reinstall the rhun LAGC editor themes and exit
@@ -50,7 +51,7 @@ done
 # ---------------------------------------------------------------------------
 # Module selection
 # ---------------------------------------------------------------------------
-modules_all=(packages cursor config themes apply)
+modules_all=(packages cursor config themes system apply)
 modules=("${modules_all[@]}")
 if [[ -n "$only_modules" ]]; then
     modules=()
@@ -425,6 +426,44 @@ install_qt_menu() {
 }
 
 # ---------------------------------------------------------------------------
+# System files (outside $HOME, need sudo)
+# ---------------------------------------------------------------------------
+# Only these absolute paths may ever be written by the overlay; restore.sh
+# enforces the same allowlist. Sources live under system/ in the repository.
+# The list is local because arrays do not survive into `bash -c` subshells.
+step_system() {
+    local system_files=(etc/systemd/logind.conf.d/10-my-hyde-lid.conf)
+    local relative source target changed=false
+    for relative in "${system_files[@]}"; do
+        source="$repo_dir/system/$relative"
+        target="/$relative"
+        if [[ -f $target ]] && cmp -s -- "$source" "$target"; then
+            printf 'Up to date: %s\n' "$target"
+            continue
+        fi
+        if ! $dry_run && ! sudo -v; then
+            printf 'sudo unavailable; %s was NOT installed (run ./install.sh --only system).\n' "$target" >&2
+            return 0
+        fi
+        if [[ -e $target ]]; then
+            run mkdir -p -- "$backup_dir/.system/$(dirname -- "$relative")"
+            run cp -a -- "$target" "$backup_dir/.system/$relative"
+        elif $dry_run; then
+            printf '[dry-run] mark-system-created %q\n' "$relative"
+        else
+            mkdir -p "$backup_dir"
+            printf '%s\n' "$relative" >> "$backup_dir/.system-created"
+        fi
+        run sudo install -Dm0644 -- "$source" "$target"
+        changed=true
+    done
+    # logind rereads its configuration on reload (SIGHUP); the session survives.
+    if $changed; then
+        run sudo systemctl reload systemd-logind
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Steps
 # ---------------------------------------------------------------------------
 step_packages() {
@@ -661,39 +700,48 @@ if $interactive; then
     mkdir -p "$state_dir"
     ui_banner
 
-    mode=$(ui_choose '¿Qué instalar?' \
-        'Todo (recomendado)' \
-        'Solo temas' \
-        'Solo cursor' \
-        'Personalizado…') || { ui_bar; exit 0; }
-    printf '%s\n' "$(gum style --foreground "$sage" '●')  $(gum style --foreground "$ink" "$mode")"
-    ui_bar
+    # An explicit --only selection is final; the picker would override it.
+    if [[ -n $only_modules ]]; then
+        mode=only
+        printf '%s\n' "$(gum style --foreground "$sage" '●')  $(gum style --foreground "$ink" "Módulos: $only_modules")"
+        ui_bar
+    else
+        mode=$(ui_choose '¿Qué instalar?' \
+            'Todo (recomendado)' \
+            'Solo temas' \
+            'Solo cursor' \
+            'Personalizado…') || { ui_bar; exit 0; }
+        printf '%s\n' "$(gum style --foreground "$sage" '●')  $(gum style --foreground "$ink" "$mode")"
+        ui_bar
 
-    case "$mode" in
-        'Solo temas')    modules=(themes apply) ;;
-        'Solo cursor')   modules=(cursor apply) ;;
-        'Personalizado…')
-            mapfile -t picked < <(ui_multiselect 'Módulos:' \
-                'Paquetes (pacman)' \
-                'Cursor Future (hyprcursor)' \
-                'Configs base (waybar, kitty, hooks)' \
-                'Temas LAGC + wallpapers + VSCodium + rhun' \
-                'Aplicar en vivo (reload, fuentes, envs)') || { ui_bar; exit 0; }
-            modules=()
-            for p in "${picked[@]}"; do
-                case "$p" in
-                    Paquetes*)     modules+=(packages) ;;
-                    Cursor*)       modules+=(cursor) ;;
-                    Configs*)      modules+=(config) ;;
-                    Temas*)        modules+=(themes) ;;
-                    Aplicar*)      modules+=(apply) ;;
-                esac
-            done
-            ((${#modules[@]})) || { gum style --foreground "$muted" '└  Nada seleccionado.'; exit 0; }
-            printf '%s\n' "$(gum style --foreground "$sage" '●')  $(gum style --foreground "$ink" "${picked[*]}")"
-            ui_bar
-            ;;
-    esac
+        case "$mode" in
+            'Solo temas')    modules=(themes apply) ;;
+            'Solo cursor')   modules=(cursor apply) ;;
+            'Personalizado…')
+                mapfile -t picked < <(ui_multiselect 'Módulos:' \
+                    'Paquetes (pacman)' \
+                    'Cursor Future (hyprcursor)' \
+                    'Configs base (waybar, kitty, hooks)' \
+                    'Temas LAGC + wallpapers + VSCodium + rhun' \
+                    'Sistema: tapa bloquea sin suspender (logind, sudo)' \
+                    'Aplicar en vivo (reload, fuentes, envs)') || { ui_bar; exit 0; }
+                modules=()
+                for p in "${picked[@]}"; do
+                    case "$p" in
+                        Paquetes*)     modules+=(packages) ;;
+                        Cursor*)       modules+=(cursor) ;;
+                        Configs*)      modules+=(config) ;;
+                        Temas*)        modules+=(themes) ;;
+                        Sistema*)      modules+=(system) ;;
+                        Aplicar*)      modules+=(apply) ;;
+                    esac
+                done
+                ((${#modules[@]})) || { gum style --foreground "$muted" '└  Nada seleccionado.'; exit 0; }
+                printf '%s\n' "$(gum style --foreground "$sage" '●')  $(gum style --foreground "$ink" "${picked[*]}")"
+                ui_bar
+                ;;
+        esac
+    fi
     compute_modules_csv
 
     if has_module packages; then
@@ -707,11 +755,20 @@ if $interactive; then
         ui_bar
     fi
 
-    if has_module packages; then
-        sudo_keepalive || {
-            gum style --foreground "$terracotta" '└  Sin sudo no se pueden instalar paquetes.'
-            exit 1
-        }
+    if has_module packages || has_module system; then
+        if ! sudo_keepalive; then
+            if has_module packages; then
+                gum style --foreground "$terracotta" '└  Sin sudo no se pueden instalar paquetes.'
+                exit 1
+            fi
+            modules=("${modules[@]/system}")
+            compute_modules_csv
+            gum style --foreground "$terracotta" '│  Sin sudo: se omite el módulo de sistema (logind).'
+            if [[ ${MODULES_CSV//,/} == "" ]]; then
+                gum style --foreground "$terracotta" '└  No queda nada que instalar.'
+                exit 1
+            fi
+        fi
         ui_bar
     fi
 fi
@@ -729,7 +786,7 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module step_packages step_cursor \
-    step_config step_themes step_apply install_rhun_theme
+    step_config step_themes step_apply install_rhun_theme step_system
 export repo_dir backup_dir work_dir dry_run MODULES_CSV
 
 $interactive && mkdir -p "$state_dir" && : > "$install_log"
@@ -738,6 +795,7 @@ has_module packages && ui_step 'Instalando paquetes' step_packages stream
 has_module cursor   && ui_step 'Cursor Future compilado'   step_cursor
 has_module config   && ui_step 'Configs aplicadas'         step_config
 has_module themes   && ui_step 'Temas LAGC + wallpapers'   step_themes
+has_module system   && ui_step 'Tapa sin suspender (logind)' step_system stream
 has_module apply && ! $dry_run && ui_step 'Aplicado en vivo' step_apply
 
 # ---------------------------------------------------------------------------

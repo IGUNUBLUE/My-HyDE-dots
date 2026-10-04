@@ -105,7 +105,41 @@ while IFS= read -r -d '' source; do
     target="$HOME/$relative"
     mkdir -p -- "$(dirname -- "$target")"
     cp -a -- "$source" "$target"
-done < <(find "$backup" -type f ! -name .created ! -name .trees ! -name .cursor-state -print0)
+done < <(find "$backup" -path "$backup/.system" -prune -o -type f ! -name .created ! -name .trees \
+    ! -name .cursor-state ! -name .system-created -print0)
+
+# System files outside $HOME (install.sh `system` module). Only the same
+# allowlist install.sh writes may be touched; anything else is refused.
+system_files=(etc/systemd/logind.conf.d/10-my-hyde-lid.conf)
+system_allowed() {
+    local wanted=$1 entry
+    for entry in "${system_files[@]}"; do
+        [[ $entry == "$wanted" ]] && return 0
+    done
+    printf 'Refusing system path outside the overlay allowlist: /%s\n' "$wanted" >&2
+    exit 1
+}
+system_changed=false
+if [[ -f "$backup/.system-created" ]]; then
+    while IFS= read -r relative; do
+        validate_relative "$relative"
+        system_allowed "$relative"
+        sudo rm -f -- "/$relative"
+        system_changed=true
+    done < "$backup/.system-created"
+fi
+if [[ -d "$backup/.system" ]]; then
+    while IFS= read -r -d '' source; do
+        relative=${source#"$backup/.system"/}
+        validate_relative "$relative"
+        system_allowed "$relative"
+        sudo install -Dm0644 -- "$source" "/$relative"
+        system_changed=true
+    done < <(find "$backup/.system" -type f -print0)
+fi
+if $system_changed; then
+    sudo systemctl reload systemd-logind || true
+fi
 
 [[ -f "$HOME/.local/bin/hyde-brightness-panel" ]] && chmod 0755 "$HOME/.local/bin/hyde-brightness-panel"
 hyde-shell waybar --update 2>/dev/null || true

@@ -23,6 +23,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Kitty user configuration with an 11 pt default font and 0.97 background opacity: the only remaining transparency in the profile.
 - Solid Rofi launcher (opaque wallpaper-matched background) and Wallbash-generated `hyde-wallbash` themes for btop, OpenCode, Codex and Oh My Pi, all driven by the tracked templates under `~/.config/hyde/wallbash/`. The agent CLI themes are regenerated on every theme, wallpaper and mode switch, track the active palette (Calm or Tech, dark or light), preserve each client's semantic color roles, and are safe when the CLIs are not installed. An `always/` hook also pins `gtk-application-prefer-dark-theme` in `~/.config/gtk-3.0/settings.ini` to the active mode, because HyDE never writes that key — without it, GTK clients like Chromium in "Use GTK" mode stay light on dark themes.
 - Temporary Hypridle mitigation that keeps 60-second dimming but disables automatic lock, DPMS-off and suspend while the Hyprlock 0.9.6 input issue is unresolved.
+- Closing the laptop lid locks the session (same path as `SUPER + L`) and turns off only the internal `eDP-*` panels; the machine never suspends or hibernates, so work keeps running and external displays stay on. Requires the sudo `system` module, which installs a logind drop-in ignoring the lid. If Hyprlock stops accepting input after opening the lid, switch to a TTY and run `pkill -USR1 hyprlock`.
 - Dual-screen brightness popup for the laptop panel and external monitor through DDC/CI.
 - Clean Zsh startup without an automatic Fastfetch banner, plus paths for Bun, Volta, PNPM global CLIs, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
 - Optional wallpaper restoration from Nextcloud.
@@ -64,7 +65,7 @@ cd My-HyDE-dots
 ./install.sh
 ```
 
-Run interactively on a terminal and the installer shows a guided flow — module picker (full, themes-only, cursor-only, or custom), a pacman confirmation, one up-front `sudo` prompt kept alive while steps run, a spinner per step, and a closing summary with the backup path. It bootstraps `gum` (official Arch package) for the UI when missing. Non-interactive runs — piped input, `--yes`, `--dry-run`, or no `gum` — print plain output and accept defaults, so CI and scripts are unaffected. Modules can also be selected explicitly with `--only packages,cursor,config,themes,apply`; every step logs to `~/.local/state/my-hyde-dots/install-<timestamp>.log`.
+Run interactively on a terminal and the installer shows a guided flow — module picker (full, themes-only, cursor-only, or custom), a pacman confirmation, one up-front `sudo` prompt kept alive while steps run, a spinner per step, and a closing summary with the backup path. It bootstraps `gum` (official Arch package) for the UI when missing. Non-interactive runs — piped input, `--yes`, `--dry-run`, or no `gum` — print plain output and accept defaults, so CI and scripts are unaffected. Modules can also be selected explicitly with `--only packages,cursor,config,themes,system,apply`; `system` is the only module that writes outside `$HOME` (the logind lid drop-in, behind `sudo`, backed up and restored through a fixed allowlist); every step logs to `~/.local/state/my-hyde-dots/install-<timestamp>.log`.
 
 ## Official HyDE integration
 
@@ -75,6 +76,7 @@ The overlay stays within HyDE's documented user-owned extension points. It does 
 | Main preferences and cursor | `~/.config/hyde/config.toml` with the upstream schema |
 | Hyprland Lua overrides | `~/.config/hypr/hyprland.lua` |
 | Hypridle safety policy | `~/.config/hypr/hypridle.conf` |
+| Lid close without suspend (system, sudo) | `/etc/systemd/logind.conf.d/10-my-hyde-lid.conf` |
 | Waybar layout, module and CSS | `~/.config/waybar/layouts/`, `modules/`, and `user-style.css` |
 | Swaync notification CSS | `~/.config/swaync/user-style.css` |
 | Wlogout power menu style | `~/.config/wlogout/style_1.css` |

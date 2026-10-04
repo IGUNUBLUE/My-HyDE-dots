@@ -51,6 +51,7 @@ This repository is the installable, update-safe source of truth for the owner's 
 - Treat output names, positions, refresh rates, and scales as hardware-specific. Inspect `hyprctl monitors all` before changing them.
 - After a change, require an empty `hyprctl configerrors` result.
 - Preserve the temporary Hypridle mitigation: dimming remains enabled, while automatic lock, DPMS-off and suspend stay disabled until Hyprlock passes a controlled dual-monitor lock/unlock test.
+- Preserve the lid policy: lid close locks and blanks only `eDP-*` panels through `locked` switch binds, and the `system` module's logind drop-in keeps the machine from suspending. Files outside `$HOME` may only be added through the `system/` tree and the shared allowlist in `install.sh`, `restore.sh` and `update-snapshot.sh`.
 
 ### Waybar
 

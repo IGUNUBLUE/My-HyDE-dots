@@ -154,3 +154,37 @@ set_interface_font("document-font-name", hyde.config.ui.document_font .. " " .. 
 set_interface_font("monospace-font-name", hyde.config.ui.monospace_font .. " " .. hyde.config.ui.monospace_font_size)
 set_interface_font("font-antialiasing", hyde.config.ui.font_antialiasing)
 set_interface_font("font-hinting", hyde.config.ui.font_hinting)
+
+-- Lid behaviour: closing the lid locks the session and powers off only the
+-- internal panel; the machine keeps running (no suspend, no hibernate). This
+-- only holds while systemd-logind ignores the lid, which the overlay's
+-- `system` module installs as /etc/systemd/logind.conf.d/10-my-hyde-lid.conf.
+-- See memory/decisions/2026-10-03-lid-lock-no-suspend.md.
+--
+-- libinput reports the lid switch "on" when the lid is CLOSED. "Lid Switch" is
+-- the generic ACPI lid device name (PNP0C0D). `locked = true` is the Lua form
+-- of `bindl`, so the binds also fire on a locked session. Internal panels are
+-- found at runtime by the generic eDP-* connector name; external outputs are
+-- never touched, so a docked session keeps running on them.
+local function set_internal_panels(action)
+	for _, monitor in ipairs(hl.get_monitors()) do
+		if tostring(monitor.name):match("^eDP%-") then
+			hl.dispatch(hl.dsp.dpms({ action = action, monitor = monitor.name }))
+		end
+	end
+end
+
+hl.bind("switch:on:Lid Switch", function()
+	-- Same lock path as SUPER + L (loginctl lock-session -> hypridle lock_cmd).
+	hl.exec_cmd(hyde.sh.session.lock())
+	set_internal_panels("off")
+end, {
+	locked = true,
+	description = "[Hardware Controls|Lid] lock + internal panel off on lid close (no suspend)",
+})
+hl.bind("switch:off:Lid Switch", function()
+	set_internal_panels("on")
+end, {
+	locked = true,
+	description = "[Hardware Controls|Lid] internal panel on on lid open",
+})
