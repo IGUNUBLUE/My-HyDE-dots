@@ -49,7 +49,7 @@ chmod 0755 "$repo_dir/dotfiles/.local/bin/my-hyde-qt-menu"
 
 # Wallbash theme-switch hooks (GTK refresh, Waybar guard, rhun follow) and the
 # rhun themes they select.
-for hook in gtk-dark-mode:my-hyde-gtk-dark-mode waybar-guard:my-hyde-waybar-guard rhun-theme:my-hyde-rhun-theme; do
+for hook in gtk-dark-mode:my-hyde-gtk-dark-mode waybar-guard:my-hyde-waybar-guard rhun-theme:my-hyde-rhun-theme vscodium-theme:my-hyde-vscodium-theme; do
     copy_dot "$HOME/.config/hyde/wallbash/always/${hook%%:*}.dcol" "$repo_dir/dotfiles/.config/hyde/wallbash/always/${hook%%:*}.dcol"
     copy_dot "$HOME/.config/hyde/wallbash/scripts/${hook#*:}.sh" "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/${hook#*:}.sh"
     chmod 0755 "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/${hook#*:}.sh"

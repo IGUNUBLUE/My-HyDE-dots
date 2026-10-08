@@ -192,6 +192,15 @@ for m in json.load(sys.stdin):
     ws = m["activeWorkspace"]["id"]
     fs = any(c["workspace"]["id"] == ws and c["fullscreen"] for c in clients)
     print(m["name"], "%d,%d" % (m["x"], m["y"] + 4), "%dx20" % int(m["width"] / m["scale"]), fs)')
+    vsc="$cfg/VSCodium/User/settings.json"
+    if [[ -f $vsc ]]; then
+        vsc_want="$theme"; [[ $theme == LAGC\ * ]] || vsc_want="LAGC Calm ${mode^}"
+        vsc_got=$(python3 -c 'import json,re,sys
+t=open(sys.argv[1]).read(); t=re.sub(r"^\s*//.*$","",t,flags=re.M); t=re.sub(r",(\s*[}\]])",r"\1",t)
+d=json.loads(t); auto=d.get("window.autoDetectColorScheme", False)
+print(d.get("workbench.preferred%sColorTheme" % sys.argv[2].title()) if auto else d.get("workbench.colorTheme"))' "$vsc" "$mode")
+        expect "VSCodium effective theme" "$vsc_got" "$vsc_want"
+    fi
     if [[ -f $cfg/rhun/config ]]; then
         expect "rhun theme" "$(awk -F' = ' '$1=="theme"{print $2;exit}' "$cfg/rhun/config")" "$(tr '[:upper:] ' '[:lower:]-' <<< "$theme")"
     fi

@@ -470,6 +470,98 @@ esac
         box.close()
 
 
+# --- my-hyde-vscodium-theme.sh ------------------------------------------------
+
+VSCODIUM_SETTINGS = """{
+    // user comment that must survive
+    "workbench.startupEditor": "none",
+    "window.autoDetectColorScheme": true,
+    "workbench.preferredLightColorTheme": "LAGC Calm Light",
+    "git.autofetch": true
+}
+"""
+
+
+def vscodium_sandbox(mode: str, settings: str | None = VSCODIUM_SETTINGS) -> Sandbox:
+    box = Sandbox()
+    user = box.config / "VSCodium/User"
+    user.mkdir(parents=True)
+    (user / ".wallbash-mode").write_text(mode + "\n")
+    if settings is not None:
+        (user / "settings.json").write_text(settings)
+    return box
+
+
+def vscodium_settings(box: Sandbox) -> dict:
+    import json
+    import re
+    text = (box.config / "VSCodium/User/settings.json").read_text()
+    return json.loads(re.sub(r"^\s*//.*$", "", text, flags=re.M))
+
+
+def test_vscodium_follows_every_lagc_theme() -> None:
+    for name, mode, family in (("LAGC Calm Dark", "dark", "Calm"), ("LAGC Calm Light", "light", "Calm"),
+                               ("LAGC Tech Dark", "dark", "Tech"), ("LAGC Tech Light", "light", "Tech")):
+        box = vscodium_sandbox(mode)
+        try:
+            result = box.run("my-hyde-vscodium-theme.sh", HYDE_THEME=name)
+            check(result.returncode == 0, f"vscodium hook failed for {name}: {result.stderr}")
+            s = vscodium_settings(box)
+            check(s.get("workbench.colorTheme") == name, f"{name}: colorTheme = {s.get('workbench.colorTheme')!r}")
+            # autoDetectColorScheme picks one of these; both must be the active family.
+            check(s.get("workbench.preferredDarkColorTheme") == f"LAGC {family} Dark",
+                  f"{name}: preferredDarkColorTheme = {s.get('workbench.preferredDarkColorTheme')!r}")
+            check(s.get("workbench.preferredLightColorTheme") == f"LAGC {family} Light",
+                  f"{name}: preferredLightColorTheme = {s.get('workbench.preferredLightColorTheme')!r}")
+            text = (box.config / "VSCodium/User/settings.json").read_text()
+            check("// user comment that must survive" in text and s.get("git.autofetch") is True,
+                  f"{name}: vscodium hook dropped user settings or comments")
+        finally:
+            box.close()
+
+
+def test_vscodium_non_lagc_falls_back_to_calm() -> None:
+    for mode in ("dark", "light"):
+        box = vscodium_sandbox(mode)
+        try:
+            box.run("my-hyde-vscodium-theme.sh", HYDE_THEME="Catppuccin Mocha")
+            s = vscodium_settings(box)
+            check(s.get("workbench.colorTheme") == f"LAGC Calm {mode.title()}",
+                  f"non-LAGC {mode}: colorTheme = {s.get('workbench.colorTheme')!r}")
+        finally:
+            box.close()
+
+
+def test_vscodium_idempotent_and_creates_settings() -> None:
+    box = vscodium_sandbox("dark")
+    try:
+        box.run("my-hyde-vscodium-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        path = box.config / "VSCodium/User/settings.json"
+        first = path.stat().st_mtime_ns
+        box.run("my-hyde-vscodium-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        check(path.stat().st_mtime_ns == first, "unchanged settings.json must not be rewritten")
+    finally:
+        box.close()
+    box = vscodium_sandbox("light", settings=None)
+    try:
+        box.run("my-hyde-vscodium-theme.sh", HYDE_THEME="LAGC Tech Light")
+        check(vscodium_settings(box).get("workbench.colorTheme") == "LAGC Tech Light",
+              "vscodium hook must create settings.json when missing")
+    finally:
+        box.close()
+
+
+def test_vscodium_leaves_unparseable_settings_alone() -> None:
+    broken = '{\n    "workbench.colorTheme": "Default Dark Modern",\n    "oops": \n'
+    box = vscodium_sandbox("dark", settings=broken)
+    try:
+        box.run("my-hyde-vscodium-theme.sh", HYDE_THEME="LAGC Calm Dark")
+        check((box.config / "VSCodium/User/settings.json").read_text() == broken,
+              "a settings.json that does not parse must not be touched")
+    finally:
+        box.close()
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

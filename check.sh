@@ -494,6 +494,16 @@ grep -Fqx '${XDG_RUNTIME_DIR:-/tmp}/hyde/.waybar-guard|"$WALLBASH_SCRIPTS/my-hyd
 bash -n "$waybar_guard_script"
 grep -Fq 'install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-waybar-guard.sh"' "$repo_dir/install.sh"
 
+vscodium_follow_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/vscodium-theme.dcol"
+vscodium_follow_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-vscodium-theme.sh"
+[[ -s "$vscodium_follow_template" && -x "$vscodium_follow_script" ]] || {
+    printf 'VSCodium theme-follow hook is missing or not executable.\n' >&2
+    exit 1
+}
+grep -Fqx '${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User/.wallbash-mode|"$WALLBASH_SCRIPTS/my-hyde-vscodium-theme.sh"' "$vscodium_follow_template"
+bash -n "$vscodium_follow_script"
+grep -Fq 'install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-vscodium-theme.sh"' "$repo_dir/install.sh"
+
 python "$repo_dir/tests/qt-menu.py"
 python "$repo_dir/tests/theme-contract.py"
 python "$repo_dir/tests/hooks.py"

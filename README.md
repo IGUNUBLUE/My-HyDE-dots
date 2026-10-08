@@ -171,7 +171,7 @@ The overlay also includes a VS Code-compatible extension containing four selecta
 ./install.sh --vscodium-theme-only
 ```
 
-The normal `./install.sh` flow installs or updates the same extension whenever the `codium` CLI is available. In VSCodium, use **Preferences: Color Theme** (`Ctrl+K`, then `Ctrl+T`) and select `LAGC Calm Dark` or `LAGC Calm Light`. To remove only this overlay-owned extension:
+The normal `./install.sh` flow installs or updates the same extension whenever the `codium` CLI is available. VSCodium also **follows the active HyDE theme**: on every switch (`Super+Shift+T`) the `always/vscodium-theme.dcol` hook sets `workbench.colorTheme` to the matching LAGC theme and both `workbench.preferredDarkColorTheme`/`preferredLightColorTheme` to its family (needed because `window.autoDetectColorScheme` makes VSCodium ignore `colorTheme`); non-LAGC HyDE themes fall back to LAGC Calm by light/dark mode. VSCodium applies the change live. Only those three keys in `~/.config/VSCodium/User/settings.json` are rewritten; comments and other settings are kept and an unparseable file is left alone. In VSCodium, use **Preferences: Color Theme** (`Ctrl+K`, then `Ctrl+T`) and select `LAGC Calm Dark` or `LAGC Calm Light`. To remove only this overlay-owned extension:
 
 ```bash
 ./restore.sh --vscodium-theme-only

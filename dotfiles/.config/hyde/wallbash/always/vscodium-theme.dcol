@@ -1,0 +1,2 @@
+${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User/.wallbash-mode|"$WALLBASH_SCRIPTS/my-hyde-vscodium-theme.sh"
+<wallbash_mode>

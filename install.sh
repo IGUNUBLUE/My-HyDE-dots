@@ -520,6 +520,7 @@ step_config() {
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/codex.dcol" "$HOME/.config/hyde/wallbash/always/codex.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/gtk-dark-mode.dcol" "$HOME/.config/hyde/wallbash/always/gtk-dark-mode.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/waybar-guard.dcol" "$HOME/.config/hyde/wallbash/always/waybar-guard.dcol"
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/vscodium-theme.dcol" "$HOME/.config/hyde/wallbash/always/vscodium-theme.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/omp.dcol" "$HOME/.config/hyde/wallbash/always/omp.dcol"
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-btop.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-btop.sh" 0755
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/dunst.sh" "$HOME/.config/hyde/wallbash/scripts/dunst.sh" 0755
@@ -527,6 +528,7 @@ step_config() {
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-codex-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-codex-theme.sh" 0755
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-gtk-dark-mode.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-gtk-dark-mode.sh" 0755
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-waybar-guard.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-waybar-guard.sh" 0755
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-vscodium-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-vscodium-theme.sh" 0755
     install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-omp-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-omp-theme.sh" 0755
     # Wallbash skips a template whose target directory does not exist; creating
     # these is a no-op when the agent CLI is not installed.
