@@ -1,0 +1,5 @@
+[general]
+# Show one image pixel per framebuffer pixel instead of fitting and filtering
+# the preview. Pan with the middle button; Ctrl+wheel changes the zoom.
+# Export already uses the original image resolution regardless of preview zoom.
+input-scale = 1.0

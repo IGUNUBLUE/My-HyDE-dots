@@ -83,6 +83,7 @@ The overlay stays within HyDE's documented user-owned extension points. It does 
 | Themes and wallpapers | `~/.config/hyde/themes/<theme>/` with `wallpapers/` and `wall.set` |
 | Wallbash templates and callbacks | `~/.config/hyde/wallbash/always/` and `scripts/` |
 | Shell and terminal overrides | `~/.config/zsh/user.zsh` and `~/.config/kitty/kitty.conf` |
+| Satty image preview | `~/.config/satty/config.toml` |
 
 HyDE continues to own `~/.local/share/hyde`, `~/.local/share/hypr`, `~/.local/share/waybar`, `~/.local/lib/hyde`, and Waybar's generated `config.jsonc`, `style.css`, and `theme.css`.
 
@@ -93,6 +94,34 @@ To use another wallpaper:
 ```bash
 MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
 ```
+
+## Satty text clarity
+
+Satty opens images at 100% with `[general] input-scale = 1.0`, avoiding the
+filtered preview produced by fitting an image into the available window. Large
+captures may extend beyond the window: drag with the middle mouse button to pan,
+or use `Ctrl+wheel` to change zoom. This affects the preview only. Satty already
+exports PNG at the input image's resolution; it cannot recover detail missing
+from the source or prevent another application from compressing a shared image.
+
+The option is documented in the [Satty 0.22.0 configuration](https://github.com/Satty-org/Satty/blob/v0.22.0/README.md#configuration-file).
+Its [renderer](https://github.com/Satty-org/Satty/blob/v0.22.0/src/femtovg_area/imp.rs)
+uses the explicit input scale for the preview and renders exports at native
+resolution. Live tests on the installed grim 1.5.0 found correct native dimensions
+on both scale-1 and scale-1.25 outputs, so the overlay leaves HyDE's capture
+commands and keybindings unchanged.
+
+Install just this preference, backing up any existing file, then reopen Satty:
+
+```bash
+./install.sh --satty-only
+```
+
+No desktop reload is needed. The normal `config` module also installs this file,
+and `update-snapshot.sh` captures it. `restore.sh <backup-directory>` restores the
+previous file or removes it if the installation created it, using the existing
+backup manifest. The `satty` package is available in Arch's official `extra`
+repository; the focused installer skips packages, as the other focused modes do.
 
 ## LAGC Tech themes
 

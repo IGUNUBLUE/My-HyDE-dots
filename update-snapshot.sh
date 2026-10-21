@@ -39,6 +39,7 @@ copy_dot "$HOME/.config/waybar/user-style.css" "$repo_dir/dotfiles/.config/wayba
 copy_dot "$HOME/.config/swaync/user-style.css" "$repo_dir/dotfiles/.config/swaync/user-style.css"
 copy_dot "$HOME/.config/wlogout/style_1.css" "$repo_dir/dotfiles/.config/wlogout/style_1.css"
 copy_dot "$HOME/.config/kitty/kitty.conf" "$repo_dir/dotfiles/.config/kitty/kitty.conf"
+copy_dot "$HOME/.config/satty/config.toml" "$repo_dir/dotfiles/.config/satty/config.toml"
 copy_dot "$HOME/.config/zsh/user.zsh" "$repo_dir/dotfiles/.config/zsh/user.zsh"
 copy_dot "$HOME/.local/bin/hyde-brightness-panel" "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"
 chmod 0755 "$repo_dir/dotfiles/.local/bin/hyde-brightness-panel"

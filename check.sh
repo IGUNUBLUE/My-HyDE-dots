@@ -8,6 +8,12 @@ trap 'rm -rf -- "$pycache_dir" "$cursor_build_dir"' EXIT
 [[ -s "$repo_dir/AGENTS.md" ]] || { printf 'AGENTS.md is missing or empty.\n' >&2; exit 1; }
 [[ -s "$repo_dir/memory/index.md" ]] || { printf 'Repository memory index is missing or empty.\n' >&2; exit 1; }
 bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot.sh" "$repo_dir/check.sh"
+python - "$repo_dir/dotfiles/.config/satty/config.toml" <<'PY'
+import sys
+import tomllib
+with open(sys.argv[1], "rb") as source:
+    tomllib.load(source)
+PY
 grep -Fqx 'imagemagick' "$repo_dir/packages.arch"
 command -v magick >/dev/null || {
     printf 'ImageMagick is required to generate distinct HyDE theme wallpapers.\n' >&2

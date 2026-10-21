@@ -4,6 +4,7 @@ Read active and monitoring entries relevant to a component before modifying it.
 
 | Status | Scope | Memory | Summary |
 | --- | --- | --- | --- |
+| active | Satty, screenshots, mixed-scale displays | [Satty native preview](decisions/2026-10-21-satty-native-preview.md) | Open the preview at 100%; PNG exports already preserve source pixels. Installed grim 1.5.0 uses correct per-capture scale in live tests, so do not add a scale wrapper based on its generic help text alone. |
 | active | Hypridle, Hyprlock, NVIDIA, displays | [Hyprlock input stall mitigation](incidents/2026-09-02-hyprlock-input-stall.md) | Keep automatic lock, DPMS-off and suspend disabled until a controlled dual-monitor unlock test succeeds on a fixed version. |
 | active | Hyprland, logind, Hyprlock, laptop lid | [Lid locks without suspending](decisions/2026-10-03-lid-lock-no-suspend.md) | Lid close runs the SUPER + L lock and DPMS-off on eDP-* panels via locked switch binds; a sudo-installed logind drop-in ignores the lid so the machine keeps working; user-initiated, does not lift the hypridle mitigation; recovery `pkill -USR1 hyprlock` from a TTY. |
 | active | Waybar, Wallbash, theme switching | [Waybar reload hang guard](incidents/2026-10-03-waybar-reload-hang.md) | Waybar 0.15 can hang with no bars when HyDE's SIGUSR2 reloads overlap; an always/ guard restarts the unit once if a monitor stays without a bar after a switch; guarded by `tests/hooks.py` and `tests/live-theme.sh`. |

@@ -12,11 +12,12 @@ assume_yes=false
 qt_menu_only=false
 vscodium_theme_only=false
 rhun_theme_only=false
+satty_only=false
 only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -29,6 +30,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --qt-menu-only       refresh the Qt menu template and exit
   --vscodium-theme-only  reinstall the VSCodium LAGC themes and exit
   --rhun-theme-only    reinstall the rhun LAGC editor themes and exit
+  --satty-only         install Satty's user preferences only (no reload needed)
 EOF
 }
 
@@ -38,6 +40,7 @@ while (($#)); do
         --qt-menu-only) qt_menu_only=true; skip_packages=true ;;
         --vscodium-theme-only) vscodium_theme_only=true; skip_packages=true ;;
         --rhun-theme-only) rhun_theme_only=true; skip_packages=true ;;
+        --satty-only) satty_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         --yes|--non-interactive) assume_yes=true ;;
         --only) shift; only_modules=${1:-} ;;
@@ -78,7 +81,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only; then
     interactive=true
 fi
 
@@ -498,6 +501,7 @@ step_cursor() {
 }
 
 step_config() {
+    install_dot "$repo_dir/dotfiles/.config/satty/config.toml" "$HOME/.config/satty/config.toml"
     install_dot "$work_dir/config.toml" "$HOME/.config/hyde/config.toml"
     install_dot "$repo_dir/dotfiles/.config/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
     install_dot "$repo_dir/dotfiles/.config/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
@@ -664,8 +668,9 @@ only_install_count=0
 $qt_menu_only && ((only_install_count += 1))
 $vscodium_theme_only && ((only_install_count += 1))
 $rhun_theme_only && ((only_install_count += 1))
+$satty_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
-    printf 'Use only one of --qt-menu-only, --vscodium-theme-only or --rhun-theme-only.\n' >&2
+    printf 'Use only one of --qt-menu-only, --vscodium-theme-only, --rhun-theme-only or --satty-only.\n' >&2
     exit 2
 fi
 
@@ -692,6 +697,12 @@ if $qt_menu_only; then
         "$HOME/.local/bin/my-hyde-qt-menu"
         printf 'Qt menu preferences installed. Backup: %s\n' "$backup_dir"
     fi
+    exit 0
+fi
+
+if $satty_only; then
+    install_dot "$repo_dir/dotfiles/.config/satty/config.toml" "$HOME/.config/satty/config.toml"
+    printf 'Satty preferences installed. Reopen Satty. Backup: %s\n' "$backup_dir"
     exit 0
 fi
 
