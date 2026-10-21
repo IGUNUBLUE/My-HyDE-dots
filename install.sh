@@ -13,11 +13,12 @@ qt_menu_only=false
 vscodium_theme_only=false
 rhun_theme_only=false
 satty_only=false
+mime_only=false
 only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only] [--mime-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -31,6 +32,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --vscodium-theme-only  reinstall the VSCodium LAGC themes and exit
   --rhun-theme-only    reinstall the rhun LAGC editor themes and exit
   --satty-only         install Satty's user preferences only (no reload needed)
+  --mime-only          merge Dolphin/Ark defaults, preserving other associations
 EOF
 }
 
@@ -41,6 +43,7 @@ while (($#)); do
         --vscodium-theme-only) vscodium_theme_only=true; skip_packages=true ;;
         --rhun-theme-only) rhun_theme_only=true; skip_packages=true ;;
         --satty-only) satty_only=true; skip_packages=true ;;
+        --mime-only) mime_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         --yes|--non-interactive) assume_yes=true ;;
         --only) shift; only_modules=${1:-} ;;
@@ -81,7 +84,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only && ! $mime_only; then
     interactive=true
 fi
 
@@ -500,7 +503,21 @@ step_cursor() {
     install_dot "$repo_dir/dotfiles/.local/share/icons/default/index.theme" "$HOME/.local/share/icons/default/index.theme"
 }
 
+install_mime_defaults() {
+    local merged
+    merged=$(mktemp)
+    if ! python "$repo_dir/tools/merge-mime-defaults.py" \
+        "$HOME/.config/mimeapps.list" \
+        "$repo_dir/dotfiles/.config/hyde/mime-defaults.ini" "$merged"; then
+        rm -f -- "$merged"
+        return 1
+    fi
+    install_dot "$merged" "$HOME/.config/mimeapps.list"
+    rm -f -- "$merged"
+}
+
 step_config() {
+    install_mime_defaults
     install_dot "$repo_dir/dotfiles/.config/satty/config.toml" "$HOME/.config/satty/config.toml"
     install_dot "$work_dir/config.toml" "$HOME/.config/hyde/config.toml"
     install_dot "$repo_dir/dotfiles/.config/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
@@ -669,8 +686,9 @@ $qt_menu_only && ((only_install_count += 1))
 $vscodium_theme_only && ((only_install_count += 1))
 $rhun_theme_only && ((only_install_count += 1))
 $satty_only && ((only_install_count += 1))
+$mime_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
-    printf 'Use only one of --qt-menu-only, --vscodium-theme-only, --rhun-theme-only or --satty-only.\n' >&2
+    printf 'Use only one focused installation option (--*-only).\n' >&2
     exit 2
 fi
 
@@ -703,6 +721,12 @@ fi
 if $satty_only; then
     install_dot "$repo_dir/dotfiles/.config/satty/config.toml" "$HOME/.config/satty/config.toml"
     printf 'Satty preferences installed. Reopen Satty. Backup: %s\n' "$backup_dir"
+    exit 0
+fi
+
+if $mime_only; then
+    install_mime_defaults
+    printf 'Dolphin/Ark associations merged. Backup: %s\n' "$backup_dir"
     exit 0
 fi
 
@@ -799,7 +823,7 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module step_packages step_cursor \
-    step_config step_themes step_apply install_rhun_theme step_system
+    step_config step_themes step_apply install_rhun_theme step_system install_mime_defaults
 export repo_dir backup_dir work_dir dry_run MODULES_CSV
 
 $interactive && mkdir -p "$state_dir" && : > "$install_log"

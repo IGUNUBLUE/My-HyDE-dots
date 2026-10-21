@@ -1,6 +1,10 @@
 [Unit]
 Description=Restore GTK3 cursor size after HyDE theme edits settings.ini
+StartLimitIntervalSec=10
+StartLimitBurst=20
 
 [Service]
 Type=oneshot
+# Coalesce HyDE's writes and our own correction before reading the final files.
+ExecStartPre=/usr/bin/sleep 1
 ExecStart=%h/.local/bin/gtk3-cursor-fix

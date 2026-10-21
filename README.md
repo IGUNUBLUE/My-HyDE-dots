@@ -27,6 +27,9 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Dual-screen brightness popup for the laptop panel and external monitor through DDC/CI.
 - Clean Zsh startup without an automatic Fastfetch banner, plus paths for Bun, Volta, PNPM global CLIs, Linuxbrew and Kiro while leaving HyDE in charge of Starship and Oh My Zsh.
 - Optional wallpaper restoration from Nextcloud.
+- Dolphin for folders/trash and Ark for ZIP files. Installation merges only
+  these MIME preferences, preserving browser, editor and other associations;
+  it never snapshots the full personal `mimeapps.list`.
 
 ## Visual layer
 
@@ -70,6 +73,18 @@ Run interactively on a terminal and the installer shows a guided flow — module
 ## Official HyDE integration
 
 The overlay stays within HyDE's documented user-owned extension points. It does not patch the shared runtime, generated Waybar files, or theme output in place.
+
+Use `./install.sh --mime-only` to apply only the Dolphin/Ark associations from
+`dotfiles/.config/hyde/mime-defaults.ini`. The existing `~/.config/mimeapps.list`
+is backed up before merging; `./restore.sh <backup-directory>` restores that
+file from the recorded backup. Other associations and comments are preserved.
+
+For updates on this Swaync profile, inspect the current official installer first:
+the full restore at HyDE `fa2fd57a` also installs Dunst, and its `--test` mode
+still runs migrations. The [2026-10-21 update record](memory/decisions/2026-10-21-hyde-update-swaync.md)
+documents the official granular deployment used to preserve Swaync, the backup
+and rollback boundaries, and the live validation. Reapply this overlay after
+updating upstream and run `tests/live-theme.sh` before accepting the result.
 
 | Customization | Supported HyDE location |
 | --- | --- |

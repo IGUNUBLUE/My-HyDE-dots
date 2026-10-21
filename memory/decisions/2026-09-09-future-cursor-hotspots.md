@@ -37,3 +37,25 @@ Vendor the reviewed upstream XCursor `dist/` payload under `dotfiles/.local/shar
 ## Exit criteria
 
 Revisit when the monitor scales change, HyDE changes its cursor schema, upstream publishes a reviewed hotspot fix, or a reproducible shape-specific hotspot error survives a fresh login with all selectors agreeing. Any custom hotspot patch must document the affected cursor name, scale, old coordinate, new coordinate and visual acceptance evidence.
+
+## Follow-up 2026-10-21: keep the GTK cursor watcher alive
+
+During the post-cleanup theme checks, `gtk3-cursor-fix.service` reached the
+default five starts per ten seconds; systemd propagated `start-limit-hit` to
+its path unit and stopped watching. Each helper invocation had exited zero.
+The repeated writes from HyDE, GTK refresh hooks and the correction itself are
+legitimate, so resetting the failed state alone is not a lasting fix.
+
+The tracked service now waits one second before reading the files to coalesce
+writes, with an explicit burst limit of twenty starts per ten seconds. The
+helper remains idempotent and the path unit retains its own trigger limit.
+Installed with the backed-up config module, reloaded the user manager, reset
+only the two affected units and restarted the watcher. A live burst of eight
+writes to both files left it active with GTK/XSettings at 32. Native cursor
+size 46 and the cursor payload are unchanged. `tests/live-theme.sh` now checks
+the path's active state and both size values after every theme switch.
+The full updated live suite passed 160/160 and restored the original theme.
+If rolling back these unit files, reload the user manager with
+`systemctl --user daemon-reload`, clear any recorded failure on the two cursor
+units and restart the cursor path. Do not change the cursor payload to address
+this service activation problem.

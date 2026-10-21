@@ -147,6 +147,10 @@ sys.exit(0 if all(any(l["namespace"] == "waybar" for ls in v["levels"].values() 
         org.freedesktop.appearance color-scheme 2>/dev/null | grep -oE 'uint32 [0-9]+' | awk '{print $2}')" "$portal_want"
     expect "gtk-3.0 prefer-dark" "$(ini "$cfg/gtk-3.0/settings.ini" gtk-application-prefer-dark-theme)" "$([[ $mode == dark ]] && echo 1 || echo 0)"
     expect "gtk-3.0 theme" "$(ini "$cfg/gtk-3.0/settings.ini" gtk-theme-name)" "$(hvar "$theme" GTK_THEME)"
+    cursor_size=$(awk -F= '/^XCURSOR_SIZE=/{print $2;exit}' "$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf")
+    expect "cursor watcher" "$(systemctl --user is-active gtk3-cursor-fix.path)" active
+    expect "GTK3 cursor size" "$(ini "$cfg/gtk-3.0/settings.ini" gtk-cursor-theme-size)" "$cursor_size"
+    expect "XSettings cursor size" "$(awk '$1=="Gtk/CursorThemeSize"{print $2;exit}' "$cfg/xsettingsd/xsettingsd.conf")" "$cursor_size"
     expect "xsettingsd running" "$(systemctl --user is-active xsettingsd.service)" active
     gtk_dir=${XDG_DATA_HOME:-$HOME/.local/share}/themes/$(hvar "$theme" GTK_THEME)
     expect "Wallbash-Gtk bg" "$(grep -oE '@define-color theme_bg_color #[0-9A-Fa-f]{6}' "$gtk_dir/gtk-3.0/gtk.css" | head -1 | awk '{print $3}' | upper)" "#$base"
