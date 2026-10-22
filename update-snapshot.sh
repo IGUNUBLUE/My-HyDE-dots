@@ -21,6 +21,12 @@ copy_theme() {
 
 mkdir -p "$repo_dir/dotfiles/.config/hyde"
 sed "s|$HOME|@HOME@|g" "$HOME/.config/hyde/config.toml" > "$repo_dir/dotfiles/.config/hyde/config.toml.in"
+# Snapshot only the declared Herdr/Radar appearance keys, never session/plugin state.
+for item in herdr-theme herdr-radar; do
+    if [[ $item == herdr-theme ]]; then live="$HOME/.config/herdr/config.toml"; else live="$HOME/.config/herdr/plugins/config/hhdebb.herdr-radar/config.toml"; fi
+    profile="$repo_dir/dotfiles/.config/hyde/$item.toml"
+    python "$repo_dir/tools/merge-toml-overlay.py" --snapshot "$live" "$profile" "$profile"
+done
 copy_dot "$HOME/.config/environment.d/90-cursor-theme.conf" "$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf"
 copy_dot "$HOME/.icons/default/index.theme" "$repo_dir/dotfiles/.icons/default/index.theme"
 copy_dot "$HOME/.local/share/icons/default/index.theme" "$repo_dir/dotfiles/.local/share/icons/default/index.theme"

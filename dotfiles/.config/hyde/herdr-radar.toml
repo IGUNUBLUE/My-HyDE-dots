@@ -1,0 +1,2 @@
+# Radar stays enabled; only its competing appearance writer is disabled.
+follow_appearance = false

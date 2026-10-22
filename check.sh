@@ -16,6 +16,8 @@ with open(sys.argv[1], "rb") as source:
 PY
 PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.local/bin/my-hyde-network-status"
 python "$repo_dir/tests/network.py"
+python "$repo_dir/tests/herdr-theme.py"
+bash -n "$repo_dir/tools/herdr-theme.sh"
 python - "$repo_dir" <<'PYTHON'
 import configparser
 import json

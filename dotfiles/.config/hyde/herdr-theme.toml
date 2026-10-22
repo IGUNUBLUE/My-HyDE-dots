@@ -1,0 +1,17 @@
+# User overlay: native Herdr 0.9.5 appearance switching owns the mode.
+[theme]
+name = "terminal"
+auto_switch = true
+dark_name = "terminal"
+light_name = "terminal"
+
+[theme.custom.light]
+overlay0 = "darkgray"
+overlay1 = "gray"
+surface_dim = "white"
+active_row_bg = "white"
+
+[theme.custom.dark]
+overlay1 = "blue"
+surface_dim = "black"
+active_row_bg = "darkgray"

@@ -15,11 +15,12 @@ rhun_theme_only=false
 satty_only=false
 mime_only=false
 network_only=false
+herdr_theme_only=false
 only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only] [--mime-only] [--network-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only] [--mime-only] [--network-only] [--herdr-theme-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -35,6 +36,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --satty-only         install Satty's user preferences only (no reload needed)
   --mime-only          merge Dolphin/Ark defaults, preserving other associations
   --network-only       install networkmanager-dmenu and replace the old network interfaces
+  --herdr-theme-only   merge Herdr/Radar appearance settings and reload config
 EOF
 }
 
@@ -47,6 +49,7 @@ while (($#)); do
         --satty-only) satty_only=true; skip_packages=true ;;
         --mime-only) mime_only=true; skip_packages=true ;;
         --network-only) network_only=true ;;
+        --herdr-theme-only) herdr_theme_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         --yes|--non-interactive) assume_yes=true ;;
         --only) shift; only_modules=${1:-} ;;
@@ -87,7 +90,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only && ! $mime_only && ! $network_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only && ! $mime_only && ! $network_only && ! $herdr_theme_only; then
     interactive=true
 fi
 
@@ -476,6 +479,7 @@ step_system() {
 # Steps
 # ---------------------------------------------------------------------------
 source "$repo_dir/tools/network.sh"
+source "$repo_dir/tools/herdr-theme.sh"
 
 step_packages() {
     local missing=() package
@@ -525,6 +529,7 @@ install_mime_defaults() {
 step_config() {
     require_network_gui
     install_network_config
+    install_herdr_theme
     install_mime_defaults
     install_dot "$repo_dir/dotfiles/.config/satty/config.toml" "$HOME/.config/satty/config.toml"
     install_dot "$work_dir/config.toml" "$HOME/.config/hyde/config.toml"
@@ -694,6 +699,7 @@ $rhun_theme_only && ((only_install_count += 1))
 $satty_only && ((only_install_count += 1))
 $mime_only && ((only_install_count += 1))
 $network_only && ((only_install_count += 1))
+$herdr_theme_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
     printf 'Use only one focused installation option (--*-only).\n' >&2
     exit 2
@@ -734,6 +740,12 @@ fi
 if $mime_only; then
     install_mime_defaults
     printf 'Dolphin/Ark associations merged. Backup: %s\n' "$backup_dir"
+    exit 0
+fi
+
+if $herdr_theme_only; then
+    install_herdr_theme
+    printf 'Herdr appearance settings installed. Backup: %s\n' "$backup_dir"
     exit 0
 fi
 
@@ -844,7 +856,7 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_vscodium_theme has_module step_packages step_cursor \
     step_config step_themes step_apply install_rhun_theme step_system install_mime_defaults \
     network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
-    apply_network_config remove_legacy_network_applet
+    apply_network_config remove_legacy_network_applet install_herdr_theme
 export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes
 
 $interactive && mkdir -p "$state_dir" && : > "$install_log"

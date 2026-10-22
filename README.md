@@ -110,6 +110,29 @@ To use another wallpaper:
 MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
 ```
 
+## Herdr contrast and Radar
+
+Herdr's `terminal` theme follows Mira/Kitty's ANSI colors. Its light/dark
+custom color tables require `theme.auto_switch = true` in Herdr 0.9.5. Radar
+1.3.14's appearance synchronizer forces that flag off, making light-mode
+selected tabs/buttons hard to read. Keep Herdr's native switching enabled and
+set the external plugin's documented `follow_appearance = false` preference.
+Radar's sidebar, tab-bar and agent indicators remain enabled; no plugin source
+is patched and no Mira or Herdr process is restarted.
+
+```bash
+./install.sh --herdr-theme-only
+```
+
+Normal config installation also merges these optional settings when Herdr is
+installed. Only the declared preferences in `dotfiles/.config/hyde/herdr-*.toml`
+are applied. Existing keys, plugin configuration, file permissions and private
+session state are preserved. Both files are prepared/validated before writing,
+backed up in the overlay manifest and reloaded through `herdr server reload-config`.
+`restore.sh` restores only recorded paths; `update-snapshot.sh` extracts only the
+declared preferences, never the whole Herdr config. With no running server,
+settings apply on the next start. See the [contrast decision](memory/decisions/2026-10-22-herdr-radar-contrast.md).
+
 ## Network GUI
 
 [networkmanager-dmenu](https://github.com/firecat53/networkmanager-dmenu) opens

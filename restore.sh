@@ -148,6 +148,9 @@ fi
 if [[ -f "$backup/.config/hyde/config.toml" && -f "$HOME/.config/hyde/config.toml" ]]; then
     hyde-shell config --no-daemon >/dev/null 2>&1 || true
 fi
+if [[ -f "$backup/.config/herdr/config.toml" ]] && command -v herdr >/dev/null; then
+    herdr server reload-config 2>/dev/null || true
+fi
 hyde-shell waybar --update 2>/dev/null || true
 hyprctl reload >/dev/null 2>&1 || true
 
