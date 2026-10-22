@@ -5,6 +5,15 @@
 - Scope: NetworkManager, Rofi, Waybar, install/restore/snapshot
 - Sources: explicit owner request to replace nmrs; upstream networkmanager-dmenu 2.7.2, official Arch extra package, HyDE current pkg_core.lst and variables.lua, HyDE Making Themes documentation, installed Rofi 2.0 parser.
 
+## Current state
+
+The accepted implementation is networkmanager-dmenu plus one custom/network-status
+Waybar module. The nmrs window and the two-native-module attempt below are history,
+not additional active components. Old nmrs names in lifecycle scripts are exact
+cleanup/rollback paths; the superseded nmrs decision is kept for incident context.
+The private package archive, backups and logs are rollback/evidence artifacts and
+are never installed automatically or added to the repository.
+
 ## Context
 
 nmrs 1.6 publishes an empty main window title. The owner accepted the proposed
@@ -50,7 +59,8 @@ the current nmrs package archive is in the user's private overlay package cache.
 Do not name a module instance `menu`. During this migration `network#menu`
 raised the live bar minimum from 24 to 49 pixels on both displays. Renaming it
 `network#connections` restored 24 pixels with identical font, margins and CSS.
-Keep this safe instance name and check actual layer height after reload.
+That intermediate module was later replaced by custom/network-status. Do not
+restore either intermediate module; keep checking actual layer height after reload.
 
 ## Validation
 
