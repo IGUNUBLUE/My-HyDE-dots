@@ -1,0 +1,12 @@
+{
+    "custom/network-status": {
+        "exec": "$HOME/.local/bin/my-hyde-network-status",
+        "return-type": "json",
+        "format": "{text}",
+        "max-length": 22,
+        "interval": 2,
+        "tooltip": true,
+        "on-click": "$HOME/.local/bin/my-hyde-network",
+        "on-click-right": "$HOME/.local/bin/my-hyde-network"
+    }
+}

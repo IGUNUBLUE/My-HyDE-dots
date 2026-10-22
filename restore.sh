@@ -106,7 +106,7 @@ while IFS= read -r -d '' source; do
     mkdir -p -- "$(dirname -- "$target")"
     cp -a -- "$source" "$target"
 done < <(find "$backup" -path "$backup/.system" -prune -o -type f ! -name .created ! -name .trees \
-    ! -name .cursor-state ! -name .system-created -print0)
+    ! -name .cursor-state ! -name .system-created ! -name .network-package-state -print0)
 
 # System files outside $HOME (install.sh `system` module). Only the same
 # allowlist install.sh writes may be touched; anything else is refused.
@@ -141,7 +141,13 @@ if $system_changed; then
     sudo systemctl reload systemd-logind || true
 fi
 
+[[ ! -f "$HOME/.local/bin/my-hyde-network" ]] || chmod 0755 "$HOME/.local/bin/my-hyde-network"
 [[ -f "$HOME/.local/bin/hyde-brightness-panel" ]] && chmod 0755 "$HOME/.local/bin/hyde-brightness-panel"
+# Restoring TOML alone can leave exported launcher settings pointing at a
+# removed style until HyDE regenerates its derived configuration.
+if [[ -f "$backup/.config/hyde/config.toml" && -f "$HOME/.config/hyde/config.toml" ]]; then
+    hyde-shell config --no-daemon >/dev/null 2>&1 || true
+fi
 hyde-shell waybar --update 2>/dev/null || true
 hyprctl reload >/dev/null 2>&1 || true
 
@@ -172,5 +178,12 @@ if [[ -f "$cursor_env" ]]; then
     fi
 else
     systemctl --user unset-environment XCURSOR_THEME XCURSOR_SIZE HYPRCURSOR_THEME HYPRCURSOR_SIZE || true
+fi
+if [[ -f "$backup/.network-package-state" ]]; then
+    printf 'Removed network frontends (reinstall before using their restored settings):\n'
+    cat "$backup/.network-package-state"
+    printf 'Reinstall nm-applet: sudo pacman -S --needed network-manager-applet\n'
+    printf 'For nmrs, reinstall its cached package or use your AUR helper.\n'
+    printf 'Package rollback is manual; networkmanager-dmenu stays installed.\n'
 fi
 printf 'Restore completed.\n'

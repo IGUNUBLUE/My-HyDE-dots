@@ -1,11 +1,16 @@
 # Arch packages needed by this overlay (official repos or configured trusted Arch-compatible repos).
 brightnessctl
 ddcutil
+desktop-file-utils
 gtk-layer-shell
 gum
 imagemagick
 inter-font
+libnm
 noto-fonts
+networkmanager
+networkmanager-dmenu
+rofi
 python-gobject
 satty
 tela-circle-icon-theme-blue

@@ -1,0 +1,49 @@
+/* Standalone network menu. HyDE owns theme.rasi and its four LAGC palettes. */
+@import "theme.rasi"
+* {
+    font: "Inter Medium 11";
+    background-color: @main-bg;
+    text-color: @main-fg;
+    border-color: @main-br;
+    spacing: 8px;
+}
+window {
+    width: 620px;
+    location: center;
+    anchor: center;
+    fullscreen: false;
+    border: 2px;
+    border-radius: 16px;
+    padding: 18px;
+    children: [mainbox];
+}
+mainbox { children: [inputbar, message, listview]; }
+inputbar {
+    children: [prompt, entry];
+    background-color: @main-ex;
+    border-radius: 8px;
+    padding: 12px;
+}
+prompt { background-color: transparent; }
+entry { background-color: transparent; placeholder: "Buscar red…"; }
+message { padding: 6px; }
+textbox { background-color: transparent; }
+listview {
+    lines: 10;
+    columns: 1;
+    fixed-height: false;
+    scrollbar: true;
+    cycle: false;
+}
+element { children: [element-text]; padding: 10px; border-radius: 8px; }
+element-text { background-color: transparent; text-color: inherit; }
+element normal.normal { background-color: @main-bg; text-color: @main-fg; }
+element alternate.normal { background-color: @main-ex; text-color: @main-fg; }
+element normal.active, element alternate.active {
+    background-color: @main-ex; text-color: @main-fg;
+    border: 0px 0px 0px 3px; border-color: @select-bg;
+}
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: @select-bg; text-color: @select-fg;
+}
+scrollbar { width: 5px; handle-color: @main-br; handle-width: 5px; }

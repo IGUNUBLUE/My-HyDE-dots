@@ -67,6 +67,10 @@ hl.monitor({
 -- swaync.service owns the daemon. Blank it so start_up.lua skips the spawn.
 hyde.config.start.notifications = ""
 
+-- The network menu opens on demand from Waybar; NetworkManager owns the connection.
+-- XDG autostart is disabled separately in autostart/nm-applet.desktop.
+hyde.config.start.applet_network_manager = ""
+
 -- Solid-first spacing and depth: keep windows opaque and every user-owned
 -- surface fully solid; only Kitty retains a small transparency. Blur is
 -- intentionally disabled because the diffuse backdrop is uncomfortable to use.

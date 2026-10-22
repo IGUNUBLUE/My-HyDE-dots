@@ -1,0 +1,20 @@
+[dmenu]
+dmenu_command = rofi -no-config -theme "@HOME@/.config/rofi/network.rasi" -i -no-sort -no-show-icons
+highlight = True
+compact = True
+format = {name}  {sec}  {signal}%%  {bars}
+list_saved = False
+prompt = Redes
+
+[dmenu_passphrase]
+obscure = True
+
+[editor]
+terminal = kitty
+gui_if_available = True
+gui = nm-connection-editor
+
+[nmdm]
+rescan_delay = 5
+notification_timeout = 5
+show_notifications = True

@@ -109,7 +109,7 @@
         "orientation": "inherit",
         "modules": [
             "custom/brightness-panel",
-            "network",
+            "custom/network-status",
             "group/volumecontrol",
             "custom/updates",
             "custom/keybindhint"

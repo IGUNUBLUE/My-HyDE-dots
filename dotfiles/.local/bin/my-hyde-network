@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+command -v networkmanager_dmenu >/dev/null || {
+    printf 'Install networkmanager-dmenu: ./install.sh --network-only\n' >&2
+    exit 127
+}
+# One menu at a time, without killing Rofi or another application's dialog.
+exec 9>"${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/my-hyde-network-${UID}.lock"
+flock -n 9 || exit 0
+networkmanager_dmenu --config "${XDG_CONFIG_HOME:-$HOME/.config}/networkmanager-dmenu/config.ini" "$@"

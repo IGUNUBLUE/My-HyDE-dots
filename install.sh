@@ -14,17 +14,18 @@ vscodium_theme_only=false
 rhun_theme_only=false
 satty_only=false
 mime_only=false
+network_only=false
 only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only] [--mime-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only] [--mime-only] [--network-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
 
   --dry-run            print actions without applying them
-  --skip-packages      do not install packages.arch entries
+  --skip-packages      do not install or remove packages (packages.arch)
   --yes                non-interactive: accept defaults, no prompts
   --only a,b           run only these modules: packages,cursor,config,themes,system,apply
                        (system needs sudo: installs the logind lid drop-in)
@@ -33,6 +34,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --rhun-theme-only    reinstall the rhun LAGC editor themes and exit
   --satty-only         install Satty's user preferences only (no reload needed)
   --mime-only          merge Dolphin/Ark defaults, preserving other associations
+  --network-only       install networkmanager-dmenu and replace the old network interfaces
 EOF
 }
 
@@ -44,6 +46,7 @@ while (($#)); do
         --rhun-theme-only) rhun_theme_only=true; skip_packages=true ;;
         --satty-only) satty_only=true; skip_packages=true ;;
         --mime-only) mime_only=true; skip_packages=true ;;
+        --network-only) network_only=true ;;
         --skip-packages) skip_packages=true ;;
         --yes|--non-interactive) assume_yes=true ;;
         --only) shift; only_modules=${1:-} ;;
@@ -84,7 +87,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only && ! $mime_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only && ! $mime_only && ! $network_only; then
     interactive=true
 fi
 
@@ -472,6 +475,8 @@ step_system() {
 # ---------------------------------------------------------------------------
 # Steps
 # ---------------------------------------------------------------------------
+source "$repo_dir/tools/network.sh"
+
 step_packages() {
     local missing=() package
     while IFS= read -r package; do
@@ -481,6 +486,7 @@ step_packages() {
     if ((${#missing[@]})); then
         run sudo pacman -S --needed "${missing[@]}"
     fi
+    install_network_packages
 }
 
 step_cursor() {
@@ -517,6 +523,8 @@ install_mime_defaults() {
 }
 
 step_config() {
+    require_network_gui
+    install_network_config
     install_mime_defaults
     install_dot "$repo_dir/dotfiles/.config/satty/config.toml" "$HOME/.config/satty/config.toml"
     install_dot "$work_dir/config.toml" "$HOME/.config/hyde/config.toml"
@@ -524,9 +532,7 @@ step_config() {
     install_dot "$repo_dir/dotfiles/.config/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
     install_dot "$repo_dir/dotfiles/.config/fontconfig/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
     install_dot "$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf" "$HOME/.config/environment.d/90-cursor-theme.conf"
-    install_dot "$repo_dir/dotfiles/.config/hypr/hyprland.lua" "$HOME/.config/hypr/hyprland.lua"
     install_dot "$repo_dir/dotfiles/.config/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
-    install_dot "$repo_dir/dotfiles/.config/waybar/layouts/my-hyde.jsonc" "$HOME/.config/waybar/layouts/my-hyde.jsonc"
     install_dot "$repo_dir/dotfiles/.config/waybar/modules/brightness-panel.jsonc" "$HOME/.config/waybar/modules/brightness-panel.jsonc"
     install_dot "$repo_dir/dotfiles/.config/waybar/user-style.css" "$HOME/.config/waybar/user-style.css"
     install_dot "$repo_dir/dotfiles/.config/swaync/user-style.css" "$HOME/.config/swaync/user-style.css"
@@ -601,8 +607,8 @@ step_apply() {
         "$HOME/.local/bin/my-hyde-qt-menu"
     fi
     if has_module config; then
-        hyde-shell waybar --set "$HOME/.config/waybar/layouts/my-hyde.jsonc"
-        hyprctl reload >/dev/null 2>&1 || true
+        hyde-shell config --no-daemon
+        apply_network_config
         systemctl --user restart hyde-Hyprland-idle.service
         # HyDE's theme.switch writes xsettingsd.conf but nothing starts the
         # daemon; without it X11/XWayland clients never see live changes.
@@ -687,6 +693,7 @@ $vscodium_theme_only && ((only_install_count += 1))
 $rhun_theme_only && ((only_install_count += 1))
 $satty_only && ((only_install_count += 1))
 $mime_only && ((only_install_count += 1))
+$network_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
     printf 'Use only one focused installation option (--*-only).\n' >&2
     exit 2
@@ -727,6 +734,18 @@ fi
 if $mime_only; then
     install_mime_defaults
     printf 'Dolphin/Ark associations merged. Backup: %s\n' "$backup_dir"
+    exit 0
+fi
+
+if $network_only; then
+    $skip_packages || install_network_packages
+    require_network_gui
+    install_network_config
+    if ! $dry_run; then
+        apply_network_config
+    fi
+    $skip_packages || remove_legacy_network_applet
+    printf 'NetworkManager menu installed. Backup: %s\n' "$backup_dir"
     exit 0
 fi
 
@@ -782,7 +801,7 @@ if $interactive; then
     compute_modules_csv
 
     if has_module packages; then
-        if ui_confirm '¿Instalar paquetes de pacman?'; then
+        if ui_confirm '¿Instalar paquetes de pacman y retirar nm-applet/nmrs?'; then
             printf '%s\n' "$(gum style --foreground "$sage" '●')  $(gum style --foreground "$ink" 'Paquetes: sí')"
         else
             modules=("${modules[@]/packages}")
@@ -823,8 +842,10 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module step_packages step_cursor \
-    step_config step_themes step_apply install_rhun_theme step_system install_mime_defaults
-export repo_dir backup_dir work_dir dry_run MODULES_CSV
+    step_config step_themes step_apply install_rhun_theme step_system install_mime_defaults \
+    network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
+    apply_network_config remove_legacy_network_applet
+export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes
 
 $interactive && mkdir -p "$state_dir" && : > "$install_log"
 
@@ -834,6 +855,9 @@ has_module config   && ui_step 'Configs aplicadas'         step_config
 has_module themes   && ui_step 'Temas LAGC + wallpapers'   step_themes
 has_module system   && ui_step 'Tapa sin suspender (logind)' step_system stream
 has_module apply && ! $dry_run && ui_step 'Aplicado en vivo' step_apply
+if has_module packages && has_module config; then
+    ui_step 'Retirando interfaces anteriores' remove_legacy_network_applet stream
+fi
 
 # ---------------------------------------------------------------------------
 # Summary

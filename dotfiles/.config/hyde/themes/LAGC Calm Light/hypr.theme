@@ -3,7 +3,7 @@ $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 # olive #5C7040, amber #8A5A1E, brick #9E4F43 (attention only).
 
 $GTK_THEME=Wallbash-Gtk
-$ICON_THEME=Tela-circle-green
+$ICON_THEME=Tela-circle-green-light
 $CURSOR_THEME=Future-cursors
 $CURSOR_SIZE=46
 $COLOR_SCHEME=prefer-light

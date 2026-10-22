@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Redes
+Comment=Conexiones de NetworkManager
+Exec="@HOME@/.local/bin/my-hyde-network"
+Icon=network-wireless
+Terminal=false
+Categories=Network;
+Keywords=WiFi;Network;Red;Internet;VPN;

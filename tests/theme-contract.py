@@ -59,7 +59,9 @@ for name in LAGC:
     check(variables.get("GTK_THEME") == "Wallbash-Gtk",
           f"{name}: $GTK_THEME must be Wallbash-Gtk so GTK apps and GTK-mode browsers follow the palette")
     check(variables.get("CURSOR_THEME") == "Future-cursors", f"{name}: $CURSOR_THEME must be Future-cursors")
-    check(bool(variables.get("ICON_THEME")), f"{name}: $ICON_THEME must be declared")
+    icon_family = "blue" if "Tech" in name else "green"
+    check(variables.get("ICON_THEME") == f"Tela-circle-{icon_family}-{mode}",
+          f"{name}: tray icons must use the Tela light/dark variant matching the surface")
     check(re.fullmatch(r"[0-9A-F]{6}", base or "") is not None, f"{name}: dcol_pry1 must be a hex color")
 
     kitty = (directory / "kitty.theme").read_text()

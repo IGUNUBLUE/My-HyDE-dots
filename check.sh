@@ -7,13 +7,45 @@ cursor_build_dir=$(mktemp -d)
 trap 'rm -rf -- "$pycache_dir" "$cursor_build_dir"' EXIT
 [[ -s "$repo_dir/AGENTS.md" ]] || { printf 'AGENTS.md is missing or empty.\n' >&2; exit 1; }
 [[ -s "$repo_dir/memory/index.md" ]] || { printf 'Repository memory index is missing or empty.\n' >&2; exit 1; }
-bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot.sh" "$repo_dir/check.sh"
+bash -n "$repo_dir/install.sh" "$repo_dir/restore.sh" "$repo_dir/update-snapshot.sh" "$repo_dir/check.sh" "$repo_dir/tools/network.sh" "$repo_dir/dotfiles/.local/bin/my-hyde-network"
 python - "$repo_dir/dotfiles/.config/satty/config.toml" <<'PY'
 import sys
 import tomllib
 with open(sys.argv[1], "rb") as source:
     tomllib.load(source)
 PY
+PYTHONPYCACHEPREFIX="$pycache_dir" python -m py_compile "$repo_dir/dotfiles/.local/bin/my-hyde-network-status"
+python "$repo_dir/tests/network.py"
+python - "$repo_dir" <<'PYTHON'
+import configparser
+import json
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+network = json.loads((root / 'dotfiles/.config/waybar/modules/network-connections.jsonc').read_text())['custom/network-status']
+assert network['on-click'] == '$HOME/.local/bin/my-hyde-network'
+assert network['on-click-right'] == '$HOME/.local/bin/my-hyde-network'
+assert network['exec'] == '$HOME/.local/bin/my-hyde-network-status'
+assert network['max-length'] == 22 and network['return-type'] == 'json'
+assert 'format-alt' not in network
+layout = (root / 'dotfiles/.config/waybar/layouts/my-hyde.jsonc').read_text()
+assert layout.count('"custom/network-status"') == 1
+assert '"network#connections"' not in layout and '"network#wifi-ssid"' not in layout
+assert 'hyde.config.start.applet_network_manager = ""' in (root / 'dotfiles/.config/hypr/hyprland.lua').read_text()
+entry = configparser.ConfigParser()
+entry.read(root / 'dotfiles/.config/autostart/nm-applet.desktop')
+assert entry['Desktop Entry'].getboolean('Hidden')
+assert 'networkmanager-dmenu' in (root / 'packages.arch').read_text().splitlines()
+assert 'networkmanager' in (root / 'packages.arch').read_text().splitlines()
+for name in ('install.sh', 'update-snapshot.sh'):
+    # install.sh delegates the network paths to its sourced helper.
+    source = (root / name).read_text()
+    if name == 'install.sh':
+        assert 'source "$repo_dir/tools/network.sh"' in source
+        source += (root / 'tools/network.sh').read_text()
+    for path in ('network-connections.jsonc', 'autostart/nm-applet.desktop', 'bin/my-hyde-network', 'bin/my-hyde-network-status', 'applications/networkmanager_dmenu.desktop', '.config/rofi/network.rasi', '.config/networkmanager-dmenu/config.ini'):
+        assert path in source, (name, path)
+PYTHON
 grep -Fqx 'imagemagick' "$repo_dir/packages.arch"
 command -v magick >/dev/null || {
     printf 'ImageMagick is required to generate distinct HyDE theme wallpapers.\n' >&2

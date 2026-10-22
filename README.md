@@ -102,13 +102,69 @@ updating upstream and run `tests/live-theme.sh` before accepting the result.
 
 HyDE continues to own `~/.local/share/hyde`, `~/.local/share/hypr`, `~/.local/share/waybar`, `~/.local/lib/hyde`, and Waybar's generated `config.jsonc`, `style.css`, and `theme.css`.
 
-The installer uses only official Arch packages, backs up every replaced file or symlink-rich managed tree, installs the pinned user-owned cursor payload, prepares the user Kvantum template from installed HyDE, and selects the custom Waybar layout through HyDE's own commands.
+The installer uses official/configured Arch packages, backs up every replaced file or symlink-rich managed tree, installs the pinned user-owned cursor payload, prepares the user Kvantum template from installed HyDE, and selects the custom Waybar layout through HyDE's own commands.
 
 To use another wallpaper:
 
 ```bash
 MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
 ```
+
+## Network GUI
+
+[networkmanager-dmenu](https://github.com/firecat53/networkmanager-dmenu) opens
+an independent Rofi menu from the persistent Waybar network icon or the **Redes**
+application entry. Wi-Fi networks retain upstream signal-strength order;
+Rofi sorting is disabled. Type to filter, scroll through results, or rescan.
+The menu closes after use, avoiding nmrs's empty persistent window title.
+NetworkManager continues managing connections and saved passwords.
+
+```bash
+./install.sh --network-only
+```
+
+The full installer makes the same change. `networkmanager-dmenu`, `rofi` and
+`networkmanager` come from official Arch packages; no AUR build is needed.
+Only after the replacement passes its version check and configuration installs,
+the installer simulates each removal and removes only `network-manager-applet`
+and/or `nmrs` with nonrecursive `pacman -R`. Any wider plan is rejected.
+NetworkManager, profiles, keyrings and `nm-connection-editor` remain untouched.
+`--skip-packages` skips installation/removal and requires a working replacement;
+`--dry-run` never installs or removes packages.
+
+HyDE lists nm-applet as a core package. This owner-requested replacement keeps
+both startup overrides: the user Lua setting and the `Hidden=true` XDG autostart
+entry. Reapply the overlay if a HyDE update reinstalls the applet.
+The single `custom/network-status` module reads active Wi-Fi/Ethernet links
+through libnm. It prefers the connected Wi-Fi SSID for the label, falling back
+to the Ethernet profile name or a disconnected icon. VPN/dummy interfaces cannot
+hide the physical Wi-Fi name. Its label is capped at 22 characters including the
+icon, with end ellipsis; the tooltip keeps full connection names, signal/IP
+details and the primary connection. Names are escaped as text. It performs no
+network changes, and uses the already required python-gobject/libnm stack.
+Height stays 24 pixels and clicking opens the same network menu.
+
+The standalone `~/.config/rofi/network.rasi` imports HyDE's `theme.rasi` colors,
+so all four LAGC themes follow the existing Wallbash pipeline on the next open.
+It runs with `-no-config`, keeping its layout separate from the normal app/window
+launcher. Password entry is masked. A file lock prevents duplicate network menus
+without killing other Rofi dialogs. No launcher TOML keys or shared HyDE files change.
+The former nmrs hook, palettes and desktop override are backed up and removed
+by exact overlay paths; unrelated nmrs preferences stay private and untouched.
+
+LAGC uses Tela blue/green `-light` and `-dark` variants to keep tray glyphs legible.
+Fonts, icon sizes and bar height are unchanged.
+
+The focused installer records every replaced/removed file. To roll back, reinstall
+the frontend listed in the private `.network-package-state` record, then run
+`./restore.sh <backup-directory>`. The current machine's nmrs archive is cached
+under `~/.cache/my-hyde-dots/packages/`; fresh machines can use an AUR helper.
+For nm-applet use `sudo pacman -S --needed network-manager-applet` and log in again.
+Restore only affects recorded paths and never automatically reverses package
+transactions. Private network profiles/passwords must never enter snapshots.
+
+See the [current network menu decision](memory/decisions/2026-10-22-networkmanager-dmenu.md)
+and [earlier nmrs incident](memory/decisions/2026-10-21-nmrs-network-gui.md).
 
 ## Satty text clarity
 
@@ -159,7 +215,7 @@ hydectl theme set "LAGC Tech Dark"
 hydectl theme set "LAGC Tech Light"
 ```
 
-Both themes render GTK3/GTK4 apps through the Wallbash-generated `Wallbash-Gtk` theme and use `Tela-circle-blue` icons, so app interiors follow the active palette exactly. The palette itself is an eye-comfort refresh of the original neon set: a uniform HSL transform desaturates accents ~28% and clamps extreme lightness while preserving the navy/cyan/cobalt identity. HyDE's standard Wallbash pipeline applies the palette to Swaync and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback keeps the Light theme's Rofi window-switcher selection on the softened cyan accent after the shared opaque-Rofi template runs, without changing Kvantum's highlight and link roles.
+Both themes render GTK3/GTK4 apps through the Wallbash-generated `Wallbash-Gtk` theme and use the matching `Tela-circle-blue-light`/`Tela-circle-blue-dark` icons, so app interiors follow the active palette exactly. The palette itself is an eye-comfort refresh of the original neon set: a uniform HSL transform desaturates accents ~28% and clamps extreme lightness while preserving the navy/cyan/cobalt identity. HyDE's standard Wallbash pipeline applies the palette to Swaync and Kvantum; no shared HyDE runtime files are overwritten. A user-owned Wallbash post-render callback keeps the Light theme's Rofi window-switcher selection on the softened cyan accent after the shared opaque-Rofi template runs, without changing Kvantum's highlight and link roles.
 
 ## LAGC Calm themes
 

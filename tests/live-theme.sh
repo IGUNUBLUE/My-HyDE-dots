@@ -168,6 +168,14 @@ import json, sys
 d = json.load(sys.stdin)
 print(sum(any(l["namespace"] == "waybar" for ls in v["levels"].values() for l in ls) for v in d.values()), len(d))')
     expect "waybar bars on monitors" "${bars% *}" "${bars#* }"
+    heights=$(hyprctl layers -j | python3 -c '
+import json, sys
+d = json.load(sys.stdin)
+print(" ".join(str(l["h"]) for v in d.values() for ls in v["levels"].values() for l in ls if l["namespace"] == "waybar"))')
+    all_24=true
+    [[ -n $heights ]] || all_24=false
+    for height in $heights; do [[ $height == 24 ]] || all_24=false; done
+    $all_24 && ok "waybar height 24 on every output" || bad "waybar heights: $heights"
     # A bar can be mapped yet draw nothing (seen after a Waybar crash/restart):
     # require Waybar's main-bg on a share of each visible bar strip.
     wb_bg=$(grep -oE '@define-color main-bg #[0-9A-Fa-f]{6}' "$cfg/waybar/theme.css" | awk '{print $3}')
@@ -204,6 +212,10 @@ t=open(sys.argv[1]).read(); t=re.sub(r"^\s*//.*$","",t,flags=re.M); t=re.sub(r",
 d=json.loads(t); auto=d.get("window.autoDetectColorScheme", False)
 print(d.get("workbench.preferred%sColorTheme" % sys.argv[2].title()) if auto else d.get("workbench.colorTheme"))' "$vsc" "$mode")
         expect "VSCodium effective theme" "$vsc_got" "$vsc_want"
+    fi
+    if [[ -f $cfg/rofi/network.rasi ]]; then
+        network_dump=$(rofi -no-config -theme "$cfg/rofi/network.rasi" -dump-theme 2>/dev/null)
+        expect "network menu inherits HyDE palette" "$(awk '/background-color:/{print $2;exit}' <<< "$network_dump")" "var(main-bg);"
     fi
     if [[ -f $cfg/rhun/config ]]; then
         expect "rhun theme" "$(awk -F' = ' '$1=="theme"{print $2;exit}' "$cfg/rhun/config")" "$(tr '[:upper:] ' '[:lower:]-' <<< "$theme")"

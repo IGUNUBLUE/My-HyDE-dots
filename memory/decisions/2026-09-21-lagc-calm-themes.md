@@ -60,3 +60,16 @@ Revert by deleting the two theme directories, restoring `config.toml` font keys 
 ## Follow-up: second dunst spawn source at session start
 
 - 2026-09-24 the same notification recurred: `~/.local/share/hypr/lua/variables.lua` defaults `hyde.config.start.notifications` to `hyde-shell app -u hyde-Hyprland-notifications.service -t service -- dunst`, and `start_up.lua` runs it on `hyprland.start` via `check_exec` — app2unit emits the critical "Executable not found: 'dunst'" notification. The wallbash shadow only covers theme applies, not session start. Fix: `hyde.config.start.notifications = ""` in `hyprland.lua` (mutate the existing table, `check_exec` skips empty strings), plus `install.sh` add-wants `swaync.service` to `graphical-session.target` so the daemon role stays with systemd on fresh installs. `config-registry.toml`'s dunst `post_hook` is a non-issue: `killall` fails before `dunst` is attempted.
+
+## Follow-up: explicit Tela light/dark panel variants (2026-10-21)
+
+- The generic `Tela-circle-blue` and `Tela-circle-green` themes have pale
+  `#dfdfdf` panel glyphs, including Nextcloud's `state-ok` checkmark, which nearly
+  disappear on light LAGC bars. The installed `-light` variant uses `#505050`.
+- Each `hypr.theme` now declares `Tela-circle-{blue,green}-{dark,light}` matching
+  its surface mode. The existing Arch packages already include these variants;
+  do not replace icons with static tray mappings, which would lose status changes.
+- The custom network module keeps its icon visible on click. Its bandwidth display
+  moves to the tooltip, removing the upstream light mint/amber inline colors.
+- Neither font/icon size nor the accepted 24-pixel layout/minimum-height policy
+  changes. Revalidate theme switching and current outputs after application.

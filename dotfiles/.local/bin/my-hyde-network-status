@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Read active NetworkManager links without changing connections or secrets."""
+import html
+import json
+
+import gi
+
+gi.require_version('NM', '1.0')
+from gi.repository import GLib, NM
+
+
+def escape(value):
+    # SSIDs/profile names are untrusted text, not Pango markup or extra lines.
+    return html.escape(''.join(c if c.isprintable() else ' ' for c in value))
+
+
+def format_status(links, primary=''):
+    wifi = [link for link in links if link['kind'] == 'wifi']
+    wired = [link for link in links if link['kind'] == 'ethernet']
+    chosen = (wifi or wired or [None])[0]
+    if chosen is None:
+        return {'text': '󰖪', 'tooltip': 'Sin conexión Wi-Fi ni Ethernet', 'class': 'disconnected'}
+    icon = '' if chosen['kind'] == 'wifi' else '󰈀'
+    tooltip = []
+    for link in wifi + wired:
+        title = 'Red Wi-Fi' if link['kind'] == 'wifi' else 'Ethernet'
+        tooltip.append(f"{title}: <b>{escape(link['name'])}</b>")
+        tooltip.append(f"Interfaz: {escape(link['interface'])}")
+        if link['kind'] == 'wifi':
+            tooltip.append(f"Señal: {link['signal']}%")
+        tooltip.extend(f"IP: {escape(address)}" for address in link['addresses'])
+    if primary:
+        tooltip.append(f'Salida principal: {escape(primary)}')
+    return {'text': f"{icon}   {escape(chosen['name'])}",
+            'tooltip': '\n'.join(tooltip), 'class': chosen['kind']}
+
+
+def status():
+    try:
+        client = NM.Client.new(None)
+        if not client.get_nm_running():
+            return {'text': '󰖪', 'tooltip': 'NetworkManager no está disponible', 'class': 'disconnected'}
+        links = []
+        for device in client.get_devices():
+            if device.get_state() != NM.DeviceState.ACTIVATED:
+                continue
+            kind = device.get_device_type()
+            if kind not in (NM.DeviceType.WIFI, NM.DeviceType.ETHERNET):
+                continue
+            active = device.get_active_connection()
+            name = active.get_id() if active else 'Ethernet'
+            signal = 0
+            if kind == NM.DeviceType.WIFI:
+                ap = device.get_active_access_point()
+                if ap is None:
+                    continue
+                ssid = ap.get_ssid()
+                name = NM.utils_ssid_to_utf8(ssid.get_data()) if ssid else 'Red oculta'
+                signal = ap.get_strength()
+            addresses = []
+            for config in (device.get_ip4_config(), device.get_ip6_config()):
+                if config:
+                    addresses.extend(f'{a.get_address()}/{a.get_prefix()}' for a in config.get_addresses())
+            links.append({'kind': 'wifi' if kind == NM.DeviceType.WIFI else 'ethernet',
+                          'name': name or 'Red oculta', 'interface': device.get_iface(),
+                          'signal': signal, 'addresses': addresses})
+        primary = client.get_primary_connection()
+        return format_status(links, primary.get_id() if primary else '')
+    except GLib.Error:
+        return {'text': '󰖪', 'tooltip': 'No se pudo consultar NetworkManager', 'class': 'disconnected'}
+
+
+if __name__ == '__main__':
+    print(json.dumps(status(), ensure_ascii=False))
