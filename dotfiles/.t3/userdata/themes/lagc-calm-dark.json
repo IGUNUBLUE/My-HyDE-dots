@@ -1,0 +1,10 @@
+{
+  "name": "LAGC Calm Dark",
+  "appearance": "dark",
+  "canvas": "#2B2522",
+  "accent": "#A9C080",
+  "colors": {
+    "terminalSelection": "#455437",
+    "error": "#D67A6E"
+  }
+}

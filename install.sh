@@ -12,6 +12,7 @@ assume_yes=false
 qt_menu_only=false
 vscodium_theme_only=false
 rhun_theme_only=false
+t3_theme_only=false
 satty_only=false
 mime_only=false
 network_only=false
@@ -20,7 +21,7 @@ only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--satty-only] [--mime-only] [--network-only] [--herdr-theme-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--t3-theme-only] [--satty-only] [--mime-only] [--network-only] [--herdr-theme-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -33,6 +34,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --qt-menu-only       refresh the Qt menu template and exit
   --vscodium-theme-only  reinstall the VSCodium LAGC themes and exit
   --rhun-theme-only    reinstall the rhun LAGC editor themes and exit
+  --t3-theme-only      install the four T3 Code LAGC environment themes
   --satty-only         install Satty's user preferences only (no reload needed)
   --mime-only          merge Dolphin/Ark defaults, preserving other associations
   --network-only       install networkmanager-dmenu and replace the old network interfaces
@@ -46,6 +48,7 @@ while (($#)); do
         --qt-menu-only) qt_menu_only=true; skip_packages=true ;;
         --vscodium-theme-only) vscodium_theme_only=true; skip_packages=true ;;
         --rhun-theme-only) rhun_theme_only=true; skip_packages=true ;;
+        --t3-theme-only) t3_theme_only=true; skip_packages=true ;;
         --satty-only) satty_only=true; skip_packages=true ;;
         --mime-only) mime_only=true; skip_packages=true ;;
         --network-only) network_only=true ;;
@@ -90,7 +93,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $satty_only && ! $mime_only && ! $network_only && ! $herdr_theme_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $t3_theme_only && ! $satty_only && ! $mime_only && ! $network_only && ! $herdr_theme_only; then
     interactive=true
 fi
 
@@ -213,6 +216,29 @@ install_vscodium_theme() {
         return 1
     fi
     rm -rf -- "$temporary_dir"
+}
+
+install_t3_themes() {
+    local source target temporary
+    for source in "$repo_dir"/dotfiles/.t3/userdata/themes/lagc-*.json; do
+        target="$HOME/.t3/userdata/themes/${source##*/}"
+        backup_target "$target"
+        if $dry_run; then
+            printf '[dry-run] atomically install %q to %q\n' "$source" "$target"
+        else
+            mkdir -p -- "${target%/*}"
+            temporary=$(mktemp "${target%/*}/.lagc-theme.XXXXXXXX")
+            install -m 0644 -- "$source" "$temporary"
+            mv -f -- "$temporary" "$target"
+        fi
+    done
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/always/t3-theme.dcol" "$HOME/.config/hyde/wallbash/always/t3-theme.dcol"
+    install_dot "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-t3-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-t3-theme.sh" 0755
+    local wallbash_apply="$HOME/.local/lib/hyde/color.set.sh"
+    if [[ -x $wallbash_apply && -f ${XDG_CACHE_HOME:-$HOME/.cache}/hyde/wall.set ]]; then
+        backup_target "$HOME/.t3/userdata/.wallbash-mode"
+        run "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/t3-theme.dcol"
+    fi
 }
 
 install_rhun_theme() {
@@ -580,6 +606,7 @@ step_themes() {
     install_theme_files "LAGC Calm Light"
     install_vscodium_theme
     install_rhun_theme
+    install_t3_themes
     remove_target "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
     remove_target "$HOME/.config/hyde/wallbash/theme/lagc-tech-dark-kitty.dcol"
     remove_target "$HOME/.config/hyde/wallbash/always/lagc-tech-dark-waybar.dcol"
@@ -696,6 +723,7 @@ only_install_count=0
 $qt_menu_only && ((only_install_count += 1))
 $vscodium_theme_only && ((only_install_count += 1))
 $rhun_theme_only && ((only_install_count += 1))
+$t3_theme_only && ((only_install_count += 1))
 $satty_only && ((only_install_count += 1))
 $mime_only && ((only_install_count += 1))
 $network_only && ((only_install_count += 1))
@@ -708,6 +736,12 @@ fi
 if $vscodium_theme_only; then
     install_vscodium_theme true
     printf 'LAGC VSCodium themes installed. Select one with Preferences: Color Theme.\n'
+    exit 0
+fi
+
+if $t3_theme_only; then
+    install_t3_themes
+    printf 'LAGC T3 Code themes installed. Backup: %s\n' "$backup_dir"
     exit 0
 fi
 
@@ -854,7 +888,7 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module step_packages step_cursor \
-    step_config step_themes step_apply install_rhun_theme step_system install_mime_defaults \
+    step_config step_themes step_apply install_rhun_theme install_t3_themes step_system install_mime_defaults \
     network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
     apply_network_config remove_legacy_network_applet install_herdr_theme
 export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes

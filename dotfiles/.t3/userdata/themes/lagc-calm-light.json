@@ -1,0 +1,10 @@
+{
+  "name": "LAGC Calm Light",
+  "appearance": "light",
+  "canvas": "#F4EEE2",
+  "accent": "#5C7040",
+  "colors": {
+    "terminalSelection": "#CBDCA8",
+    "error": "#9E4F43"
+  }
+}

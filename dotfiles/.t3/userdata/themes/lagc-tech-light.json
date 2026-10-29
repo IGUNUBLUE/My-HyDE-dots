@@ -1,0 +1,10 @@
+{
+  "name": "LAGC Tech Light",
+  "appearance": "light",
+  "canvas": "#EFF6F7",
+  "accent": "#12717C",
+  "colors": {
+    "terminalSelection": "#8CC4CC",
+    "error": "#C05536"
+  }
+}

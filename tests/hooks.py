@@ -562,6 +562,36 @@ def test_vscodium_leaves_unparseable_settings_alone() -> None:
         box.close()
 
 
+
+def test_t3_theme_mapping_and_missing_dependencies() -> None:
+    for name, mode, wanted in (
+        ("LAGC Calm Dark", "dark", "lagc-calm-dark"),
+        ("LAGC Calm Light", "light", "lagc-calm-light"),
+        ("LAGC Tech Dark", "dark", "lagc-tech-dark"),
+        ("LAGC Tech Light", "light", "lagc-tech-light"),
+        ("Other", "dark", "lagc-calm-dark"),
+        ("Other", "light", "lagc-calm-light"),
+    ):
+        box = Sandbox()
+        try:
+            userdata = box.root / ".t3/userdata"
+            themes = userdata / "themes"
+            themes.mkdir(parents=True)
+            (userdata / ".wallbash-mode").write_text(mode)
+            (themes / (wanted + ".json")).write_text("{}")
+            box.fake("t3", f"#!/bin/sh\necho \"$*\" >> \"{box.log}\"\n")
+            result = box.run("my-hyde-t3-theme.sh", HYDE_THEME=name, T3CODE_HOME="/wrong")
+            check(result.returncode == 0, f"T3 hook failed: {result.stderr}")
+            check(box.calls() == [f"theme set --base-dir {box.root}/.t3 {wanted}"],
+                  f"T3 mapping for {name}: {box.calls()}")
+            (themes / (wanted + ".json")).unlink()
+            box.log.write_text("")
+            box.run("my-hyde-t3-theme.sh", HYDE_THEME=name)
+            check(not box.calls(), "T3 hook must not select a missing theme")
+        finally:
+            box.close()
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

@@ -65,13 +65,20 @@ chmod 0755 "$repo_dir/dotfiles/.local/bin/my-hyde-qt-menu"
 
 # Wallbash theme-switch hooks (GTK refresh, Waybar guard, rhun follow) and the
 # rhun themes they select.
-for hook in gtk-dark-mode:my-hyde-gtk-dark-mode waybar-guard:my-hyde-waybar-guard rhun-theme:my-hyde-rhun-theme vscodium-theme:my-hyde-vscodium-theme; do
+for hook in gtk-dark-mode:my-hyde-gtk-dark-mode waybar-guard:my-hyde-waybar-guard rhun-theme:my-hyde-rhun-theme vscodium-theme:my-hyde-vscodium-theme t3-theme:my-hyde-t3-theme; do
     copy_dot "$HOME/.config/hyde/wallbash/always/${hook%%:*}.dcol" "$repo_dir/dotfiles/.config/hyde/wallbash/always/${hook%%:*}.dcol"
     copy_dot "$HOME/.config/hyde/wallbash/scripts/${hook#*:}.sh" "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/${hook#*:}.sh"
     chmod 0755 "$repo_dir/dotfiles/.config/hyde/wallbash/scripts/${hook#*:}.sh"
 done
 for theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
     copy_dot "$HOME/.config/rhun/themes/$theme.theme" "$repo_dir/dotfiles/.config/rhun/themes/$theme.theme"
+done
+
+# Snapshot only the four overlay-owned T3 Code theme files, never client state.
+for theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
+    if [[ -f "$HOME/.t3/userdata/themes/$theme.json" ]]; then
+        copy_dot "$HOME/.t3/userdata/themes/$theme.json" "$repo_dir/dotfiles/.t3/userdata/themes/$theme.json"
+    fi
 done
 
 # System files installed by the `system` module (world-readable, no sudo).

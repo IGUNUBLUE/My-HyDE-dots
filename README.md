@@ -377,3 +377,7 @@ Run `./install.sh --qt-menu-only --skip-packages` to apply only the menu setting
 The template and callback are recorded in the normal backup manifest. After `./restore.sh`, reselect your current theme to regenerate Kvantum with the restored template. No wallpaper or generated Kvantum configuration is stored in Git.
 
 Reference: [HyDE Wallbash templates and post-processing](https://github.com/HyDE-Project/HyDE/blob/master/Configs/.config/hyde/wallbash/README.md).
+
+### T3 Code
+
+The themes module installs four LAGC environment themes (Calm and Tech, light and dark) into `~/.t3/userdata/themes/`. To install only these themes, run `./install.sh --t3-theme-only`; the normal backup can be restored with `./restore.sh <backup-directory>`. Restoring files does not undo the T3 environment default; use `~/.t3/bin/t3 theme clear` or set another theme if needed. Choose a theme under Settings → Appearance. The Wallbash hook selects the matching T3 Code theme on a HyDE theme switch; other HyDE themes use Calm in the current light/dark mode. A manual T3 selection lasts until the next Wallbash update. The [T3 Code appearance documentation](https://github.com/pingdotgg/t3code/blob/main/docs/user/appearance.md) explains environment themes and their scope.
