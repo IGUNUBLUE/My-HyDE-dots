@@ -105,6 +105,18 @@ sandbox tests and 23 existing hook cases pass; full/focused dry runs and
 Hyprland/brightness/Zsh checks pass. The earlier lock-screen-interrupted run
 above is historical, not the final acceptance receipt.
 
+## VPN visibility follow-up (2026-11-04)
+
+The status script only accepted Wi-Fi and Ethernet devices, so an active ProtonVPN
+(WireGuard) and Tailscale (tun) were invisible in Waybar although connected.
+`active_vpns()` now reads NetworkManager active connections of type `wireguard`,
+`vpn` (only when the plugin state is activated) and `tun`. Dummy killswitch
+interfaces and Docker bridges are intentionally excluded. NetworkManager's
+primary connection stayed the Wi-Fi with ProtonVPN active (policy routing), so
+the primary connection cannot be used to detect a VPN. The shield glyph goes
+before the SSID so the 22-character cap clips the name, never the VPN state.
+Tailscale counts as a VPN here; it is listed, not distinguished from privacy VPNs.
+
 ## Exit criteria
 
 Revisit if upstream changes executable/config options, signal order, secret

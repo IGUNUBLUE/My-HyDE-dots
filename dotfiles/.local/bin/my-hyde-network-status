@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read active NetworkManager links without changing connections or secrets."""
+"""Read active NetworkManager links and VPN tunnels without changing connections or secrets."""
 import html
 import json
 
@@ -8,19 +8,41 @@ import gi
 gi.require_version('NM', '1.0')
 from gi.repository import GLib, NM
 
+WIFI_ICON = '\uf1eb'
+ETHERNET_ICON = '\U000f0200'
+DISCONNECTED_ICON = '\U000f05aa'
+VPN_ICON = '\U000f0582'
+# NetworkManager connection types that represent a tunnel. Dummy killswitch
+# interfaces and bridges (Docker) are deliberately not listed.
+VPN_TYPES = ('wireguard', 'vpn', 'tun')
+
 
 def escape(value):
     # SSIDs/profile names are untrusted text, not Pango markup or extra lines.
     return html.escape(''.join(c if c.isprintable() else ' ' for c in value))
 
 
-def format_status(links, primary=''):
+def vpn_tooltip(vpns):
+    lines = []
+    for vpn in vpns:
+        line = f"VPN: <b>{escape(vpn['name'])}</b>"
+        if vpn['interface']:
+            line += f" ({escape(vpn['interface'])})"
+        lines.append(line)
+    return lines
+
+
+def format_status(links, primary='', vpns=()):
     wifi = [link for link in links if link['kind'] == 'wifi']
     wired = [link for link in links if link['kind'] == 'ethernet']
     chosen = (wifi or wired or [None])[0]
     if chosen is None:
-        return {'text': '󰖪', 'tooltip': 'Sin conexión Wi-Fi ni Ethernet', 'class': 'disconnected'}
-    icon = '' if chosen['kind'] == 'wifi' else '󰈀'
+        if vpns:
+            return {'text': f'{DISCONNECTED_ICON}  {VPN_ICON}',
+                    'tooltip': '\n'.join(['Sin conexión Wi-Fi ni Ethernet'] + vpn_tooltip(vpns)),
+                    'class': ['disconnected', 'vpn']}
+        return {'text': DISCONNECTED_ICON, 'tooltip': 'Sin conexión Wi-Fi ni Ethernet', 'class': 'disconnected'}
+    icon = WIFI_ICON if chosen['kind'] == 'wifi' else ETHERNET_ICON
     tooltip = []
     for link in wifi + wired:
         title = 'Red Wi-Fi' if link['kind'] == 'wifi' else 'Ethernet'
@@ -29,17 +51,42 @@ def format_status(links, primary=''):
         if link['kind'] == 'wifi':
             tooltip.append(f"Señal: {link['signal']}%")
         tooltip.extend(f"IP: {escape(address)}" for address in link['addresses'])
+    tooltip.extend(vpn_tooltip(vpns))
     if primary:
         tooltip.append(f'Salida principal: {escape(primary)}')
+    if vpns:
+        # The marker sits before the name so the 22-character cap clips the SSID, not the VPN state.
+        return {'text': f"{icon}  {VPN_ICON}   {escape(chosen['name'])}",
+                'tooltip': '\n'.join(tooltip), 'class': [chosen['kind'], 'vpn']}
     return {'text': f"{icon}   {escape(chosen['name'])}",
             'tooltip': '\n'.join(tooltip), 'class': chosen['kind']}
+
+
+def active_vpns(client):
+    vpns = []
+    for active in client.get_active_connections():
+        kind = active.get_connection_type()
+        if kind not in VPN_TYPES:
+            continue
+        if kind == 'vpn':
+            # Plugin VPNs (OpenVPN, ...) report their own state; they have no device of their own.
+            if not isinstance(active, NM.VpnConnection) or active.get_vpn_state() != NM.VpnConnectionState.ACTIVATED:
+                continue
+            interface = ''
+        else:
+            if active.get_state() != NM.ActiveConnectionState.ACTIVATED:
+                continue
+            devices = active.get_devices()
+            interface = devices[0].get_iface() if devices else ''
+        vpns.append({'name': active.get_id() or kind, 'interface': interface or ''})
+    return vpns
 
 
 def status():
     try:
         client = NM.Client.new(None)
         if not client.get_nm_running():
-            return {'text': '󰖪', 'tooltip': 'NetworkManager no está disponible', 'class': 'disconnected'}
+            return {'text': DISCONNECTED_ICON, 'tooltip': 'NetworkManager no está disponible', 'class': 'disconnected'}
         links = []
         for device in client.get_devices():
             if device.get_state() != NM.DeviceState.ACTIVATED:
@@ -65,9 +112,9 @@ def status():
                           'name': name or 'Red oculta', 'interface': device.get_iface(),
                           'signal': signal, 'addresses': addresses})
         primary = client.get_primary_connection()
-        return format_status(links, primary.get_id() if primary else '')
+        return format_status(links, primary.get_id() if primary else '', active_vpns(client))
     except GLib.Error:
-        return {'text': '󰖪', 'tooltip': 'No se pudo consultar NetworkManager', 'class': 'disconnected'}
+        return {'text': DISCONNECTED_ICON, 'tooltip': 'No se pudo consultar NetworkManager', 'class': 'disconnected'}
 
 
 if __name__ == '__main__':

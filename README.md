@@ -161,7 +161,10 @@ entry. Reapply the overlay if a HyDE update reinstalls the applet.
 The single `custom/network-status` module reads active Wi-Fi/Ethernet links
 through libnm. It prefers the connected Wi-Fi SSID for the label, falling back
 to the Ethernet profile name or a disconnected icon. VPN/dummy interfaces cannot
-hide the physical Wi-Fi name. Its label is capped at 22 characters including the
+hide the physical Wi-Fi name. Active `wireguard`, plugin `vpn` and `tun` connections
+(never dummy killswitch or bridge links) add a shield glyph before the name, the
+`vpn` CSS class and one `VPN:` tooltip line each; the marker is placed first so the
+22-character cap clips the SSID instead of the VPN state. Its label is capped at 22 characters including the
 icon, with end ellipsis; the tooltip keeps full connection names, signal/IP
 details and the primary connection. Names are escaped as text. It performs no
 network changes, and uses the already required python-gobject/libnm stack.

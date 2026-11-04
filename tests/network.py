@@ -31,6 +31,25 @@ class NetworkMigration(unittest.TestCase):
         self.assertEqual(module.format_status([wired])['class'], 'ethernet')
         self.assertEqual(module.format_status([])['class'], 'disconnected')
 
+    def test_vpn_marker_keeps_wifi_name_and_lists_tunnels(self):
+        sys.dont_write_bytecode = True
+        loader = importlib.machinery.SourceFileLoader('network_status_vpn', str(REPO / 'dotfiles/.local/bin/my-hyde-network-status'))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        module = importlib.util.module_from_spec(spec)
+        loader.exec_module(module)
+        wifi = dict(kind='wifi', name='Lab', interface='wl-test', signal=75, addresses=[])
+        vpns = [dict(name='Work <VPN>', interface='wg-test'), dict(name='mesh', interface='')]
+        result = module.format_status([wifi], 'Lab', vpns)
+        self.assertEqual(result['class'], ['wifi', 'vpn'])
+        self.assertEqual(result['text'].count(module.VPN_ICON), 1)
+        self.assertTrue(result['text'].endswith('Lab'))
+        self.assertIn('VPN: <b>Work &lt;VPN&gt;</b> (wg-test)', result['tooltip'])
+        self.assertIn('VPN: <b>mesh</b>', result['tooltip'])
+        self.assertNotIn(module.VPN_ICON, module.format_status([wifi], 'Lab')['text'])
+        offline = module.format_status([], '', vpns)
+        self.assertEqual(offline['class'], ['disconnected', 'vpn'])
+        self.assertIn(module.VPN_ICON, offline['text'])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
