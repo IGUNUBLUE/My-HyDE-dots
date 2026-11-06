@@ -28,6 +28,21 @@ if [[ ${1:-} == "--rhun-theme-only" ]]; then
     exit 0
 fi
 
+if [[ ${1:-} == "--herdr-app-theme-only" ]]; then
+    # Removes only overlay-owned files. ~/.config/herdr-app/settings.json is the
+    # app's own file and stays; a "theme" naming a removed LAGC theme falls back
+    # to the app's default theme.
+    app_dir="${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app"
+    for app_theme in lagc-calm-dark lagc-calm-light lagc-tech-dark lagc-tech-light; do
+        rm -f -- "$app_dir/themes/$app_theme.json"
+    done
+    rm -f -- "$HOME/.config/hyde/wallbash/always/herdr-app-theme.dcol" \
+        "$HOME/.config/hyde/wallbash/scripts/my-hyde-herdr-app-theme.sh" \
+        "$app_dir/.wallbash-mode"
+    printf 'LAGC Herdr app themes and the theme-follow hook removed.\n'
+    exit 0
+fi
+
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/my-hyde-dots/backups"
 backup=${1:-}
 

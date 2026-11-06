@@ -159,6 +159,26 @@ grep -Fq 'toml_ui monospace_font' "$rhun_follow_script"
 grep -Fq 'set_key "$work" editor font' "$rhun_follow_script"
 grep -Fq '{b"glyf", b"loca", b"cmap"}' "$rhun_follow_script"
 
+# Herdr desktop app: generated LAGC theme JSON plus the follow hook.
+python "$repo_dir/tools/herdr-app-themes.py" --check
+grep -Fq 'install_herdr_app_theme()' "$repo_dir/install.sh" || {
+    printf 'install.sh must define install_herdr_app_theme.\n' >&2
+    exit 1
+}
+awk '/^step_themes\(\) \{/{s=1} s && /^\}/{exit} s' "$repo_dir/install.sh" | grep -Eq '^[[:space:]]+install_herdr_app_theme$' || {
+    printf 'step_themes must call install_herdr_app_theme.\n' >&2
+    exit 1
+}
+herdr_app_template="$repo_dir/dotfiles/.config/hyde/wallbash/always/herdr-app-theme.dcol"
+herdr_app_script="$repo_dir/dotfiles/.config/hyde/wallbash/scripts/my-hyde-herdr-app-theme.sh"
+[[ -s "$herdr_app_template" && -x "$herdr_app_script" ]] || {
+    printf 'Herdr app theme-follow hook is missing or not executable.\n' >&2
+    exit 1
+}
+grep -Fqx '${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app/.wallbash-mode|"$WALLBASH_SCRIPTS/my-hyde-herdr-app-theme.sh"' "$herdr_app_template"
+grep -Fqx '<wallbash_mode>' "$herdr_app_template"
+bash -n "$herdr_app_script"
+
 cursor_dir="$repo_dir/dotfiles/.local/share/icons/Future-cursors"
 cursor_config="$repo_dir/dotfiles/.config/hyde/config.toml.in"
 cursor_env="$repo_dir/dotfiles/.config/environment.d/90-cursor-theme.conf"

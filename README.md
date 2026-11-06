@@ -18,6 +18,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 - Native `LAGC Calm Dark` and `LAGC Calm Light` warm low-glare themes with static `theme.dcol` palettes (sage/olive accents, WCAG AA state colors) and installer-generated gradient wallpapers.
 - A portable VSCodium extension (`igunublue.lagc-themes`) with all four `LAGC` color themes — Calm and Tech, dark and light — installed only through VSCodium's own VSIX CLI.
 - Portable `LAGC` themes for the [rhun](https://github.com/vshvedov/rhun) editor — all four Calm/Tech dark/light `.theme` files under `~/.config/rhun/themes/`, palette reused 1:1 from the VSCodium themes and validated before install. A Wallbash `always/` hook makes rhun follow the active HyDE theme live (exact LAGC match, Calm light/dark fallback otherwise) by rewriting the `[ui] theme` key, which rhun hot-reloads.
+- Portable `LAGC` themes for the [Herdr desktop app](https://herdr.dev/) (`herdr-app` with `hc`/herdr-core, not the Herdr TUI) — four generated `~/.config/herdr-app/themes/*.json` files whose terminal colors come from the Kitty palettes, plus a Wallbash `always/` hook that makes the app follow the active HyDE theme live.
 - Compact solid Waybar layout at 24 pixels with Atkinson Hyperlegible Next at 13 px (13 px font + 9 px icons is the largest combination that still fits under the modules' 26 px minimum at font 14), scoped GTK minimum-size overrides, and mandatory mixed-scale display validation.
 - Pinned GPLv3 `Future-cyan` cursor theme at visually accepted logical size 46, with native Hyprcursor plus XCursor fallback, reviewed hotspot corrections, and consistent HyDE/session/GTK defaults. Because Hyprcursor and XCursor sizes do not translate 1:1, GTK/Qt/XWayland clients use `XCURSOR_SIZE=32` (via `environment.d`) while the compositor keeps `HYPRCURSOR_SIZE=46`; a `gtk3-cursor-fix` systemd path unit restores the GTK3 value after each HyDE theme switch, which rewrites `settings.ini` with the compositor size.
 - Kitty user configuration with an 11 pt default font and 0.97 background opacity: the only remaining transparency in the profile.
@@ -270,7 +271,7 @@ HyDE reloads Waybar with `SIGUSR2` on every switch, and Waybar 0.15 can hang whe
 `./check.sh` runs the static and sandboxed suites:
 
 - `tests/theme-contract.py` — every LAGC theme agrees across `hypr.theme` (`$COLOR_SCHEME` vs `dcol_mode`, `$GTK_THEME`, cursor, icons), `theme.dcol`, Kitty, Waybar, Rofi and its rhun theme.
-- `tests/hooks.py` — runs the Wallbash hook scripts in a throwaway XDG tree with fake `gsettings`/`fc-match`/`hyprctl`/`systemctl`: GTK refresh on same-mode and mode-flip switches, waiting for `gtk-dark.css`, rhun theme/font following, the Waybar guard (restart after lost bars, tolerance of normal reload gaps, one restart at most, no action on a stopped Waybar), idempotence and preservation of foreign config keys.
+- `tests/hooks.py` — runs the Wallbash hook scripts in a throwaway XDG tree with fake `gsettings`/`fc-match`/`hyprctl`/`systemctl`: GTK refresh on same-mode and mode-flip switches, waiting for `gtk-dark.css`, rhun theme/font following, Herdr app theme following (including the in-app pick sync), the Waybar guard (restart after lost bars, tolerance of normal reload gaps, one restart at most, no action on a stopped Waybar), idempotence and preservation of foreign config keys.
 
 `tests/live-theme.sh` is the end-to-end check for a running session. It cycles the LAGC themes with `hydectl theme set` and asserts gsettings, the portal, GTK3/libadwaita client state, `settings.ini`, xsettingsd, `Wallbash-Gtk`, Kitty, Waybar (colours and a bar on every monitor), Rofi, Qt and rhun, and it keeps Chrome, Brave (GTK mode) and Firefox open with throwaway profiles to verify both page colour scheme and toolbar palette after every switch. It restores the theme that was active before the run. Run it after any change to themes, hooks or the HyDE version:
 
@@ -301,6 +302,21 @@ The normal `./install.sh` flow installs or updates the same extension whenever t
 
 ```bash
 ./restore.sh --vscodium-theme-only
+```
+
+## Herdr desktop app themes
+
+The Herdr desktop app (`herdr-app`, which runs its terminals in herdr-core/`hc`) keeps its look as plain files in `~/.config/herdr-app/`. It loads themes from `themes/<name>.json` and the active one from `"theme"` in `settings.json`, and applies edits live. This is a different program from the Herdr TUI configured in [Herdr contrast and Radar](#herdr-contrast-and-radar); they share nothing.
+
+The overlay tracks four themes, `lagc-{calm,tech}-{dark,light}.json`, under `dotfiles/.config/herdr-app/themes/`. They are **generated** by `tools/herdr-app-themes.py` from the tracked Kitty palette (background, foreground, selection, cursor and the 16 ANSI colors) and the matching rhun theme (accent, border, hover, muted and the working/blocked/done states), so a Herdr pane matches a Kitty window exactly. `--check` validates hex values, light/dark kind, 7:1 foreground contrast and 4.5:1 text on the accent, and fails when a tracked file is stale; `--write` regenerates them. `./check.sh` runs the check.
+
+The app **follows the active HyDE theme**: switching themes (`Super+Shift+T`) runs `always/herdr-app-theme.dcol` + `my-hyde-herdr-app-theme.sh`, which sets only the `theme` key of `settings.json` (atomic write, other settings preserved, no write when unchanged, an unparseable file is left alone). The four LAGC themes map 1:1; any other HyDE theme falls back to LAGC Calm by light/dark mode. The name is a single string rather than a `{light, dark}` pair, so the result does not depend on the system appearance reaching the app.
+
+Caveat: a theme chosen with the app's own picker (or `herdr-app do app.theme`) is stored in `layouts/.state/<layout>.json` and outranks `settings.json`. If such a pick exists and the app is running, the hook pushes the same family through `app.theme` for both halves so the pick cannot freeze the look; it never creates a pick itself. Do not test with `app.theme`: it leaves a pick in memory that only `layout.reset` clears. A window on a hidden workspace is not redrawn, so `herdr-app shot` returns a stale frame until the workspace is shown.
+
+```bash
+./install.sh --herdr-app-theme-only   # themes + hook; skipped until the app has created ~/.config/herdr-app
+./restore.sh --herdr-app-theme-only   # removes only overlay-owned files; settings.json stays
 ```
 
 ## rhun editor themes

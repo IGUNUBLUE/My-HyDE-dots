@@ -5,6 +5,7 @@ on PATH, so nothing on the real desktop is read or written.
 """
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -14,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "dotfiles/.config/hyde/wallbash/scripts"
 RHUN_THEMES = ROOT / "dotfiles/.config/rhun/themes"
+HERDR_APP_THEMES = ROOT / "dotfiles/.config/herdr-app/themes"
 FAILURES: list[str] = []
 
 
@@ -561,6 +563,101 @@ def test_vscodium_leaves_unparseable_settings_alone() -> None:
     finally:
         box.close()
 
+
+
+# --- my-hyde-herdr-app-theme.sh ----------------------------------------------
+
+HERDR_APP_SETTINGS = {"zoom": 1.25, "sounds": {"enabled": True}, "minimum_contrast": 1.0}
+
+
+def herdr_app_sandbox(mode: str, settings: str | None = None) -> Sandbox:
+    box = Sandbox()
+    app = box.config / "herdr-app"
+    (app / "themes").mkdir(parents=True)
+    for theme in HERDR_APP_THEMES.glob("*.json"):
+        shutil.copy(theme, app / "themes")
+    (app / ".wallbash-mode").write_text(mode + "\n")
+    (app / "settings.json").write_text(settings if settings is not None else json.dumps(HERDR_APP_SETTINGS, indent=2))
+    return box
+
+
+def herdr_app_settings(box: Sandbox) -> dict:
+    return json.loads((box.config / "herdr-app/settings.json").read_text())
+
+
+def test_herdr_app_follows_every_lagc_theme() -> None:
+    for name, slug, mode in (("LAGC Calm Dark", "lagc-calm-dark", "dark"),
+                             ("LAGC Calm Light", "lagc-calm-light", "light"),
+                             ("LAGC Tech Dark", "lagc-tech-dark", "dark"),
+                             ("LAGC Tech Light", "lagc-tech-light", "light")):
+        box = herdr_app_sandbox(mode)
+        try:
+            box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME=name)
+            settings = herdr_app_settings(box)
+            check(settings.get("theme") == slug, f"Herdr app must select {slug} for {name}")
+            check({k: v for k, v in settings.items() if k != "theme"} == HERDR_APP_SETTINGS,
+                  f"Herdr app hook changed other settings for {name}")
+        finally:
+            box.close()
+
+
+def test_herdr_app_non_lagc_falls_back_to_calm_by_mode() -> None:
+    for mode in ("dark", "light"):
+        box = herdr_app_sandbox(mode)
+        try:
+            box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="Catppuccin Latte")
+            check(herdr_app_settings(box).get("theme") == f"lagc-calm-{mode}",
+                  f"non-LAGC {mode} theme must fall back to lagc-calm-{mode}")
+        finally:
+            box.close()
+
+
+def test_herdr_app_is_idempotent_and_tolerant() -> None:
+    box = herdr_app_sandbox("dark")
+    try:
+        box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        path = box.config / "herdr-app/settings.json"
+        first = path.stat().st_mtime_ns
+        box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        check(path.stat().st_mtime_ns == first, "unchanged theme must not rewrite settings.json")
+        (box.config / "herdr-app/themes/lagc-tech-dark.json").unlink()
+        path.write_text(json.dumps({"theme": "graphite"}))
+        box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        check(herdr_app_settings(box) == {"theme": "graphite"}, "a missing theme must never be selected")
+    finally:
+        box.close()
+    box = herdr_app_sandbox("dark", settings="{not json")
+    try:
+        box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Calm Dark")
+        check((box.config / "herdr-app/settings.json").read_text() == "{not json",
+              "a settings.json that does not parse must not be touched")
+    finally:
+        box.close()
+    box = Sandbox()
+    try:
+        result = box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Calm Dark")
+        check(result.returncode == 0 and not (box.config / "herdr-app").exists(),
+              "without the app (no marker) the hook must do nothing")
+    finally:
+        box.close()
+
+
+def test_herdr_app_syncs_an_in_app_theme_pick() -> None:
+    box = herdr_app_sandbox("dark")
+    try:
+        box.fake("herdr-app", f"#!/usr/bin/env bash\necho \"herdr-app $*\" >> \"{box.log}\"\n")
+        box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        check(not box.calls(), f"no in-app pick: the hook must not call the app: {box.calls()}")
+        state = box.config / "herdr-app/layouts/.state"
+        state.mkdir(parents=True)
+        (state / "main.json").write_text('{\n  "nodes": {},\n  "theme": {"light": "paper", "dark": "graphite"}\n}\n')
+        (box.config / "herdr-app/settings.json").write_text("{}")
+        box.run("my-hyde-herdr-app-theme.sh", HYDE_THEME="LAGC Tech Dark")
+        check(box.calls() == ['herdr-app do app.theme {"name":"lagc-tech-light"}',
+                              'herdr-app do app.theme {"name":"lagc-tech-dark"}'],
+              f"an in-app pick must be synced for both halves: {box.calls()}")
+    finally:
+        box.close()
 
 
 def test_t3_theme_mapping_and_missing_dependencies() -> None:

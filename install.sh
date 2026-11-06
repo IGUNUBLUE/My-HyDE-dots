@@ -17,11 +17,12 @@ satty_only=false
 mime_only=false
 network_only=false
 herdr_theme_only=false
+herdr_app_theme_only=false
 only_modules=""
 
 usage() {
     cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--t3-theme-only] [--satty-only] [--mime-only] [--network-only] [--herdr-theme-only]
+Usage: ./install.sh [--dry-run] [--skip-packages] [--yes] [--only a,b] [--qt-menu-only] [--vscodium-theme-only] [--rhun-theme-only] [--t3-theme-only] [--satty-only] [--mime-only] [--network-only] [--herdr-theme-only] [--herdr-app-theme-only]
 
 Applies this personal overlay after an official HyDE installation.
 Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
@@ -39,6 +40,7 @@ Existing target files are backed up under ~/.local/state/my-hyde-dots/backups/.
   --mime-only          merge Dolphin/Ark defaults, preserving other associations
   --network-only       install networkmanager-dmenu and replace the old network interfaces
   --herdr-theme-only   merge Herdr/Radar appearance settings and reload config
+  --herdr-app-theme-only  install the LAGC themes and theme-follow hook for the Herdr desktop app
 EOF
 }
 
@@ -53,6 +55,7 @@ while (($#)); do
         --mime-only) mime_only=true; skip_packages=true ;;
         --network-only) network_only=true ;;
         --herdr-theme-only) herdr_theme_only=true; skip_packages=true ;;
+        --herdr-app-theme-only) herdr_app_theme_only=true; skip_packages=true ;;
         --skip-packages) skip_packages=true ;;
         --yes|--non-interactive) assume_yes=true ;;
         --only) shift; only_modules=${1:-} ;;
@@ -93,7 +96,7 @@ has_module() { [[ $MODULES_CSV == *",$1,"* ]]; }
 sage='#A9C080'; amber='#D4A55C'; terracotta='#D67A6E'; muted='#8B8378'; ink='#E9DFCE'
 
 interactive=false
-if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $t3_theme_only && ! $satty_only && ! $mime_only && ! $network_only && ! $herdr_theme_only; then
+if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vscodium_theme_only && ! $rhun_theme_only && ! $t3_theme_only && ! $satty_only && ! $mime_only && ! $network_only && ! $herdr_theme_only && ! $herdr_app_theme_only; then
     interactive=true
 fi
 
@@ -268,6 +271,40 @@ install_rhun_theme() {
             run "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/rhun-theme.dcol"
         else
             "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/rhun-theme.dcol" >/dev/null 2>&1 || true
+        fi
+    fi
+}
+
+install_herdr_app_theme() {
+    # The Herdr desktop app (herdr-app, not the Herdr TUI) loads themes from
+    # ~/.config/herdr-app/themes/<name>.json and the active one from "theme" in
+    # settings.json, both applied live. The Wallbash always/ hook keeps "theme"
+    # in step with the active HyDE theme. Skipped when the app was never started,
+    # because the app creates and owns its directory.
+    local source_dir="$repo_dir/dotfiles/.config/herdr-app/themes"
+    local wallbash_dir="$repo_dir/dotfiles/.config/hyde/wallbash"
+    local source wallbash_apply
+
+    if ! python "$repo_dir/tools/herdr-app-themes.py" --check; then
+        return 1
+    fi
+    if [[ ! -d "$HOME/.config/herdr-app" ]]; then
+        printf 'Herdr desktop app not initialised (no ~/.config/herdr-app); skipping its LAGC themes.\n'
+        return 0
+    fi
+    while IFS= read -r -d '' source; do
+        install_dot "$source" "$HOME/.config/herdr-app/themes/${source#"$source_dir"/}"
+    done < <(find "$source_dir" -type f -name '*.json' -print0)
+    install_dot "$wallbash_dir/always/herdr-app-theme.dcol" "$HOME/.config/hyde/wallbash/always/herdr-app-theme.dcol"
+    install_dot "$wallbash_dir/scripts/my-hyde-herdr-app-theme.sh" "$HOME/.config/hyde/wallbash/scripts/my-hyde-herdr-app-theme.sh" 0755
+
+    # Render the hook once so the app matches the current theme immediately.
+    wallbash_apply="$HOME/.local/lib/hyde/color.set.sh"
+    if [[ -x $wallbash_apply && -f ${XDG_CACHE_HOME:-$HOME/.cache}/hyde/wall.set ]]; then
+        if $dry_run; then
+            run "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/herdr-app-theme.dcol"
+        else
+            "$wallbash_apply" --single "$HOME/.config/hyde/wallbash/always/herdr-app-theme.dcol" >/dev/null 2>&1 || true
         fi
     fi
 }
@@ -606,6 +643,7 @@ step_themes() {
     install_theme_files "LAGC Calm Light"
     install_vscodium_theme
     install_rhun_theme
+    install_herdr_app_theme
     install_t3_themes
     remove_target "$HOME/.config/hyde/wallbash/always/rofi-opaque.dcol"
     remove_target "$HOME/.config/hyde/wallbash/theme/lagc-tech-dark-kitty.dcol"
@@ -728,6 +766,7 @@ $satty_only && ((only_install_count += 1))
 $mime_only && ((only_install_count += 1))
 $network_only && ((only_install_count += 1))
 $herdr_theme_only && ((only_install_count += 1))
+$herdr_app_theme_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
     printf 'Use only one focused installation option (--*-only).\n' >&2
     exit 2
@@ -742,6 +781,12 @@ fi
 if $t3_theme_only; then
     install_t3_themes
     printf 'LAGC T3 Code themes installed. Backup: %s\n' "$backup_dir"
+    exit 0
+fi
+
+if $herdr_app_theme_only; then
+    install_herdr_app_theme
+    printf 'LAGC Herdr app themes and theme-follow hook installed; the app now follows the active HyDE theme.\n'
     exit 0
 fi
 
@@ -824,7 +869,7 @@ if $interactive; then
                     'Paquetes (pacman)' \
                     'Cursor Future (hyprcursor)' \
                     'Configs base (waybar, kitty, hooks)' \
-                    'Temas LAGC + wallpapers + VSCodium + rhun' \
+                    'Temas LAGC + wallpapers + VSCodium + rhun + Herdr app' \
                     'Sistema: tapa bloquea sin suspender (logind, sudo)' \
                     'Aplicar en vivo (reload, fuentes, envs)') || { ui_bar; exit 0; }
                 modules=()
@@ -888,7 +933,7 @@ export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module step_packages step_cursor \
-    step_config step_themes step_apply install_rhun_theme install_t3_themes step_system install_mime_defaults \
+    step_config step_themes step_apply install_rhun_theme install_herdr_app_theme install_t3_themes step_system install_mime_defaults \
     network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
     apply_network_config remove_legacy_network_applet install_herdr_theme
 export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes
