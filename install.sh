@@ -565,12 +565,15 @@ step_packages() {
     install_network_packages
 }
 
-require_swaync() {
+require_config_packages() {
     $dry_run && return 0
-    pacman -Q swaync >/dev/null 2>&1 || {
-        printf 'swaync is required by this profile. Install it with sudo pacman -S --needed swaync, or include the packages module.\n' >&2
-        return 1
-    }
+    local package
+    for package in swaync xsettingsd; do
+        pacman -Q "$package" >/dev/null 2>&1 || {
+            printf '%s is required by this profile. Install it with sudo pacman -S --needed %s, or include the packages module.\n' "$package" "$package" >&2
+            return 1
+        }
+    done
 }
 
 step_cursor() {
@@ -607,7 +610,7 @@ install_mime_defaults() {
 }
 
 step_config() {
-    require_swaync
+    require_config_packages
     require_network_gui
     install_network_config
     install_herdr_theme
@@ -962,7 +965,7 @@ fi
 # ---------------------------------------------------------------------------
 # Fail before changing any target when packages were explicitly skipped.
 if has_module config && ! has_module packages; then
-    require_swaync
+    require_config_packages
 fi
 work_dir=$(mktemp -d)
 trap 'rm -rf -- "$work_dir"; [[ -n ${SUDO_KEEPALIVE_PID:-} ]] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
@@ -973,7 +976,7 @@ sed "s|@HOME@|$HOME|g" "$repo_dir/dotfiles/.config/hyde/config.toml.in" > "$conf
 export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
-    install_vscodium_theme has_module require_swaync step_packages step_cursor \
+    install_vscodium_theme has_module require_config_packages step_packages step_cursor \
     step_config step_themes step_apply install_rhun_theme install_herdr_app_theme install_t3_themes step_system install_mime_defaults \
     network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
     apply_network_config remove_legacy_network_applet install_herdr_theme
@@ -982,7 +985,7 @@ export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes
 $interactive && mkdir -p "$state_dir" && : > "$install_log"
 
 has_module packages && ui_step 'Instalando paquetes' step_packages stream
-has_module config && require_swaync
+has_module config && require_config_packages
 has_module cursor   && ui_step 'Cursor Future compilado'   step_cursor
 has_module config   && ui_step 'Configs aplicadas'         step_config
 has_module themes   && ui_step 'Temas LAGC + wallpapers'   step_themes

@@ -79,7 +79,8 @@ cd My-HyDE-dots
 
 The full installer checks that Hyprland is reachable before installing packages
 or changing targets. The `config` module requires `swaync`, which is included in
-`packages.arch`; when using `--skip-packages`, install Swaync first. HyDE's default
+`packages.arch` along with the XSettings daemon `xsettingsd`; when using
+`--skip-packages`, install both first. HyDE's default
 Dunst startup is disabled by this profile, and Swaync is started by its user
 service. File-only installation from a TTY is available explicitly:
 

@@ -53,6 +53,14 @@ temporary directory and installed by replacing the recorded destination. The
 The full `./check.sh`, installer dry run and whitespace check also pass after
 this correction (now 10 lifecycle tests).
 
+## Additional dependency check
+
+Source inspection found the same undeclared service dependency for xsettingsd:
+the overlay calls add-wants for xsettingsd.service, while current HyDE only
+deploys its configuration. The host package has no reverse dependencies. Added
+the official Arch package and early config preflight, with two failing-then-
+passing lifecycle regressions. The full check passes with 12 lifecycle tests.
+
 ## VM acceptance
 
 In progress: official Arch cloud image `20261115.625457`, SHA256

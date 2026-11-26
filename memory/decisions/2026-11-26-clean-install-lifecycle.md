@@ -30,6 +30,11 @@ compositor connectivity before full live installation or network-only changes,
 including before the optional gum bootstrap. Dry runs and explicit file-only
 module selections remain available without a session.
 
+Also declare and preflight xsettingsd: this overlay explicitly starts its user
+service, while current HyDE deploys its configuration without declaring the
+daemon package. It is not a dependency of any installed package on the audited
+host, so the existing installation had masked the same clean-machine gap.
+
 The first upstream graphical session can still have Dunst running. Stop its
 HyDE notification unit, its user unit and remaining user-owned Dunst process
 before starting Swaync; daemon startup errors must fail the apply step. Honor

@@ -29,12 +29,20 @@ class Lifecycle(unittest.TestCase):
                         XDG_RUNTIME_DIR=str(self.root / 'run'),
                         CALLS=str(self.root / 'calls'),
                         PACKAGE_STATE=str(self.root / 'swaync-installed'),
+                        XSETTINGS_STATE=str(self.root / 'xsettings-installed'),
                         NO_SESSION='0')
         (self.root / 'swaync-installed').touch()
+        (self.root / 'xsettings-installed').touch()
         self.stub('sudo', '[[ $1 != pacman ]] || { shift; exec pacman "$@"; }; exit 99')
         self.stub('pacman', '''case "$1" in
-            -Q) [[ $2 != swaync || -f $PACKAGE_STATE ]] ;;
-            -S) touch "$PACKAGE_STATE" ;;
+            -Q) case "$2" in
+                swaync) [[ -f $PACKAGE_STATE ]] ;;
+                xsettingsd) [[ -f $XSETTINGS_STATE ]] ;;
+                *) exit 0 ;;
+                esac ;;
+            -S) [[ " $* " != *' swaync '* ]] || touch "$PACKAGE_STATE"
+                [[ " $* " != *' xsettingsd '* ]] || touch "$XSETTINGS_STATE"
+                exit 0 ;;
             *) exit 99 ;;
         esac''')
         self.stub('hyprctl', '[[ $NO_SESSION == 0 ]]')
@@ -88,6 +96,19 @@ class Lifecycle(unittest.TestCase):
         result = self.invoke('install.sh', '--yes', '--skip-packages', '--only', 'config,apply')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.root / 'notification-daemon').read_text(), 'swaync')
+
+    def test_packages_install_the_xsettings_service(self):
+        (self.root / 'xsettings-installed').unlink()
+        result = self.invoke('install.sh', '--yes', '--only', 'packages')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.root / 'xsettings-installed').exists(), self.calls())
+
+    def test_missing_xsettings_refuses_config_before_writing(self):
+        (self.root / 'xsettings-installed').unlink()
+        result = self.invoke('install.sh', '--yes', '--skip-packages', '--only', 'config')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('xsettingsd', result.stderr)
+        self.assertEqual((self.home / '.config/hypr/hyprland.lua').read_text(), '-- before overlay\n')
 
     def test_missing_swaync_refuses_config_before_writing(self):
         (self.root / 'swaync-installed').unlink()

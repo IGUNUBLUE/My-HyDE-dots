@@ -22,6 +22,8 @@ fail before its fix. Wallpaper tests additionally validate a real generated imag
    Swaync refuses before writing targets. On initial application, stop the
    upstream Dunst daemon before starting Swaync; propagate startup failure.
    The package step honors the documented `--yes` option.
+   The overlay's XSettings service also has an explicit package dependency and
+   is checked before file-only config installation.
 2. A missing/unreachable graphical session fails before packages, backups or
    configuration are changed. Dry runs and file-only selections still work.
 3. All four LAGC themes have valid wallpaper links without private source images;
