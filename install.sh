@@ -100,16 +100,6 @@ if [[ -t 0 && -t 1 ]] && ! $dry_run && ! $assume_yes && ! $qt_menu_only && ! $vs
     interactive=true
 fi
 
-if $interactive && ! command -v gum >/dev/null; then
-    printf 'Para la experiencia interactiva se necesita gum (repo oficial Arch).\n'
-    if sudo -v && sudo pacman -S --needed --noconfirm gum; then
-        printf '\n'
-    else
-        interactive=false
-    fi
-fi
-command -v gum >/dev/null 2>&1 || interactive=false
-
 ui_bar()  { gum style --foreground "$muted" '│'; }
 ui_head() { gum style --foreground "$amber" --bold '◆'; }
 ui_step_done() { printf '%s %s\n' "$(gum style --foreground "$sage" '●')" "$(gum style --foreground "$ink" "$1")"; }
@@ -415,12 +405,20 @@ generate_theme_wallpaper() {
 
     case "$variant" in
         dark)
-            run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
-                -fill '#061B2B' -colorize 30 -modulate 88,105,100 "$target"
+            if [[ -f "$source" ]]; then
+                run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
+                    -fill '#061B2B' -colorize 30 -modulate 88,105,100 "$target"
+            else
+                run magick -size 1920x1080 gradient:'#061B2B'-'#123B50' -strip "$target"
+            fi
             ;;
         light)
-            run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
-                -fill '#EAFBFF' -colorize 36 -modulate 108,92,100 "$target"
+            if [[ -f "$source" ]]; then
+                run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
+                    -fill '#EAFBFF' -colorize 36 -modulate 108,92,100 "$target"
+            else
+                run magick -size 1920x1080 gradient:'#EAFBFF'-'#C9DDE8' -strip "$target"
+            fi
             ;;
         *)
             printf 'Unknown LAGC Tech wallpaper variant: %s\n' "$variant" >&2
@@ -459,18 +457,20 @@ generate_calm_wallpaper() {
 
     if ! $dry_run && curl -fsSL --max-time 30 -o "$target" "$url" && [[ -s "$target" ]]; then
         run magick "$target" -resize '3840x2160>' -strip -quality 92 "$target"
-    elif [[ "$variant" == dark ]]; then
-        run magick -size 1920x1080 gradient:'#332C26'-'#211D1B' \
-            \( -size 1920x1080 xc:black -fill '#A9C080' \
-            -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.10 \) \
-            -compose screen -composite "${target%.jpg}.png"
-        target="${target%.jpg}.png"
     else
-        run magick -size 1920x1080 gradient:'#F4EEE2'-'#E2D7C4' \
-            \( -size 1920x1080 xc:black -fill '#DDE7C8' \
-            -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.45 \) \
-            -compose screen -composite "${target%.jpg}.png"
         target="${target%.jpg}.png"
+        backup_target "$target"
+        if [[ "$variant" == dark ]]; then
+            run magick -size 1920x1080 gradient:'#332C26'-'#211D1B' \
+                \( -size 1920x1080 xc:black -fill '#A9C080' \
+                -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.10 \) \
+                -compose screen -composite "$target"
+        else
+            run magick -size 1920x1080 gradient:'#F4EEE2'-'#E2D7C4' \
+                \( -size 1920x1080 xc:black -fill '#DDE7C8' \
+                -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.45 \) \
+                -compose screen -composite "$target"
+        fi
     fi
 
     link_theme_wallpaper "$theme_name" "$target"
@@ -551,9 +551,19 @@ step_packages() {
         pacman -Q "$package" >/dev/null 2>&1 || missing+=("$package")
     done < "$repo_dir/packages.arch"
     if ((${#missing[@]})); then
-        run sudo pacman -S --needed "${missing[@]}"
+        local options=(-S --needed)
+        $assume_yes && options+=(--noconfirm)
+        run sudo pacman "${options[@]}" "${missing[@]}"
     fi
     install_network_packages
+}
+
+require_swaync() {
+    $dry_run && return 0
+    pacman -Q swaync >/dev/null 2>&1 || {
+        printf 'swaync is required by this profile. Install it with sudo pacman -S --needed swaync, or include the packages module.\n' >&2
+        return 1
+    }
 }
 
 step_cursor() {
@@ -590,6 +600,7 @@ install_mime_defaults() {
 }
 
 step_config() {
+    require_swaync
     require_network_gui
     install_network_config
     install_herdr_theme
@@ -662,12 +673,8 @@ step_themes() {
     done
 
     local theme_wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
-    if [[ -f "$theme_wallpaper" ]]; then
-        generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark
-        generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light
-    else
-        printf 'LAGC Tech theme wallpapers were not generated; select a wallpaper first or set MY_HYDE_WALLPAPER when installing.\n' >&2
-    fi
+    generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark
+    generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light
     generate_calm_wallpaper "LAGC Calm Dark" dark
     generate_calm_wallpaper "LAGC Calm Light" light
 }
@@ -701,10 +708,14 @@ step_apply() {
         # swaync.service is the notification daemon; hyprland.lua blanks
         # hyde.config.start.notifications, so guarantee the wants link keeps a
         # daemon in the session on fresh installs.
+        # The first upstream session already has Dunst owning the notification
+        # bus name. Release it before starting this profile's daemon.
+        systemctl --user stop "hyde-${XDG_SESSION_DESKTOP:-Hyprland}-notifications.service" dunst.service 2>/dev/null || true
+        pkill -u "$(id -u)" -x dunst 2>/dev/null || true
         systemctl --user add-wants graphical-session.target swaync.service
         # Processes keep a stale fontconfig map until restarted; without this a
         # running swaync renders notification text as tofu after font install.
-        systemctl --user restart swaync.service 2>/dev/null || true
+        systemctl --user restart swaync.service
         systemctl --user daemon-reload 2>/dev/null || true
         systemctl --user enable --now gtk3-cursor-fix.path 2>/dev/null || true
 
@@ -770,6 +781,15 @@ $herdr_app_theme_only && ((only_install_count += 1))
 if ((only_install_count > 1)); then
     printf 'Use only one focused installation option (--*-only).\n' >&2
     exit 2
+fi
+
+# Reach the compositor before any package bootstrap, backup or target write.
+# An inherited signature alone may point at an already-closed session.
+if ! $dry_run && { $network_only || { ((only_install_count == 0)) && has_module apply; }; }; then
+    if ! command -v hyprctl >/dev/null || ! hyprctl monitors >/dev/null 2>&1; then
+        printf 'A running Hyprland session is required to apply this overlay. Reboot after installing official HyDE, log in to HyDE, and rerun from its terminal. For file-only installation omit apply with --only packages,cursor,config,themes,system.\n' >&2
+        exit 1
+    fi
 fi
 
 if $vscodium_theme_only; then
@@ -843,6 +863,16 @@ fi
 # ---------------------------------------------------------------------------
 # Interactive flow
 # ---------------------------------------------------------------------------
+if $interactive && ! command -v gum >/dev/null; then
+    printf 'Para la experiencia interactiva se necesita gum (repo oficial Arch).\n'
+    if sudo -v && sudo pacman -S --needed --noconfirm gum; then
+        printf '\n'
+    else
+        interactive=false
+    fi
+fi
+command -v gum >/dev/null 2>&1 || interactive=false
+
 if $interactive; then
     mkdir -p "$state_dir"
     ui_banner
@@ -923,6 +953,10 @@ fi
 # ---------------------------------------------------------------------------
 # Execute
 # ---------------------------------------------------------------------------
+# Fail before changing any target when packages were explicitly skipped.
+if has_module config && ! has_module packages; then
+    require_swaync
+fi
 work_dir=$(mktemp -d)
 trap 'rm -rf -- "$work_dir"; [[ -n ${SUDO_KEEPALIVE_PID:-} ]] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
 
@@ -932,7 +966,7 @@ sed "s|@HOME@|$HOME|g" "$repo_dir/dotfiles/.config/hyde/config.toml.in" > "$conf
 export -f run backup_target install_dot install_tree backup_cursor_state \
     install_theme_files link_theme_wallpaper generate_theme_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
-    install_vscodium_theme has_module step_packages step_cursor \
+    install_vscodium_theme has_module require_swaync step_packages step_cursor \
     step_config step_themes step_apply install_rhun_theme install_herdr_app_theme install_t3_themes step_system install_mime_defaults \
     network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
     apply_network_config remove_legacy_network_applet install_herdr_theme
@@ -941,6 +975,7 @@ export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes
 $interactive && mkdir -p "$state_dir" && : > "$install_log"
 
 has_module packages && ui_step 'Instalando paquetes' step_packages stream
+has_module config && require_swaync
 has_module cursor   && ui_step 'Cursor Future compilado'   step_cursor
 has_module config   && ui_step 'Configs aplicadas'         step_config
 has_module themes   && ui_step 'Temas LAGC + wallpapers'   step_themes

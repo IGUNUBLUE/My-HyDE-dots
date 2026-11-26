@@ -58,16 +58,52 @@ Notes for later changes:
 
 ## Fresh installation
 
-1. Install or update official HyDE first.
-2. Restore the Nextcloud wallpaper folder if desired.
-3. Clone and apply this overlay:
+1. Install minimal Arch Linux with working networking and a normal user with
+   `sudo` access. Install official HyDE using its
+   [installation instructions](https://hydeproject.pages.dev/en/getting-started/installation/)
+   and choose Zsh if you want this overlay's shell preferences.
+2. Reboot after HyDE finishes, select the HyDE/Hyprland session, and open a
+   terminal inside that desktop. Run this overlay as your normal user; it asks
+   for `sudo` only for packages and the logind drop-in.
+3. Restore Nextcloud wallpapers if desired. They are optional: all four LAGC
+   themes get generated wallpaper fallbacks when private images are absent
+   (Calm first tries its public photo download).
+4. Clone over HTTPS and apply this overlay; no SSH key is needed:
 
 ```bash
-git clone git@github.com:IGUNUBLUE/My-HyDE-dots.git
+git clone https://github.com/IGUNUBLUE/My-HyDE-dots.git
 cd My-HyDE-dots
 ./install.sh --dry-run
 ./install.sh
 ```
+
+The full installer checks that Hyprland is reachable before installing packages
+or changing targets. The `config` module requires `swaync`, which is included in
+`packages.arch`; when using `--skip-packages`, install Swaync first. HyDE's default
+Dunst startup is disabled by this profile, and Swaync is started by its user
+service. File-only installation from a TTY is available explicitly:
+
+```bash
+./install.sh --only packages,cursor,config,themes,system
+# After logging in to HyDE, rerun the full installer to apply the configuration.
+./install.sh
+```
+
+After the first installation, log out and back in so applications inherit the
+cursor environment. The installer preserves the active HyDE theme. Select a
+LAGC theme explicitly, for example `hydectl theme set "LAGC Calm Dark"`. Check
+`hyprctl configerrors`, the bar on every output, its brightness right-click popup
+and cursor clicks before accepting the desktop. Run `tests/live-theme.sh` for the
+theme-cycle checks; it temporarily changes themes and opens throwaway browsers.
+Keep the existing manual lock/unlock acceptance requirement in `memory/index.md`.
+
+This is a settings overlay, not a backup of all installed applications. Install
+Nextcloud, Bun, Volta, PNPM, OMP, editors and other development tools separately;
+the Zsh paths do not install their binaries. VSCodium themes are installed when
+`codium` is available. For Herdr desktop, start the app once and rerun
+`./install.sh --herdr-app-theme-only`; its themes are skipped until its own config
+directory exists. No browser profiles, saved network credentials or documents
+are restored by this repository.
 
 Run interactively on a terminal and the installer shows a guided flow — module picker (full, themes-only, cursor-only, or custom), a pacman confirmation, one up-front `sudo` prompt kept alive while steps run, a spinner per step, and a closing summary with the backup path. It bootstraps `gum` (official Arch package) for the UI when missing. Non-interactive runs — piped input, `--yes`, `--dry-run`, or no `gum` — print plain output and accept defaults, so CI and scripts are unaffected. Modules can also be selected explicitly with `--only packages,cursor,config,themes,system,apply`; `system` is the only module that writes outside `$HOME` (the logind lid drop-in, behind `sudo`, backed up and restored through a fixed allowlist); every step logs to `~/.local/state/my-hyde-dots/install-<timestamp>.log`.
 
@@ -228,7 +264,9 @@ repository; the focused installer skips packages, as the other focused modes do.
 
 The overlay installs two native HyDE themes without committing any private wallpaper content. HyDE's graphical theme selector identifies themes only by the image referenced by each theme's `wall.set`; it hides the theme name. To keep the Dark and Light cards recognizable, `install.sh` uses ImageMagick to create distinct palette-tinted variants of the selected wallpaper under each theme's supported `wallpapers/` directory, points `wall.set` to that local variant, and refreshes each theme through HyDE's documented wallpaper-cache command. The generated images are reversible installation state and are never added to Git.
 
-The default source is `~/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png`. Provide another source with `MY_HYDE_WALLPAPER`:
+The default source is `~/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png`.
+When it is absent, the installer generates palette-matched Tech gradients, so
+both themes remain selectable on a fresh machine. Provide another source with `MY_HYDE_WALLPAPER`:
 
 ```bash
 MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
@@ -270,6 +308,12 @@ HyDE reloads Waybar with `SIGUSR2` on every switch, and Waybar 0.15 can hang whe
 
 `./check.sh` runs the static and sandboxed suites:
 
+- `tests/lifecycle.py` — runs the real install/restore commands in an isolated
+  HOME with fake package/desktop commands: Swaync dependency installation and
+  early refusal, unavailable sessions, file-only/dry-run behavior, themes without
+  Nextcloud (real ImageMagick Tech images), offline wallpaper rollback and regular
+  or dangling symlink restoration. These checks do not replace a graphical VM
+  acceptance test.
 - `tests/theme-contract.py` — every LAGC theme agrees across `hypr.theme` (`$COLOR_SCHEME` vs `dcol_mode`, `$GTK_THEME`, cursor, icons), `theme.dcol`, Kitty, Waybar, Rofi and its rhun theme.
 - `tests/hooks.py` — runs the Wallbash hook scripts in a throwaway XDG tree with fake `gsettings`/`fc-match`/`hyprctl`/`systemctl`: GTK refresh on same-mode and mode-flip switches, waiting for `gtk-dark.css`, rhun theme/font following, Herdr app theme following (including the in-app pick sync), the Waybar guard (restart after lost bars, tolerance of normal reload gaps, one restart at most, no action on a stopped Waybar), idempotence and preservation of foreign config keys.
 
@@ -346,6 +390,11 @@ Afterwards just switch HyDE themes and rhun follows; a theme picked by hand in r
 ```
 
 Pass a specific directory under `~/.local/state/my-hyde-dots/backups/` to restore an older snapshot.
+
+Recorded symbolic links, including dangling links, are restored as links rather
+than copied through their referents. Generated fallback wallpapers are included
+in rollback. Packages and unrecorded application state are not rolled back;
+network frontend package restoration is reported as a separate manual step.
 
 ## Capture later changes
 

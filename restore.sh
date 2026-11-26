@@ -119,8 +119,12 @@ while IFS= read -r -d '' source; do
     relative=${source#"$backup"/}
     target="$HOME/$relative"
     mkdir -p -- "$(dirname -- "$target")"
-    cp -a -- "$source" "$target"
-done < <(find "$backup" -path "$backup/.system" -prune -o -type f ! -name .created ! -name .trees \
+    # Replace the recorded path itself, never write through a live symlink.
+    if [[ -L "$source" ]]; then
+        remove_path "$target"
+    fi
+    cp -a --remove-destination -- "$source" "$target"
+done < <(find "$backup" -path "$backup/.system" -prune -o \( -type f -o -type l \) ! -name .created ! -name .trees \
     ! -name .cursor-state ! -name .system-created ! -name .network-package-state -print0)
 
 # System files outside $HOME (install.sh `system` module). Only the same

@@ -128,3 +128,17 @@ Do not describe a change as verified when only static validation ran. Report sep
 - Flag rollback changes that can delete or restore paths outside the overlay manifest.
 - Flag monitor or DDC changes that silently assume identical hardware on every installation; require documentation or graceful detection.
 - Flag changes that contradict an active repository memory without resolving its exit criteria and updating the memory index.
+
+## Agent skills
+
+### Issue tracker
+
+For specs, implementation tickets and progress, use local Markdown in `.scratch/`; see `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+For incoming issues, use the role names in `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+When exploring domain terms or design decisions, follow the single-context layout in `docs/agents/domain.md`. Repository operational safeguards remain in `memory/index.md`.
