@@ -40,6 +40,11 @@ gradients within the theme's own wallpapers directory. Record the actual Calm
 fallback filename. Restore recorded links as links and replace destination files
 without following a symlink into an unrelated referent.
 
+Render/download wallpapers inside the installer's temporary directory before
+replacing their recorded destinations. ImageMagick and curl follow destination
+symlinks; backing up such a link alone cannot recover a private referent that
+those tools overwrite. A real-image CLI regression covers install and rollback.
+
 Keep lifecycle regression tests at the real CLI boundary in an isolated HOME.
 Only external package/network/desktop commands are faked. Preserve upstream
 runtime ownership, accepted visuals, idle mitigation and the logind allowlist.

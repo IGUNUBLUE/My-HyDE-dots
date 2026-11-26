@@ -30,7 +30,37 @@ Final local checks passed after the daemon handover changes:
 - `TMPDIR=/var/tmp ./install.sh --dry-run --skip-packages`: exit 0.
 - `git diff --check`: clean.
 
-Standards/Spec review and VM results are appended below.
+## Standards review
+
+Independent read-only reviewer checked candidate `b656058` against `5c6ffe4`.
+One P1 privacy/backup breach: real ImageMagick followed an existing Tech output
+symlink and overwrote the private image it referenced. Restore preserved the
+link but could not recover the referent. No additional heuristic findings.
+
+## Spec review
+
+A second independent read-only reviewer checked the same candidate against
+`spec.md`. One P1 against requirement 4: the same wallpaper referent corruption.
+No other concrete implementation/scope findings. The 9 lifecycle tests passed;
+an additional isolated Swaync startup failure correctly propagated exit 1.
+
+## Review correction
+
+Added a real ImageMagick/public install+restore regression; it failed before the
+fix. Tech and Calm images are now rendered/downloaded into the installer's own
+temporary directory and installed by replacing the recorded destination. The
+10-test lifecycle suite passes and the personal image remains byte-identical.
+The full `./check.sh`, installer dry run and whitespace check also pass after
+this correction (now 10 lifecycle tests).
+
+## VM acceptance
+
+In progress: official Arch cloud image `20261115.625457`, SHA256
+`dbd02830f6eb0fe07ef6e5edaddbae8b577ce4296d9e79118904704cce0a1f60`, verified
+against the official mirror checksum. A separate 40 GiB copy-on-write disk and
+NoCloud seed are used with QEMU 11.1.3/KVM, 2 virtual CPUs, 4 GiB RAM and a Virtio
+GPU. SSH is forwarded only on loopback; guest access uses a task-owned disposable
+key, never the owner's credentials. No graphical environment is preinstalled.
 
 ## Isolation
 

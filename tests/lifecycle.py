@@ -142,6 +142,30 @@ class Lifecycle(unittest.TestCase):
                 self.assertEqual(image.returncode, 0, image.stderr)
                 self.assertEqual(image.stdout, 'PNG 1920x1080')
 
+    def test_wallpaper_install_preserves_a_symlink_referent(self):
+        (self.bin / 'magick').unlink()
+        personal = self.home / 'personal.png'
+        subprocess.run(['/usr/bin/magick', '-size', '2x2', 'xc:red', str(personal)], check=True)
+        original = personal.read_bytes()
+        target = self.home / '.config/hyde/themes/LAGC Tech Dark/wallpapers/lagc-tech-dark.png'
+        target.parent.mkdir(parents=True)
+        target.symlink_to(personal)
+        # Real image rendering for Tech; keep the unchanged expensive Calm
+        # render out of this focused test.
+        self.stub('magick', '''if [[ ${@: -1} == *lagc-tech-* ]]; then
+            exec /usr/bin/magick "$@"
+        fi
+        printf generated > "${@: -1}"''')
+        result = self.invoke('install.sh', '--yes', '--only', 'themes')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(personal.read_bytes(), original)
+        backup = next((self.home / '.local/state/my-hyde-dots/backups').iterdir())
+        result = self.invoke('restore.sh', str(backup))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(target.readlink(), personal)
+        self.assertEqual(personal.read_bytes(), original)
+
     def test_offline_wallpaper_reinstall_restores_previous_image(self):
         previous = self.write('.config/hyde/themes/LAGC Calm Dark/wallpapers/lagc-calm-dark.png',
                               'previous wallpaper')

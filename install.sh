@@ -393,9 +393,10 @@ link_theme_wallpaper() {
 
 generate_theme_wallpaper() {
     local theme_name=$1 source=$2 variant=$3
-    local wallpaper_dir target
+    local wallpaper_dir target output
     wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
     target="$wallpaper_dir/lagc-tech-$variant.png"
+    output="$work_dir/lagc-tech-$variant.png"
 
     if [[ ! -d "$wallpaper_dir" ]]; then
         backup_target "$wallpaper_dir"
@@ -407,17 +408,17 @@ generate_theme_wallpaper() {
         dark)
             if [[ -f "$source" ]]; then
                 run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
-                    -fill '#061B2B' -colorize 30 -modulate 88,105,100 "$target"
+                    -fill '#061B2B' -colorize 30 -modulate 88,105,100 "$output"
             else
-                run magick -size 1920x1080 gradient:'#061B2B'-'#123B50' -strip "$target"
+                run magick -size 1920x1080 gradient:'#061B2B'-'#123B50' -strip "$output"
             fi
             ;;
         light)
             if [[ -f "$source" ]]; then
                 run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
-                    -fill '#EAFBFF' -colorize 36 -modulate 108,92,100 "$target"
+                    -fill '#EAFBFF' -colorize 36 -modulate 108,92,100 "$output"
             else
-                run magick -size 1920x1080 gradient:'#EAFBFF'-'#C9DDE8' -strip "$target"
+                run magick -size 1920x1080 gradient:'#EAFBFF'-'#C9DDE8' -strip "$output"
             fi
             ;;
         *)
@@ -426,6 +427,9 @@ generate_theme_wallpaper() {
             ;;
     esac
 
+    # install replaces an existing link rather than letting image tools write
+    # through it to a private wallpaper outside the overlay.
+    run install -m0644 -- "$output" "$target"
     link_theme_wallpaper "$theme_name" "$target"
     # Cache only the generated image. Caching the whole theme also walks every
     # configured custom wallpaper path, which can be unnecessarily expensive.
@@ -434,9 +438,10 @@ generate_theme_wallpaper() {
 
 generate_calm_wallpaper() {
     local theme_name=$1 variant=$2
-    local wallpaper_dir target url
+    local wallpaper_dir target url output
     wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
     target="$wallpaper_dir/lagc-calm-$variant.jpg"
+    output="$work_dir/lagc-calm-$variant.jpg"
 
     case "$variant" in
         # Warm low-glare photos matching each palette; fall back to a
@@ -455,24 +460,26 @@ generate_calm_wallpaper() {
     fi
     backup_target "$target"
 
-    if ! $dry_run && curl -fsSL --max-time 30 -o "$target" "$url" && [[ -s "$target" ]]; then
-        run magick "$target" -resize '3840x2160>' -strip -quality 92 "$target"
+    if ! $dry_run && curl -fsSL --max-time 30 -o "$output" "$url" && [[ -s "$output" ]]; then
+        run magick "$output" -resize '3840x2160>' -strip -quality 92 "$output"
     else
         target="${target%.jpg}.png"
+        output="${output%.jpg}.png"
         backup_target "$target"
         if [[ "$variant" == dark ]]; then
             run magick -size 1920x1080 gradient:'#332C26'-'#211D1B' \
                 \( -size 1920x1080 xc:black -fill '#A9C080' \
                 -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.10 \) \
-                -compose screen -composite "$target"
+                -compose screen -composite "$output"
         else
             run magick -size 1920x1080 gradient:'#F4EEE2'-'#E2D7C4' \
                 \( -size 1920x1080 xc:black -fill '#DDE7C8' \
                 -draw 'ellipse 1520,180 760,480 0,360' -blur 0x280 -evaluate multiply 0.45 \) \
-                -compose screen -composite "$target"
+                -compose screen -composite "$output"
         fi
     fi
 
+    run install -m0644 -- "$output" "$target"
     link_theme_wallpaper "$theme_name" "$target"
     run hyde-shell wallpaper --cache wall "$target"
 }
