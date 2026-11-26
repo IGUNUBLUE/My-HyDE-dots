@@ -1,6 +1,10 @@
 # Reliable installation after official HyDE
 
-Status: in-progress
+Status: ready-for-human
+
+Implementation and publication are complete. Functional VM installation and
+recorded-file rollback pass; final visual acceptance remains open on the
+Waybar finding in `issues/02-waybar-visual-acceptance.md`.
 
 ## Agreed scope
 
@@ -39,4 +43,5 @@ fail before its fix. Wallpaper tests additionally validate a real generated imag
 ## Delivery
 
 Review Standards and Spec separately against the pre-change commit. Commit
-locally after checks; no push. Do not install the changes on the owner's desktop.
+after checks and publish to `origin/main`, as authorized by the owner. Do not
+install the changes on the owner's desktop.

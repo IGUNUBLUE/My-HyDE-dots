@@ -394,8 +394,10 @@ Pass a specific directory under `~/.local/state/my-hyde-dots/backups/` to restor
 
 Recorded symbolic links, including dangling links, are restored as links rather
 than copied through their referents. Generated fallback wallpapers are included
-in rollback. Packages and unrecorded application state are not rolled back;
-network frontend package restoration is reported as a separate manual step.
+in rollback. Packages, service enablement and unrecorded application state are
+not rolled back. Network frontend package restoration is a separate manual step.
+If the backup predates this Swaync profile and restores stock Dunst settings,
+stop/disable Swaync separately before logging back in. Its package stays installed.
 
 ## Capture later changes
 

@@ -62,6 +62,13 @@ all four wallpaper links, valid Tech PNG dimensions, offline wallpaper rollback,
 and both regular and dangling original symlinks. Full suite and VM acceptance
 results are recorded separately in `.scratch/clean-install/validation.md`.
 
+The real minimal-Arch VM completed official HyDE installation and the full
+overlay, rebooted with the profile services active, and restored nine checked
+recorded destinations plus the logind drop-in. The live theme cycle passed 135
+assertions but failed all five 24-pixel bar-height assertions (actual height 26).
+Keep this visual acceptance gap separate from the passing lifecycle checks;
+no physical mixed-scale pointer or lock/unlock acceptance was performed.
+
 ## Exit criteria
 
 Revisit if HyDE changes daemon selection, session startup, theme discovery or
