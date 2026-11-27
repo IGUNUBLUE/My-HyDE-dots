@@ -263,8 +263,8 @@ repository; the focused installer skips packages, as the other focused modes do.
 ![LAGC Tech Dark](assets/previews/lagc-tech-dark.png)
 ![LAGC Tech Light](assets/previews/lagc-tech-light.png)
 
-LAGC Tech Dark ships with a view of Earth's night horizon from the ISS.
-LAGC Tech Light ships with a Landsat image of the Antarctic coast.
+LAGC Tech Dark ships with a starry view of Reflection Lake in California.
+LAGC Tech Light ships with a daylight photograph of Lake Tekapo in New Zealand.
 The installer copies both bundled JPEGs into the respective theme wallpaper
 directories, updates each `wall.set`, and builds HyDE's previews. The Tech
 wallpapers install offline. See the [image credits](assets/wallpapers/README.md).

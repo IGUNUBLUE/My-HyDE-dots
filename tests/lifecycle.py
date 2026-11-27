@@ -160,7 +160,7 @@ class Lifecycle(unittest.TestCase):
                 image = subprocess.run(['/usr/bin/magick', 'identify', '-format', '%m %wx%h', str(link)],
                                        capture_output=True, text=True)
                 self.assertEqual(image.returncode, 0, image.stderr)
-                self.assertEqual(image.stdout, {'dark': 'JPEG 1920x1280', 'light': 'JPEG 2560x2560'}[variant])
+                self.assertEqual(image.stdout, {'dark': 'JPEG 2880x1917', 'light': 'JPEG 2400x1437'}[variant])
 
     def test_applying_active_lagc_theme_refreshes_wallpaper_and_palette(self):
         self.write('.local/state/hyde/staterc', 'HYDE_THEME="LAGC Tech Light"\n')
