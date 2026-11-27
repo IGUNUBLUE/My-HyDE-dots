@@ -69,6 +69,24 @@ assertions but failed all five 24-pixel bar-height assertions (actual height 26)
 Keep this visual acceptance gap separate from the passing lifecycle checks;
 no physical mixed-scale pointer or lock/unlock acceptance was performed.
 
+## Follow-up: Tech wallpapers and palette on the reinstalled desktop
+
+The real installation finished before Nextcloud had restored the Tech photo,
+so both Tech themes used their gradient fallback. Report the missing photo
+when selecting the themes module and refuse an unreadable explicit override
+before writing files. After sync, the themes and apply modules rebuild the
+wallpapers and reapply the active LAGC theme. HyDE's backend-only wallpaper
+setter leaves global wallpaper and color state untouched. Use its theme
+switcher for the full update and leave the active upstream theme alone.
+
+The owner later requested redistributable images bundled for the two Tech
+themes. Their defaults now come from the checked-in NASA renditions under
+`assets/wallpapers/`, with attribution and source URLs beside them. Keep
+private sources outside Git and use `MY_HYDE_WALLPAPER` for an explicit
+override. Installing Tech defaults requires neither Nextcloud nor an image
+download. Keep existing PNG wallpaper files available when updating the
+theme's recorded link to the bundled JPEG.
+
 ## Exit criteria
 
 Revisit if HyDE changes daemon selection, session startup, theme discovery or

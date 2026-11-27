@@ -146,11 +146,6 @@ class Lifecycle(unittest.TestCase):
         self.assertNotIn('hyprctl ', self.calls())
 
     def test_all_themes_have_wallpapers_without_nextcloud(self):
-        # Use ImageMagick itself for the new Tech fallback, not a placeholder.
-        self.stub('magick', '''if [[ ${@: -1} == *lagc-tech-* ]]; then
-            exec /usr/bin/magick "$@"
-        fi
-        touch -- "${@: -1}"''')
         result = self.invoke('install.sh', '--yes', '--only', 'themes')
         self.assertEqual(result.returncode, 0, result.stderr)
         for theme in ('LAGC Tech Dark', 'LAGC Tech Light', 'LAGC Calm Dark', 'LAGC Calm Light'):
@@ -158,19 +153,51 @@ class Lifecycle(unittest.TestCase):
             self.assertTrue(link.is_symlink(), theme)
             self.assertTrue(link.exists(), theme)
             if 'Tech' in theme:
+                variant = theme.split()[-1].lower()
+                filename = f'lagc-tech-{variant}.jpg'
+                self.assertEqual(link.readlink(), link.parent / 'wallpapers' / filename)
+                self.assertEqual(link.read_bytes(), (REPO / 'assets/wallpapers' / filename).read_bytes())
                 image = subprocess.run(['/usr/bin/magick', 'identify', '-format', '%m %wx%h', str(link)],
                                        capture_output=True, text=True)
                 self.assertEqual(image.returncode, 0, image.stderr)
-                self.assertEqual(image.stdout, 'PNG 1920x1080')
+                self.assertEqual(image.stdout, {'dark': 'JPEG 1920x1280', 'light': 'JPEG 2560x2560'}[variant])
+
+    def test_applying_active_lagc_theme_refreshes_wallpaper_and_palette(self):
+        self.write('.local/state/hyde/staterc', 'HYDE_THEME="LAGC Tech Light"\n')
+        result = self.invoke('install.sh', '--yes', '--only', 'themes,apply')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('hyde-shell theme.switch -s LAGC Tech Light', self.calls())
+        self.assertNotIn('hyde-shell wallpaper --set', self.calls())
+
+    def test_applying_themes_keeps_upstream_theme_wallpaper(self):
+        self.write('.local/state/hyde/staterc', 'HYDE_THEME="Decay Green"\n')
+        source = self.write('personal.png', 'source')
+        self.env['MY_HYDE_WALLPAPER'] = str(source)
+        result = self.invoke('install.sh', '--yes', '--only', 'themes,apply')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn('hyde-shell theme.switch', self.calls())
+        self.assertNotIn('hyde-shell wallpaper --set', self.calls())
+
+    def test_missing_explicit_wallpaper_source_refuses_before_writing(self):
+        self.env['MY_HYDE_WALLPAPER'] = str(self.home / 'missing.png')
+        result = self.invoke('install.sh', '--yes', '--only', 'themes')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('Cannot read MY_HYDE_WALLPAPER', result.stderr)
+        self.assertFalse((self.home / '.config/hyde/themes').exists())
 
     def test_wallpaper_install_preserves_a_symlink_referent(self):
         (self.bin / 'magick').unlink()
         personal = self.home / 'personal.png'
         subprocess.run(['/usr/bin/magick', '-size', '2x2', 'xc:red', str(personal)], check=True)
         original = personal.read_bytes()
-        target = self.home / '.config/hyde/themes/LAGC Tech Dark/wallpapers/lagc-tech-dark.png'
+        self.env['MY_HYDE_WALLPAPER'] = str(personal)
+        target = self.home / '.config/hyde/themes/LAGC Tech Dark/wallpapers/lagc-tech-dark.jpg'
         target.parent.mkdir(parents=True)
         target.symlink_to(personal)
+        previous = target.with_suffix('.png')
+        previous.write_bytes(original)
+        wall_set = target.parent.parent / 'wall.set'
+        wall_set.symlink_to(previous)
         # Real image rendering for Tech; keep the unchanged expensive Calm
         # render out of this focused test.
         self.stub('magick', '''if [[ ${@: -1} == *lagc-tech-* ]]; then
@@ -180,11 +207,15 @@ class Lifecycle(unittest.TestCase):
         result = self.invoke('install.sh', '--yes', '--only', 'themes')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(personal.read_bytes(), original)
+        image = subprocess.run(['/usr/bin/magick', 'identify', '-format', '%wx%h', str(target)],
+                               check=True, capture_output=True, text=True)
+        self.assertEqual(image.stdout, '2x2')
         backup = next((self.home / '.local/state/my-hyde-dots/backups').iterdir())
         result = self.invoke('restore.sh', str(backup))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(target.is_symlink())
         self.assertEqual(target.readlink(), personal)
+        self.assertEqual(wall_set.readlink(), previous)
         self.assertEqual(personal.read_bytes(), original)
 
     def test_offline_wallpaper_reinstall_restores_previous_image(self):

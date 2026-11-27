@@ -65,9 +65,9 @@ Notes for later changes:
 2. Reboot after HyDE finishes, select the HyDE/Hyprland session, and open a
    terminal inside that desktop. Run this overlay as your normal user; it asks
    for `sudo` only for packages and the logind drop-in.
-3. Restore Nextcloud wallpapers if desired. They are optional: all four LAGC
-   themes get generated wallpaper fallbacks when private images are absent
-   (Calm first tries its public photo download).
+3. Restore Nextcloud wallpapers if desired. LAGC Tech includes its default
+   wallpapers in this checkout. LAGC Calm downloads its public photos when
+   available and generates gradients offline.
 4. Clone over HTTPS and apply this overlay; no SSH key is needed:
 
 ```bash
@@ -263,14 +263,18 @@ repository; the focused installer skips packages, as the other focused modes do.
 ![LAGC Tech Dark](assets/previews/lagc-tech-dark.png)
 ![LAGC Tech Light](assets/previews/lagc-tech-light.png)
 
-The overlay installs two native HyDE themes without committing any private wallpaper content. HyDE's graphical theme selector identifies themes only by the image referenced by each theme's `wall.set`; it hides the theme name. To keep the Dark and Light cards recognizable, `install.sh` uses ImageMagick to create distinct palette-tinted variants of the selected wallpaper under each theme's supported `wallpapers/` directory, points `wall.set` to that local variant, and refreshes each theme through HyDE's documented wallpaper-cache command. The generated images are reversible installation state and are never added to Git.
+LAGC Tech Dark ships with a view of Earth's night horizon from the ISS.
+LAGC Tech Light ships with a Landsat image of the Antarctic coast.
+The installer copies both bundled JPEGs into the respective theme wallpaper
+directories, updates each `wall.set`, and builds HyDE's previews. The Tech
+wallpapers install offline. See the [image credits](assets/wallpapers/README.md).
 
-The default source is `~/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png`.
-When it is absent, the installer generates palette-matched Tech gradients, so
-both themes remain selectable on a fresh machine. Provide another source with `MY_HYDE_WALLPAPER`:
+Run `./install.sh --only themes,apply` from HyDE to install the defaults and
+refresh the active LAGC theme. To use a personal photo, pass
+`MY_HYDE_WALLPAPER`. The installer creates a tinted copy for each Tech theme:
 
 ```bash
-MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh
+MY_HYDE_WALLPAPER=/absolute/path/image.png ./install.sh --only themes,apply
 ```
 
 Open HyDE's official selector or switch directly:
@@ -290,7 +294,7 @@ Both themes render GTK3/GTK4 apps through the Wallbash-generated `Wallbash-Gtk` 
 
 `LAGC Calm Dark` and `LAGC Calm Light` are a warm low-glare pair designed for eye comfort: charcoal `#2B2522`/parchment `#E9DFCE` with a sage `#A9C080` accent on dark, and sepia paper `#F4EEE2`/ink `#3A342C` with a deep olive `#5C7040` accent on light. Both ship a `theme.dcol` static Wallbash palette, so `colors.conf`, Waybar, Rofi, Swaync, Kvantum and Kitty always render the same palette instead of deriving colors from the wallpaper (the default HyDE behavior for themes without `theme.dcol`, which makes a switch look partially applied).
 
-Both variants use `Wallbash-Gtk` for GTK3/GTK4 apps and `Tela-circle-green` icons, matching the sage/olive accent family. `install.sh` downloads each theme's wallpaper from Wallhaven (dark: `7jwx8v`, a misty golden forest path originally from Flickr user peste76; light: `ly8xwr`, a foggy morning garden originally from Unsplash photo `m1Jnyio2pUs`) and falls back to a deterministic ImageMagick gradient when offline, so no wallpaper binary is committed and installs never fail on a missing image. All interactive and state colors meet WCAG AA on their surfaces.
+Both variants use `Wallbash-Gtk` for GTK3/GTK4 apps and `Tela-circle-green` icons, matching the sage/olive accent family. `install.sh` downloads each Calm wallpaper from Wallhaven (dark: `7jwx8v`, a misty golden forest path originally from Flickr user peste76; light: `ly8xwr`, a foggy morning garden originally from Unsplash photo `m1Jnyio2pUs`). These photos stay outside Git, and the installer generates deterministic ImageMagick gradients when offline. All interactive and state colors meet WCAG AA on their surfaces.
 
 ```bash
 hydectl theme set "LAGC Calm Dark"
@@ -311,8 +315,8 @@ HyDE reloads Waybar with `SIGUSR2` on every switch, and Waybar 0.15 can hang whe
 
 - `tests/lifecycle.py` — runs the real install/restore commands in an isolated
   HOME with fake package/desktop commands: Swaync dependency installation and
-  early refusal, unavailable sessions, file-only/dry-run behavior, themes without
-  Nextcloud (real ImageMagick Tech images), offline wallpaper rollback and regular
+  early refusal, unavailable sessions, file-only/dry-run behavior, bundled Tech
+  wallpapers, custom photo rendering, offline wallpaper rollback and regular
   or dangling symlink restoration. These checks do not replace a graphical VM
   acceptance test.
 - `tests/theme-contract.py` — every LAGC theme agrees across `hypr.theme` (`$COLOR_SCHEME` vs `dcol_mode`, `$GTK_THEME`, cursor, icons), `theme.dcol`, Kitty, Waybar, Rofi and its rhun theme.

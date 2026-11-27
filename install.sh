@@ -391,47 +391,31 @@ link_theme_wallpaper() {
     run ln -s -- "$wallpaper" "$target"
 }
 
-generate_theme_wallpaper() {
-    local theme_name=$1 source=$2 variant=$3
-    local wallpaper_dir target output
-    wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
-    target="$wallpaper_dir/lagc-tech-$variant.png"
-    output="$work_dir/lagc-tech-$variant.png"
+install_tech_wallpaper() {
+    local theme_name=$1 variant=$2
+    local wallpaper_dir="$HOME/.config/hyde/themes/$theme_name/wallpapers"
+    local filename="lagc-tech-$variant.jpg"
+    local target="$wallpaper_dir/$filename"
+    local source="$repo_dir/assets/wallpapers/$filename"
+
+    if [[ -n $theme_wallpaper ]]; then
+        local tint modulate amount
+        case "$variant" in
+            dark)  tint='#061B2B'; amount=30; modulate=88,105,100 ;;
+            light) tint='#EAFBFF'; amount=36; modulate=108,92,100 ;;
+        esac
+        source="$work_dir/$filename"
+        run magick "$theme_wallpaper" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
+            -fill "$tint" -colorize "$amount" -modulate "$modulate" -quality 92 "$source"
+    fi
 
     if [[ ! -d "$wallpaper_dir" ]]; then
         backup_target "$wallpaper_dir"
         run mkdir -p -- "$wallpaper_dir"
     fi
-    backup_target "$target"
-
-    case "$variant" in
-        dark)
-            if [[ -f "$source" ]]; then
-                run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
-                    -fill '#061B2B' -colorize 30 -modulate 88,105,100 "$output"
-            else
-                run magick -size 1920x1080 gradient:'#061B2B'-'#123B50' -strip "$output"
-            fi
-            ;;
-        light)
-            if [[ -f "$source" ]]; then
-                run magick "$source" -auto-orient -strip -resize '3840x2160>' -colorspace sRGB \
-                    -fill '#EAFBFF' -colorize 36 -modulate 108,92,100 "$output"
-            else
-                run magick -size 1920x1080 gradient:'#EAFBFF'-'#C9DDE8' -strip "$output"
-            fi
-            ;;
-        *)
-            printf 'Unknown LAGC Tech wallpaper variant: %s\n' "$variant" >&2
-            return 1
-            ;;
-    esac
-
-    # install replaces an existing link rather than letting image tools write
-    # through it to a private wallpaper outside the overlay.
-    run install -m0644 -- "$output" "$target"
+    install_dot "$source" "$target"
     link_theme_wallpaper "$theme_name" "$target"
-    # Cache only the generated image. Caching the whole theme also walks every
+    # Cache only the selected image. Caching the whole theme also walks every
     # configured custom wallpaper path, which can be unnecessarily expensive.
     run hyde-shell wallpaper --cache wall "$target"
 }
@@ -682,9 +666,8 @@ step_themes() {
         remove_target "$stale_wallpaper"
     done
 
-    local theme_wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
-    generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark
-    generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light
+    install_tech_wallpaper "LAGC Tech Dark" dark
+    install_tech_wallpaper "LAGC Tech Light" light
     generate_calm_wallpaper "LAGC Calm Dark" dark
     generate_calm_wallpaper "LAGC Calm Light" light
 }
@@ -749,20 +732,16 @@ step_apply() {
     fi
 
     if has_module themes; then
-        # Apply the ACTIVE theme's own wallpaper (its wall.set target), not the
-        # Tech source image -- a global --set would rewrite the theme's link.
-        local staterc="$HOME/.local/state/hyde/staterc" active_theme="" wall_set wallpaper
-        [[ -f $staterc ]] && active_theme=$(awk -F'"' '/^HYDE_THEME=/{print $2}' "$staterc")
-        wall_set="$HOME/.config/hyde/themes/$active_theme/wall.set"
-        if [[ -n $active_theme && -e $wall_set ]]; then
-            hyde-shell wallpaper --set "$(readlink -f "$wall_set")"
-        else
-            wallpaper="${MY_HYDE_WALLPAPER:-$HOME/Nextcloud/my_wallpapers/banner-ai-v4-painterly-companion.png}"
-            if [[ -f $wallpaper ]]; then
-                hyde-shell wallpaper --set "$wallpaper"
-            else
-                printf 'Wallpaper not found, skipped: %s\n' "$wallpaper"
-            fi
+        # Reapply the active overlay theme so HyDE refreshes its global
+        # wallpaper and regenerates colors for every Wallbash consumer.
+        local staterc="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/staterc" active_theme
+        if [[ -r $staterc ]]; then
+            active_theme=$(awk -F'"' '/^HYDE_THEME=/{print $2; exit}' "$staterc")
+            case "$active_theme" in
+                'LAGC Tech Dark'|'LAGC Tech Light'|'LAGC Calm Dark'|'LAGC Calm Light')
+                    hyde-shell theme.switch -s "$active_theme"
+                    ;;
+            esac
         fi
     fi
 
@@ -963,6 +942,12 @@ fi
 # ---------------------------------------------------------------------------
 # Execute
 # ---------------------------------------------------------------------------
+theme_wallpaper=${MY_HYDE_WALLPAPER:-}
+if has_module themes && [[ -n $theme_wallpaper ]] &&
+    [[ ! -f $theme_wallpaper || ! -r $theme_wallpaper ]]; then
+    printf 'Cannot read MY_HYDE_WALLPAPER: %s\n' "$theme_wallpaper" >&2
+    exit 1
+fi
 # Fail before changing any target when packages were explicitly skipped.
 if has_module config && ! has_module packages; then
     require_config_packages
@@ -974,13 +959,13 @@ config_tmp="$work_dir/config.toml"
 sed "s|@HOME@|$HOME|g" "$repo_dir/dotfiles/.config/hyde/config.toml.in" > "$config_tmp"
 
 export -f run backup_target install_dot install_tree backup_cursor_state \
-    install_theme_files link_theme_wallpaper generate_theme_wallpaper \
+    install_theme_files link_theme_wallpaper install_tech_wallpaper \
     generate_calm_wallpaper remove_target install_qt_menu \
     install_vscodium_theme has_module require_config_packages step_packages step_cursor \
     step_config step_themes step_apply install_rhun_theme install_herdr_app_theme install_t3_themes step_system install_mime_defaults \
     network_gui require_network_gui install_network_packages install_network_config remove_old_network_config \
     apply_network_config remove_legacy_network_applet install_herdr_theme
-export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes
+export repo_dir backup_dir work_dir dry_run MODULES_CSV assume_yes theme_wallpaper
 
 $interactive && mkdir -p "$state_dir" && : > "$install_log"
 

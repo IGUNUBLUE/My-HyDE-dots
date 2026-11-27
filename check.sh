@@ -87,8 +87,8 @@ done
     printf 'LAGC Calm Dark must sort before LAGC Calm Light in the HyDE selector.\n' >&2
     exit 1
 }
-grep -Fq 'generate_theme_wallpaper "LAGC Tech Dark" "$theme_wallpaper" dark' "$repo_dir/install.sh"
-grep -Fq 'generate_theme_wallpaper "LAGC Tech Light" "$theme_wallpaper" light' "$repo_dir/install.sh"
+grep -Fq 'install_tech_wallpaper "LAGC Tech Dark" dark' "$repo_dir/install.sh"
+grep -Fq 'install_tech_wallpaper "LAGC Tech Light" light' "$repo_dir/install.sh"
 grep -Fq 'generate_calm_wallpaper "LAGC Calm Dark" dark' "$repo_dir/install.sh"
 grep -Fq 'generate_calm_wallpaper "LAGC Calm Light" light' "$repo_dir/install.sh"
 grep -Fq 'run hyde-shell wallpaper --cache wall "$target"' "$repo_dir/install.sh"
@@ -112,7 +112,7 @@ grep -Fq 'select-fg:          #061B2BFF;' "$rofi_callback"
 bash -n "$rofi_callback"
 
 if find "$repo_dir/dotfiles/.config/hyde/themes" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) -print -quit | grep -q .; then
-    printf 'Theme wallpaper assets must not be tracked; install.sh links an existing user wallpaper instead.\n' >&2
+    printf 'Keep bundled wallpaper assets and credits under assets/wallpapers.\n' >&2
     exit 1
 fi
 
