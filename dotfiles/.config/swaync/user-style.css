@@ -65,6 +65,50 @@
   background: @sw-msg-sum-fg;
 }
 
+/* Keep the DND switch on the notification palette even when GTK still
+ * supplies widget colors from the theme active when Swaync started. */
+.control-center .widget-dnd switch {
+  background: @sw-noti-bg-hover;
+  border: 2px solid @sw-noti-window-txt;
+}
+
+.control-center .widget-dnd switch > slider {
+  background: @sw-noti-window-txt;
+}
+
+.control-center .widget-dnd switch:checked {
+  background: @sw-noti-window-br;
+  border-color: @sw-noti-window-br;
+}
+
+.control-center .widget-dnd switch:checked > slider {
+  background: @sw-cc-bg;
+}
+
+/* Use the rendered notification palette for the volume and brightness scales. */
+.control-center .widget-volume scale trough,
+.control-center .widget-backlight scale trough {
+  background: @sw-msg-sum-fg;
+}
+
+.control-center .widget-volume scale highlight,
+.control-center .widget-backlight scale highlight {
+  background: @sw-noti-window-br;
+}
+
+.control-center .widget-volume scale slider,
+.control-center .widget-backlight scale slider {
+  background: @sw-cc-bg;
+  box-shadow: inset 0 0 0 2px @sw-noti-window-br;
+}
+
+.control-center .widget-volume scale slider:hover,
+.control-center .widget-backlight scale slider:hover,
+.control-center .widget-volume scale slider:active,
+.control-center .widget-backlight scale slider:active {
+  box-shadow: inset 0 0 0 2px @sw-noti-window-br, 0 0 0 4px alpha(@sw-noti-window-br, 0.2);
+}
+
 /* Match the wlogout outline: upstream borders notification cards and the
  * control center in the cobalt accent; use the palette's divider tone
  * (primary color 3, the same value the old wallbash_1xa3 held) at the same

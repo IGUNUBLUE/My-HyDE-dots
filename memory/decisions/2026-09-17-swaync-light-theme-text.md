@@ -29,3 +29,19 @@ Keep the fix inside the user-owned `~/.config/swaync/user-style.css` (tracked at
 ## Exit criteria
 
 Resolve when upstream `swaync.dcol` derives text color from the palette (for example `wallbash_txt1`) or otherwise renders light themes readably; then re-test a live popup and simplify `user-style.css` to only the owner's visual preferences.
+
+## Follow-up: DND switch after a clean installation
+
+The live Tech Light panel background sampled at the expected `#D9ECF0`,
+but the unchecked DND thumb still drew in pink from the GTK widget styling.
+Set the track and thumb with the same generated `sw-*` tokens as the rest
+of the control center. Use the foreground for the unchecked thumb and the
+theme accent for the checked track.
+
+## Follow-up: Volume and brightness sliders
+
+The Tech Light volume track still inherited GTK's pink `#F0AAAC` while
+the control center used its intended `#D9ECF0` background. Scope the scale
+overrides to the volume and backlight widgets and use the rendered `sw-*`
+palette for the trough, fill, thumb, and hover ring. This keeps the controls
+on the current Wallbash palette without depending on a GTK theme reload.
