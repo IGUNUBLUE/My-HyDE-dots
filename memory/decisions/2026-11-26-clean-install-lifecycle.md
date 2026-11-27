@@ -87,6 +87,12 @@ override. Installing Tech defaults requires neither Nextcloud nor an image
 download. Keep existing PNG wallpaper files available when updating the
 theme's recorded link to the bundled JPEG.
 
+## Follow-up: Switching keyboard layouts
+
+The live configuration had both XKB layouts (`es,latam`), with Spain active
+and no switch binding. The user override now binds Super+Space to Hyprland's
+`switchxkblayout all next` so the laptop and external keyboards switch together.
+
 ## Exit criteria
 
 Revisit if HyDE changes daemon selection, session startup, theme discovery or

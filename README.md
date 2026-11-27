@@ -10,7 +10,7 @@ Durable operational decisions and incident mitigations live in [`memory/index.md
 
 ## Included
 
-- Hyprland monitor layout, Spanish keyboard layouts, and a fully solid visual layer: opaque windows and surfaces, 8 px squircle corners, palette-driven shadows, a looping border gradient, and WCAG AA state colors defined per theme.
+- Hyprland monitor layout, Spanish (Spain) and Latin American keyboard layouts (switch with `Super+Space`), and a fully solid visual layer: opaque windows and surfaces, 8 px squircle corners, palette-driven shadows, a looping border gradient, and WCAG AA state colors defined per theme.
 - UI font pairing: `Inter` Medium (official `inter-font` package) drives GTK/Qt/documents/menus, while `Atkinson Hyperlegible Next` SemiBold stays on the Waybar, with a sharp LCD fontconfig baseline (`hintslight` + `rgba=rgb` + `lcddefault`). The installer fetches the static Next weights from the upstream `googlefonts` repo for the bar; the packaged classic `ttf-atkinson-hyperlegible` stays as the offline fallback family.
 - User-owned fontconfig baseline at `~/.config/fontconfig/fonts.conf`, installed and snapshotted by this overlay.
 - A reversible `Material Sakura Polished` theme variant with clearer, icon-bearing Qt context menus and moderate spacing, while preserving HyDE's Kvantum/Wallbash pipeline.

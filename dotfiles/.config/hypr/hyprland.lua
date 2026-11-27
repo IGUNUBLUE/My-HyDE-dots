@@ -23,7 +23,7 @@ end
 --
 -- Adding a keybind:
 --
---     hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(hyde.sh.gamelauncher()), {
+--     hl.bind("SUPER + SHIFT + SPACE", hl.dsp.exec_cmd(hyde.sh.gamelauncher()), {
 --         description = "[Utilities] game launcher",
 --     })
 --
@@ -131,6 +131,10 @@ hl.layer_rule({
 	},
 	blur = false,
 	blur_popups = false,
+})
+
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"), {
+	description = "[Hardware Controls|Keyboard] switch between Spanish and Latin American layouts",
 })
 
 -- Animation timings belong to the selected HyDE preset (SUPER + SHIFT + Y);
